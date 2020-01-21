@@ -123,9 +123,7 @@ void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &AShieldManCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AShieldManCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &AShieldManCharacter::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AShieldManCharacter::LookUpAtRate);
 
 }
 
@@ -143,18 +141,6 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 	Super::AddControllerPitchInput(Val);
 	//위 아래 이동
 	AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f  });
-}
-
-void AShieldManCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AShieldManCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AShieldManCharacter::MoveForward(float Value)
