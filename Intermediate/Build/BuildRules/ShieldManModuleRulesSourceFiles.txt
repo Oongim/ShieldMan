@@ -1,3 +1,0 @@
-C:\Users\rkdqm\Documents\Unreal Projects\ShieldMan\Source\ShieldMan\ShieldMan.Build.cs
-C:\Users\rkdqm\Documents\Unreal Projects\ShieldMan\Source\ShieldMan.Target.cs
-C:\Users\rkdqm\Documents\Unreal Projects\ShieldMan\Source\ShieldManEditor.Target.cs
