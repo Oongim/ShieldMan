@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\ShieldMan.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{9F0EA197-CD1D-44D0-8FF9-559A4384D237}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\ShieldMan.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\ShieldManEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\.gitattributes" />
+    <None Include="..\..\.gitignore" />
+    <Filter Include="Config">
+      <UniqueIdentifier>{8F24327E-301F-40CF-A276-10C3604A6553}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Config\Android">
+      <UniqueIdentifier>{6147E93F-671A-4C7A-8597-073E64379E64}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\Android\AndroidEngine.ini">
+      <Filter>Config\Android</Filter>
+    </None>
+    <Filter Include="Config\IOS">
+      <UniqueIdentifier>{0145B93E-6ABD-4D2D-AD11-6145AF719AB8}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\IOS\IOSEngine.ini">
+      <Filter>Config\IOS</Filter>
+    </None>
+    <Filter Include="Config\Linux">
+      <UniqueIdentifier>{6E075820-194B-4EF7-87D7-47D35C88651C}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\Linux\LinuxEngine.ini">
+      <Filter>Config\Linux</Filter>
+    </None>
+    <Filter Include="Config\Mac">
+      <UniqueIdentifier>{7F2EFC3E-C1CB-4A24-B481-83F6CFB84680}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\Mac\MacEngine.ini">
+      <Filter>Config\Mac</Filter>
+    </None>
+    <Filter Include="Config\PS4">
+      <UniqueIdentifier>{9E5D301D-D236-4E72-8DDA-45F91EF85288}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\PS4\PS4Engine.ini">
+      <Filter>Config\PS4</Filter>
+    </None>
+    <Filter Include="Config\Switch">
+      <UniqueIdentifier>{95718E03-0561-41FA-A51B-92DACE41DC22}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\Switch\SwitchEngine.ini">
+      <Filter>Config\Switch</Filter>
+    </None>
+    <Filter Include="Config\Windows">
+      <UniqueIdentifier>{2C324FE1-12A9-4227-9CCC-9E07712FD122}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\Windows\WindowsEngine.ini">
+      <Filter>Config\Windows</Filter>
+    </None>
+    <Filter Include="Config\XboxOne">
+      <UniqueIdentifier>{9DB7D97C-C50F-46F0-A3A1-5256E65536CA}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\XboxOne\XboxOneEngine.ini">
+      <Filter>Config\XboxOne</Filter>
+    </None>
+    <Filter Include="Source\ShieldMan">
+      <UniqueIdentifier>{586AD35E-DC36-4D39-85F5-6D972B0B6950}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\ShieldMan\ShieldMan.Build.cs">
+      <Filter>Source\ShieldMan</Filter>
+    </None>
+    <Filter Include="Source\ShieldMan\Private">
+      <UniqueIdentifier>{CC73A91B-D56A-4540-A411-F39BD724F5B0}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\BodyControl.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\ControlMode.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\LHandControl.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\RHandControl.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\ShieldMan.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\ShieldManCharacter.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\ShieldManGameMode.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ShieldMan\Private\SMAnimInstance.cpp">
+      <Filter>Source\ShieldMan\Private</Filter>
+    </ClCompile>
+    <Filter Include="Source\ShieldMan\Public">
+      <UniqueIdentifier>{F9688C65-6C28-4FC9-822B-D2AD4D7F4ED3}</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\BodyControl.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\ControlMode.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\LHandControl.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\RHandControl.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\ShieldMan.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\ShieldManCharacter.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\ShieldManGameMode.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ShieldMan\Public\SMAnimInstance.h">
+      <Filter>Source\ShieldMan\Public</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
