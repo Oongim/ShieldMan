@@ -13,17 +13,20 @@ UCLASS()
 class SHIELDMAN_API USMAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+		FVector Hand_Right;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+		FVector Hand_Left;
 
 public:
 	USMAnimInstance();
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
-	FVector Hand_Right;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
-	FVector Hand_Left;
+	void ClampLHand();
+	void ClampRHand();
 
 public:
 	void AddHand_RightPos(FVector pos);

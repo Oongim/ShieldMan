@@ -34,9 +34,19 @@ AShieldManCharacter::AShieldManCharacter()
 
 	Init_Camera();
 
+	//Init_PhysicalAnim();
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 	CurControlMode = new BodyControl();
+
+	Right_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("RIGHT_COLLISION"));
+	Right_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_r")));
+	Right_Collision->SetSphereRadius(10.f);
+
+	Left_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("LEFT_COLLISION"));
+	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
+	Left_Collision->SetSphereRadius(10.f);
 }
 
 void AShieldManCharacter::Init_Mesh()
@@ -65,6 +75,7 @@ void AShieldManCharacter::Init_Mesh()
 		GetMesh()->SetAnimInstanceClass(TP_ANIM.Class);
 		
 	}
+
 }
 
 void AShieldManCharacter::Init_Camera()
@@ -78,7 +89,7 @@ void AShieldManCharacter::Init_Camera()
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
-	SpringArm->bDoCollisionTest = true;
+	SpringArm->bDoCollisionTest = false;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -95,6 +106,27 @@ void AShieldManCharacter::Init_Camera()
 	);
 }
 
+void AShieldManCharacter::Init_PhysicalAnim()
+{
+	/*PhysicalAnimation = CreateDefaultSubobject< UPhysicalAnimationComponent>(TEXT("PHYSICALANUMATION"));
+
+	FName BoneName{ TEXT("spine_01") };
+	FPhysicalAnimationData Data;
+	Data.BodyName = BoneName;
+	Data.bIsLocalSimulation = false;
+	Data.OrientationStrength = 10000.f;
+	Data.AngularVelocityStrength = 100.f;
+	Data.PositionStrength = 1000.f;
+	Data.VelocityStrength = 100.f;
+
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
+
+	PhysicalAnimation->ApplyPhysicalAnimationSettingsBelow( BoneName, Data, false);
+
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -108,55 +140,6 @@ void AShieldManCharacter::PostInitializeComponents()
 
 	}
 }
-
-void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
-{
-	// Set up gameplay key bindings
-	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	PlayerInputComponent->BindAction("SetBodyControl", IE_Pressed, this, &AShieldManCharacter::SetBodyControl);
-	PlayerInputComponent->BindAction("SetRHandControl", IE_Released, this, &AShieldManCharacter::SetRHandControl);
-	PlayerInputComponent->BindAction("SetLHandControl", IE_Released, this, &AShieldManCharacter::SetLHandControl);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &AShieldManCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AShieldManCharacter::MoveRight);
-
-	PlayerInputComponent->BindAxis("Turn", this, &AShieldManCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &AShieldManCharacter::AddControllerPitchInput);
-
-}
-
-void AShieldManCharacter::AddControllerYawInput(float Val)
-{
-	if (CurControlMode->isControlMode(BodyControlMode)) {
-		Super::AddControllerYawInput(Val);
-	}
-	//좌 우 이동
-	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		
-		AnimInstance->AddHand_RightPos({ 0.f, 0.f, -Val });
-	}
-	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
-	}
-}
-
-void AShieldManCharacter::AddControllerPitchInput(float Val)
-{
-	if (CurControlMode->isControlMode(BodyControlMode)) {
-		Super::AddControllerPitchInput(Val);
-	}
-	//위 아래 이동
-	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f });
-	}
-	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ -Val, 0.f, 0.f });
-	}
-}
-
 void AShieldManCharacter::SetBodyControl()
 {
 	if (!CurControlMode->isControlMode(BodyControlMode)) {
@@ -180,6 +163,71 @@ void AShieldManCharacter::SetLHandControl()
 		CurControlMode = new LHandControl();
 	}
 }
+
+void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+{
+	// Set up gameplay key bindings
+	check(PlayerInputComponent);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("SetBodyControl", IE_Pressed, this, &AShieldManCharacter::SetBodyControl);
+	PlayerInputComponent->BindAction("SetRHandControl", IE_Released, this, &AShieldManCharacter::SetRHandControl);
+	PlayerInputComponent->BindAction("SetLHandControl", IE_Released, this, &AShieldManCharacter::SetLHandControl);
+
+	PlayerInputComponent->BindAxis("MoveForward", this, &AShieldManCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AShieldManCharacter::MoveRight);
+
+	PlayerInputComponent->BindAxis("Turn", this, &AShieldManCharacter::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &AShieldManCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("MouseWheel", this, &AShieldManCharacter::AddControllerRolInput);
+
+}
+
+void AShieldManCharacter::AddControllerYawInput(float Val)
+{
+	if (CurControlMode->isControlMode(BodyControlMode)) {
+		Super::AddControllerYawInput(Val);
+	}
+	//좌 우 이동
+	else if (CurControlMode->isControlMode(RHandControlMode)) {
+		
+		AnimInstance->AddHand_RightPos({ 0.f, 0.f, -Val });
+	}
+	else if (CurControlMode->isControlMode(LHandControlMode)) {
+		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
+
+	}
+}
+
+void AShieldManCharacter::AddControllerPitchInput(float Val)
+{
+	if (CurControlMode->isControlMode(BodyControlMode)) {
+		Super::AddControllerPitchInput(Val);
+	}
+	//위 아래 이동
+	else if (CurControlMode->isControlMode(RHandControlMode)) {
+		AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f });
+	}
+	else if (CurControlMode->isControlMode(LHandControlMode)) {
+		AnimInstance->AddHand_LeftPos({ Val, 0.f, 0.f });
+	}
+}
+
+
+void AShieldManCharacter::AddControllerRolInput(float Val)
+{
+	Val *= 2;
+	//앞 뒤 이동
+	if (CurControlMode->isControlMode(RHandControlMode)) {
+	AnimInstance->AddHand_RightPos({ 0.f, -Val, 0.f });
+	}
+	else if (CurControlMode->isControlMode(LHandControlMode)) {
+	AnimInstance->AddHand_LeftPos({ 0.f, Val, 0.f });
+	}
+}
+
+
 
 void AShieldManCharacter::MoveForward(float Value)
 {
@@ -209,4 +257,3 @@ void AShieldManCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
-

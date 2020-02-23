@@ -24,16 +24,25 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance, meta = (AllowPrivateAccess = "true"))
 	class USMAnimInstance* AnimInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand, meta = (AllowPrivateAccess = "true"))
 	FVector Hand_Right;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand, meta = (AllowPrivateAccess = "true"))
 	FVector Hand_Left;
 
 	ControlMode* CurControlMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		USphereComponent* Right_Collision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		USphereComponent* Left_Collision;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
+		//UPhysicalAnimationComponent* PhysicalAnimation;
 
 public:		//생성자 , public 변수
 	AShieldManCharacter();
@@ -53,6 +62,9 @@ protected: //조작
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	/*팔 앞뒤 조종*/
+	void AddControllerRolInput(float Val);
+
 	virtual void AddControllerYawInput(float Val) override;
 	virtual void AddControllerPitchInput(float Val) override;
 
@@ -69,6 +81,7 @@ protected:
 private:	//private 함수
 	void Init_Mesh();
 	void Init_Camera();
+	void Init_PhysicalAnim();
 
 public:		//public 함수
 
