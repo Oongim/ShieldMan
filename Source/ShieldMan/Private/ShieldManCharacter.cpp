@@ -42,11 +42,16 @@ AShieldManCharacter::AShieldManCharacter()
 
 	Right_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("RIGHT_COLLISION"));
 	Right_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_r")));
-	Right_Collision->SetSphereRadius(10.f);
+	Right_Collision->SetSphereRadius(5.f);
 
 	Left_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("LEFT_COLLISION"));
 	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
-	Left_Collision->SetSphereRadius(10.f);
+	Left_Collision->SetSphereRadius(5.f);
+
+
+	MaxHP=100.f;
+	CurrentHP = 80.f;
+	PlayerName = TEXT("KDK");
 }
 
 void AShieldManCharacter::Init_Mesh()

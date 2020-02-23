@@ -41,6 +41,8 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
 		USphereComponent* Left_Collision;
 
+	
+
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
 		//UPhysicalAnimationComponent* PhysicalAnimation;
 
@@ -54,6 +56,15 @@ public:		//생성자 , public 변수
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Status")
+		float MaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+		float CurrentHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Status")
+		FName PlayerName;
 
 protected: //조작
 	/** Called for forwards/backward input */
