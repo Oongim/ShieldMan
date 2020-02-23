@@ -56,6 +56,10 @@ protected: //¡∂¿€
 	virtual void AddControllerYawInput(float Val) override;
 	virtual void AddControllerPitchInput(float Val) override;
 
+	void SetBodyControl();
+	void SetRHandControl();
+	void SetLHandControl();
+
 protected:
 	// APawn interface
 	virtual void PostInitializeComponents() override;

@@ -15,5 +15,5 @@ BodyControl::~BodyControl()
 
 void BodyControl::Initialize()
 {
-	SetModeName(TEXT("BodyControl"));
+	SetModeName(BodyControlMode);
 }

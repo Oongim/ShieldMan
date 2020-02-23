@@ -5,8 +5,14 @@
 
 LHandControl::LHandControl()
 {
+	Initialize();
 }
 
 LHandControl::~LHandControl()
 {
+}
+
+void LHandControl::Initialize()
+{
+	SetModeName(LHandControlMode);
 }

@@ -3,3 +3,10 @@
 #pragma once
 
 #include "EngineMinimal.h"
+
+
+enum EControlMode {
+	BodyControlMode,
+	RHandControlMode,
+	LHandControlMode
+};

@@ -10,7 +10,7 @@
 class SHIELDMAN_API ControlMode
 {
 private:
-	FName modeName;
+	EControlMode modeName;
 
 public:
 	ControlMode();
@@ -18,6 +18,6 @@ public:
 
 public:
 	virtual void Initialize() = 0;
-	bool isControlMode(FName name);
-	void SetModeName(FName name);
+	bool isControlMode(EControlMode name);
+	void SetModeName(EControlMode name);
 };

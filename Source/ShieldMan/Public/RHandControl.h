@@ -2,14 +2,17 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ControlMode.h"
 
 /**
  * 
  */
-class SHIELDMAN_API RHandControl
+class SHIELDMAN_API RHandControl : public ControlMode
 {
 public:
 	RHandControl();
 	~RHandControl();
+
+public:
+	virtual void Initialize();
 };

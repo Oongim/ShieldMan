@@ -5,8 +5,14 @@
 
 RHandControl::RHandControl()
 {
+	Initialize();
 }
 
 RHandControl::~RHandControl()
 {
+}
+
+void RHandControl::Initialize()
+{
+	SetModeName(RHandControlMode);
 }

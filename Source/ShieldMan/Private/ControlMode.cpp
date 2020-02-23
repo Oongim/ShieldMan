@@ -11,12 +11,12 @@ ControlMode::~ControlMode()
 {
 }
 
-bool ControlMode::isControlMode(FName name)
+bool ControlMode::isControlMode(EControlMode name)
 {
 	return modeName == name;
 }
 
-void ControlMode::SetModeName(FName name)
+void ControlMode::SetModeName(EControlMode name)
 {
 	modeName = name;
 }

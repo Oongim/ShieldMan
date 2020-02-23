@@ -116,12 +116,13 @@ void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("SetBodyControl", IE_Pressed, this, &AShieldManCharacter::SetBodyControl);
+	PlayerInputComponent->BindAction("SetRHandControl", IE_Released, this, &AShieldManCharacter::SetRHandControl);
+	PlayerInputComponent->BindAction("SetLHandControl", IE_Released, this, &AShieldManCharacter::SetLHandControl);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AShieldManCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShieldManCharacter::MoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &AShieldManCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AShieldManCharacter::AddControllerPitchInput);
 
@@ -129,18 +130,55 @@ void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 void AShieldManCharacter::AddControllerYawInput(float Val)
 {
-	if (CurControlMode->isControlMode(TEXT("BodyControl"))) {
+	if (CurControlMode->isControlMode(BodyControlMode)) {
 		Super::AddControllerYawInput(Val);
-		//좌 우 이동
+	}
+	//좌 우 이동
+	else if (CurControlMode->isControlMode(RHandControlMode)) {
+		
 		AnimInstance->AddHand_RightPos({ 0.f, 0.f, -Val });
+	}
+	else if (CurControlMode->isControlMode(LHandControlMode)) {
+		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
 	}
 }
 
 void AShieldManCharacter::AddControllerPitchInput(float Val)
 {
-	Super::AddControllerPitchInput(Val);
+	if (CurControlMode->isControlMode(BodyControlMode)) {
+		Super::AddControllerPitchInput(Val);
+	}
 	//위 아래 이동
-	AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f  });
+	else if (CurControlMode->isControlMode(RHandControlMode)) {
+		AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f });
+	}
+	else if (CurControlMode->isControlMode(LHandControlMode)) {
+		AnimInstance->AddHand_LeftPos({ -Val, 0.f, 0.f });
+	}
+}
+
+void AShieldManCharacter::SetBodyControl()
+{
+	if (!CurControlMode->isControlMode(BodyControlMode)) {
+		delete CurControlMode;
+		CurControlMode = new BodyControl();
+	}
+}
+
+void AShieldManCharacter::SetRHandControl()
+{
+	if (!CurControlMode->isControlMode(RHandControlMode)) {
+		delete CurControlMode;
+		CurControlMode = new RHandControl();
+	}
+}
+
+void AShieldManCharacter::SetLHandControl()
+{
+	if (!CurControlMode->isControlMode(LHandControlMode)) {
+		delete CurControlMode;
+		CurControlMode = new LHandControl();
+	}
 }
 
 void AShieldManCharacter::MoveForward(float Value)
