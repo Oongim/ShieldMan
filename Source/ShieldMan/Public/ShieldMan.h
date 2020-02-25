@@ -10,3 +10,12 @@ enum EControlMode {
 	RHandControlMode,
 	LHandControlMode
 };
+
+
+/*
+로그 출력
+
+UE_LOG(LogTemp, Warning, TEXT("This is test"));
+
+
+*/
