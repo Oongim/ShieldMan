@@ -12,11 +12,19 @@ class SHIELDMAN_API ASM_ShootObject : public AActor
 	GENERATED_BODY()
 private:
 	class AShieldManCharacter* Player;
+
+	class ASM_ShootObjectBullet* SpawnPawn;
+
+	float sleepTime;
+	float maxSleepTime;
+	bool bFire;
 	
 public:
 	UPROPERTY(BlueprintReadOnly,Category=ShootBody)
 	UStaticMeshComponent* ShootBody;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+	TSubclassOf< class ASM_ShootObjectBullet> SpawnBulletClass;
 public:	
 	// Sets default values for this actor's properties
 	ASM_ShootObject();
@@ -29,4 +37,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void SpawnBullet(FVector Loc, FRotator Rot);
 };
