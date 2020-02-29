@@ -48,6 +48,21 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
 	Left_Collision->SetSphereRadius(5.f);
 
+	Right_Shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RIGHT_SHIELD"));
+	Left_Shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("LEFT_SHIELD"));
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_SHIELD(TEXT(
+		"/Game/Import/Shield.Shield"));
+	if (SK_SHIELD.Succeeded())
+	{
+		Right_Shield->SetSkeletalMesh(SK_SHIELD.Object);
+		Left_Shield->SetSkeletalMesh(SK_SHIELD.Object);
+	}
+
+	Right_Shield->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
+	Left_Shield->SetupAttachment(GetMesh(), TEXT("hand_lSocket"));
+
+	Right_Shield->OnComponentBeginOverlap.AddDynamic(this, &AShieldManCharacter::OnOverlapBeginShield);
 
 	MaxHP=100.f;
 	CurrentHP = 80.f;
@@ -129,6 +144,16 @@ void AShieldManCharacter::Init_PhysicalAnim()
 	PhysicalAnimation->ApplyPhysicalAnimationSettingsBelow( BoneName, Data, false);
 
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
+}
+
+void AShieldManCharacter::OnOverlapBeginShield(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
+	ULog::Hello(LO_Viewport);
+	/*if (OtherActor->GetClass() == TSubclassOf< class ASM_ShootObjectBullet>().Get())
+	{
+		CurrentHP -= 10.f;
+	}*/
 }
 
 

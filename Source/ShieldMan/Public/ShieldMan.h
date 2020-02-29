@@ -45,6 +45,8 @@ ULog::Info(CUR_CLASS_FUNC_WITH_LINE);
 ULog::Info(CUR_FUNC_SIG);
 
 ....etc 조합 마음대로
+
+
  도큐먼트
 http://alielsaleh.com/tools/UE4-Plugins/DebugLogLibrary/
 		Build.cs에 추가해야 함

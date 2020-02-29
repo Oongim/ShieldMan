@@ -36,6 +36,7 @@ void ASM_ShootObjectBullet::BeginPlay()
 	Super::BeginPlay();
 	
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &ASM_ShootObjectBullet::OnOverlapBegin);
+
 }
 
 // Called every frame
@@ -44,10 +45,11 @@ void ASM_ShootObjectBullet::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bAlive) {
 		FHitResult HitResult;
-		AddActorLocalOffset(FVector(-10.f,0.f,0.f), false, &HitResult);
+		AddActorLocalOffset(FVector(-10.f,0.f,0.f), true,&HitResult);
 		count++;
-		if (count > 500)
+		if (count > 300)
 			bAlive = false;
+
 	}
 }
 
@@ -65,6 +67,6 @@ void ASM_ShootObjectBullet::Init()
 
 void ASM_ShootObjectBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	bAlive = false;
+	bAlive = true;
 }
 

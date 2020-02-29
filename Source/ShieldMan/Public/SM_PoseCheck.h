@@ -26,19 +26,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Light, meta = (AllowPrivateAccess = "true"))
 		UPointLightComponent* Left_Light;
 
-	bool isRightOverlapped = false;
-	bool isLeftOverlapped = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Light, meta = (AllowPrivateAccess = "true"))
+		UPointLightComponent* Answer_Light;
 
-	UPROPERTY(EditAnywhere)
-		UCurveFloat* DoorCurve;
+	bool bRightOverlapped = false;
+	bool bLeftOverlapped = false;
 
-	bool Open;
-	bool ReadyState;
-	float RotateValue;
-	float CurveFloatValue;
-	float TimeLineValue;
-	FRotator DoorRotation;
-	FTimeline MyTimeline;
+	float fDoorDeltaTime;
 
 public:
 	UPROPERTY(BlueprintReadWrite, Category = Collision)
@@ -78,14 +72,6 @@ public:
 	UFUNCTION()
 		void OnLeftOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	//UFUNCTION()
-	//	void ControlDoor();
-
-	//UFUNCTION()
-	//	void ToggleDoor();
-
-	//UFUNCTION()
-	//	void SetState();
 };
 
 
