@@ -10,7 +10,7 @@ UCLASS(minimalapi)
 class AShieldManGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-
+		
 public:
 	AShieldManGameMode();
 };

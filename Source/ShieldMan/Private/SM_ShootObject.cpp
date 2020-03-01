@@ -31,19 +31,19 @@ ASM_ShootObject::ASM_ShootObject()
 // Called when the game starts or when spawned
 void ASM_ShootObject::BeginPlay()
 {
-	Super::BeginPlay();
+	/*Super::BeginPlay();
 	auto p = GetWorld()->GetPawnIterator();
 
 	Player = Cast<AShieldManCharacter>(*p);
 
-	SpawnBullet(GetActorLocation(), GetActorRotation());
+	SpawnBullet(GetActorLocation(), GetActorRotation());*/
 
 }
 
 // Called every frame
 void ASM_ShootObject::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	/*Super::Tick(DeltaTime);
 
 	if (!bFire) {
 		FRotator ToPlayerInterpRot = 
@@ -65,13 +65,13 @@ void ASM_ShootObject::Tick(float DeltaTime)
 		SpawnPawn->SetActorLocationAndRotation(GetActorLocation(), GetActorRotation());
 		SpawnPawn->Init();
 		bFire = true;
-	}
+	}*/
 }
 
 void ASM_ShootObject::SpawnBullet(FVector Loc, FRotator Rot)
 {
-	SpawnPawn =
-		GetWorld()->SpawnActor<ASM_ShootObjectBullet>(SpawnBulletClass, Loc, Rot);
+	/*SpawnPawn =
+		GetWorld()->SpawnActor<ASM_ShootObjectBullet>(SpawnBulletClass, Loc, Rot);*/
 
 }
 

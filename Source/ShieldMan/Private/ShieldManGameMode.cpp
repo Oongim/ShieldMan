@@ -13,4 +13,13 @@ AShieldManGameMode::AShieldManGameMode()
 	//{
 	//	DefaultPawnClass = PlayerPawnBPClass.Class;
 	//}
+	//AShieldManGameMode::
+	//AGameModeBase::bDelayedStart = 5;
+	//PlayerControllerClass = APlayerController::StaticClass();
+	//GameStateClass = AGameStateBase::StaticClass();
+	//HUDClass = AHUD::StaticClass();
+	//SpectatorClass = ASpectatorPawn::StaticClass();
+	//PlayerStateClass = APlayerState::StaticClass();
+	//auto t = AGameMode::GetNetworkNumber();
+	//GetNetworkNumber();
 }

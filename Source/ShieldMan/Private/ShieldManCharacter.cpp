@@ -48,7 +48,7 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
 	Left_Collision->SetSphereRadius(5.f);
 
-
+	
 	MaxHP=100.f;
 	CurrentHP = 80.f;
 	PlayerName = TEXT("KDK");
@@ -196,12 +196,10 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 	}
 	//좌 우 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		
 		AnimInstance->AddHand_RightPos({ 0.f, 0.f, -Val });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
 		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
-
 	}
 }
 
@@ -224,12 +222,19 @@ void AShieldManCharacter::AddControllerRolInput(float Val)
 {
 	Val *= 2;
 	//앞 뒤 이동
+	//const FVector Direction(0, 1, 0);
+
 	if (CurControlMode->isControlMode(RHandControlMode)) {
 	AnimInstance->AddHand_RightPos({ 0.f, -Val, 0.f });
+	
+	//AddMovementInput(Direction, -Val);	//전체 움직임이 반영됨
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
 	AnimInstance->AddHand_LeftPos({ 0.f, Val, 0.f });
+	//AddMovementInput(Direction, Val);
 	}
+	
+
 }
 
 
@@ -243,7 +248,8 @@ void AShieldManCharacter::MoveForward(float Value)
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		Direction.Normalize();
 		AddMovementInput(Direction, Value);
 	}
 }
@@ -257,7 +263,8 @@ void AShieldManCharacter::MoveRight(float Value)
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 	
 		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		Direction.Normalize();
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
