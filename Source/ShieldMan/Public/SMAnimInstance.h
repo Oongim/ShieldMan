@@ -15,10 +15,16 @@ class SHIELDMAN_API USMAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+		float Speed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
 		FVector Hand_Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
 		FVector Hand_Left;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+		bool bIsInAir;
 
 public:
 	USMAnimInstance();

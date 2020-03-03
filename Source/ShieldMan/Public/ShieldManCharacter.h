@@ -42,10 +42,10 @@ private:   //private변수들
 		USphereComponent* Left_Collision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* Left_Shield;
+		class ASM_Shield* Left_Shield;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* Right_Shield;
+		class ASM_Shield* Right_Shield;
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
 		//UPhysicalAnimationComponent* PhysicalAnimation;
@@ -99,8 +99,8 @@ private:	//private 함수
 	void Init_PhysicalAnim();
 
 public:		//public 함수
-	UFUNCTION()
-	void OnOverlapBeginShield(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	bool CanSetShield();
+	void SetShield(class ASM_Shield* NewShieldR, class ASM_Shield* NewShieldL);
 
 };
 

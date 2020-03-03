@@ -5,7 +5,7 @@
 
 USMAnimInstance::USMAnimInstance()
 {
-
+	bIsInAir = false;
 }
 
 void USMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -13,6 +13,17 @@ void USMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	ClampLHand();
 	ClampRHand();
 	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	auto Pawn = TryGetPawnOwner();
+	if (::IsValid(Pawn))
+	{
+		Speed = Pawn->GetVelocity().Size();
+		auto Character = Cast<ACharacter>(Pawn);
+		if (Character)
+		{
+			bIsInAir = Character->GetMovementComponent()->IsFalling();
+		}
+	}
 }
 
 void USMAnimInstance::AddHand_RightPos(FVector pos)

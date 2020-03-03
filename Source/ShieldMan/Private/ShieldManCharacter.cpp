@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "SMAnimInstance.h"
+#include "SM_Shield.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AShieldManCharacter
@@ -48,25 +49,37 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
 	Left_Collision->SetSphereRadius(5.f);
 
-	Right_Shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RIGHT_SHIELD"));
-	Left_Shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("LEFT_SHIELD"));
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_SHIELD(TEXT(
-		"/Game/Import/Shield.Shield"));
-	if (SK_SHIELD.Succeeded())
-	{
-		Right_Shield->SetSkeletalMesh(SK_SHIELD.Object);
-		Left_Shield->SetSkeletalMesh(SK_SHIELD.Object);
-	}
-
-	Right_Shield->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
-	Left_Shield->SetupAttachment(GetMesh(), TEXT("hand_lSocket"));
-
-	Right_Shield->OnComponentBeginOverlap.AddDynamic(this, &AShieldManCharacter::OnOverlapBeginShield);
+	Right_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("RIGHT_SHIELD"));
+	Left_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("LEFT_SHIELD"));
 
 	MaxHP=100.f;
 	CurrentHP = 80.f;
 	PlayerName = TEXT("KDK");
+
+}
+
+bool AShieldManCharacter::CanSetShield()
+{
+	return  (nullptr == Right_Shield || nullptr == Left_Shield);
+}
+
+void AShieldManCharacter::SetShield(ASM_Shield* NewShieldR, ASM_Shield* NewShieldL)
+{
+	//auto CurShieldR = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
+	//auto CurShieldL = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
+
+	if (nullptr != NewShieldR && nullptr != NewShieldL)
+	{
+		NewShieldR->AttachToComponent(GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_rSocket"));
+		NewShieldR->SetOwner(this);
+		Right_Shield = NewShieldR;
+
+		NewShieldL->AttachToComponent(GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_lSocket"));
+		NewShieldL->SetOwner(this);
+		Right_Shield = NewShieldL;
+	}
 }
 
 void AShieldManCharacter::Init_Mesh()
@@ -80,6 +93,10 @@ void AShieldManCharacter::Init_Mesh()
 	//½ºÄÌ·¹Å» ¸Þ½¬ ¼³Á¤
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
 		"/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));
+
+	/*static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
+		"/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Cardboard.SK_CharM_Cardboard"));*/
+
 	if (SK_MANNEQUIN.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(SK_MANNEQUIN.Object);
@@ -90,6 +107,10 @@ void AShieldManCharacter::Init_Mesh()
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> TP_ANIM(TEXT(
 		"/Game/Mannequin/Animations/ThirdPerson_AnimBP.ThirdPerson_AnimBP_C"));
+
+	/*static ConstructorHelpers::FClassFinder<UAnimInstance> TP_ANIM(TEXT(
+		"/Game/InfinityBladeWarriors/Animation/WarriorAnimBP.WarriorAnimBP_C"));*/
+
 	if (TP_ANIM.Succeeded())
 	{
 		GetMesh()->SetAnimInstanceClass(TP_ANIM.Class);
@@ -146,17 +167,6 @@ void AShieldManCharacter::Init_PhysicalAnim()
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
 }
 
-void AShieldManCharacter::OnOverlapBeginShield(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
-	ULog::Hello(LO_Viewport);
-	/*if (OtherActor->GetClass() == TSubclassOf< class ASM_ShootObjectBullet>().Get())
-	{
-		CurrentHP -= 10.f;
-	}*/
-}
-
-
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -169,7 +179,9 @@ void AShieldManCharacter::PostInitializeComponents()
 		UE_LOG(LogTemp, Log, TEXT("why not --"));
 
 	}
+
 }
+
 void AShieldManCharacter::SetBodyControl()
 {
 	if (!CurControlMode->isControlMode(BodyControlMode)) {

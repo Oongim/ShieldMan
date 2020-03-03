@@ -22,6 +22,7 @@ public:
 	/*위젯을 만든 후 유지하는 변수*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* HUDOverlay;
+
 protected:
 	virtual void BeginPlay() override;
 
