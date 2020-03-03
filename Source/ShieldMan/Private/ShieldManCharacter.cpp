@@ -60,14 +60,11 @@ AShieldManCharacter::AShieldManCharacter()
 
 bool AShieldManCharacter::CanSetShield()
 {
-	return  (nullptr == Right_Shield || nullptr == Left_Shield);
+	return  (nullptr == Right_Shield && nullptr == Left_Shield);
 }
 
 void AShieldManCharacter::SetShield(ASM_Shield* NewShieldR, ASM_Shield* NewShieldL)
 {
-	//auto CurShieldR = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
-	//auto CurShieldL = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
-
 	if (nullptr != NewShieldR && nullptr != NewShieldL)
 	{
 		NewShieldR->AttachToComponent(GetMesh(),

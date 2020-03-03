@@ -28,6 +28,8 @@ ULog::Hello();
 
 ULog::Hello(LO_Viewport);
 
+ULog::Invalid("Can't equip Shield", "", LO_Viewport);
+
 ULog::Number(5, "The Number is: ");
 
 ULog::Vector(GetActorLocation(), "MyActor location: ", "", LO_Viewport);
