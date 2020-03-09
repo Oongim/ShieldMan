@@ -10,10 +10,22 @@ UCLASS()
 class SHIELDMAN_API ASM_SetShieldLaser : public AActor
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(VisibleAnywhere, Category = Lazer)
+		UBoxComponent* Trigger;
+
+	UPROPERTY(VisibleAnywhere, Category = Lazer)
+		UStaticMeshComponent* Lazer;
+
+	UPROPERTY(EditInstanceOnly, Category = Lazer)
+		TSubclassOf<class ASM_Shield> ShieldClass;
+
 public:	
 	// Sets default values for this actor's properties
 	ASM_SetShieldLaser();
+
+
 	
 private:
 	UFUNCTION()
@@ -24,13 +36,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
-public:	
-	UPROPERTY(VisibleAnywhere, Category = Lazer)
-	UBoxComponent* Trigger;
-
-	UPROPERTY(VisibleAnywhere, Category = Lazer)
-	UStaticMeshComponent* Lazer;
-
-	UPROPERTY(EditInstanceOnly, Category = Lazer)
-	TSubclassOf<class ASM_Shield> ShieldClass;
+public:
+	UFUNCTION()
+	void StartAttack();
 };

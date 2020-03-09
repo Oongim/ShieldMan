@@ -19,8 +19,10 @@ private:
 	float maxSleepTime;
 	bool bFire;
 	
+	float reloadMaxTime;
+	float reloadTime;
 public:
-	UPROPERTY(BlueprintReadOnly,Category=ShootBody)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category=ShootBody)
 	UStaticMeshComponent* ShootBody;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
@@ -39,4 +41,11 @@ public:
 
 	UFUNCTION()
 	void SpawnBullet(FVector Loc, FRotator Rot);
+
+	UFUNCTION()
+	void StartAttack();
+
+	UFUNCTION()
+	void StopAttack();
+
 };

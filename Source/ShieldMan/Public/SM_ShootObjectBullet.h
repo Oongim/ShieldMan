@@ -11,12 +11,14 @@ class SHIELDMAN_API ASM_ShootObjectBullet : public AActor
 {
 	GENERATED_BODY()
 private:
-	int32 count;
+	float DeathCount;
+	float DeathMaxCount;
 
-	bool bAlive;
+	bool bDeath;
+	float LifeTime;
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category = ShootBody)
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = ShootBody)
 	UStaticMeshComponent* Bullet;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category = Collision)
@@ -34,11 +36,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	bool IsAlive();
+	//bool IsAlive();
 
-	void Init();
+	//void Init();
 
 	UFUNCTION()
 	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 
 };

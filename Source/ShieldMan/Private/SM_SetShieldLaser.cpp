@@ -4,6 +4,7 @@
 #include "SM_SetShieldLaser.h"
 #include "SM_Shield.h"
 #include "ShieldManCharacter.h"
+#include "SM_ShootObject.h"
 
 // Sets default values
 ASM_SetShieldLaser::ASM_SetShieldLaser()
@@ -29,6 +30,7 @@ ASM_SetShieldLaser::ASM_SetShieldLaser()
 	Lazer->SetCollisionProfileName(TEXT("NoCollision"));
 
 	ShieldClass = ASM_Shield::StaticClass();
+
 }
 
 
@@ -45,6 +47,7 @@ void ASM_SetShieldLaser::PostInitializeComponents()
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &ASM_SetShieldLaser::OnCharacterOverlap);
 }
 
+
 void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ULog::Hello();
@@ -59,6 +62,7 @@ void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp,
 			auto NewShieldL = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
 
 			SMCharacter->SetShield(NewShieldR, NewShieldL);
+			StartAttack();
 		}
 		else
 		{
@@ -69,4 +73,26 @@ void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp,
 	{
 		ULog::Invalid("Can't OnCharacterOverlap start", "", LO_Viewport);
 	}
+
+	
+}
+
+void ASM_SetShieldLaser::StartAttack()
+{
+	ULog::Hello(LO_Viewport);
+
+	for (auto shootObject : GetWorld()->GetCurrentLevel()->Actors)
+	{
+		
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASM_ShootObject::StaticClass(), FoundActors);
+
+		for (auto d : FoundActors)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *d->GetName());
+			auto shooter = Cast< ASM_ShootObject>(d);
+			shooter->StartAttack();
+		}
+	}
+
 }

@@ -26,6 +26,8 @@ ASM_ShootObject::ASM_ShootObject()
 
 	sleepTime = 0;
 	maxSleepTime = 0.2f;
+
+	reloadMaxTime = 5.f;
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +39,7 @@ void ASM_ShootObject::BeginPlay()
 	Player = Cast<AShieldManCharacter>(*p);
 
 	SpawnBullet(GetActorLocation(), GetActorRotation());
+	PrimaryActorTick.SetTickFunctionEnable(false);
 
 }
 
@@ -60,18 +63,35 @@ void ASM_ShootObject::Tick(float DeltaTime)
 			sleepTime = 0;
 		}
 	}
-	if (!SpawnPawn->IsAlive())
+	reloadTime += DeltaTime;
+
+	if (reloadTime>=reloadMaxTime)
 	{
-		SpawnPawn->SetActorLocationAndRotation(GetActorLocation(), GetActorRotation());
-		SpawnPawn->Init();
+		reloadTime = 0.f;
+		SpawnBullet(GetActorLocation(), GetActorRotation());
+		//SpawnPawn->SetActorLocationAndRotation(GetActorLocation(), GetActorRotation());
+		//SpawnPawn->Init();
 		bFire = true;
 	}
 }
 
 void ASM_ShootObject::SpawnBullet(FVector Loc, FRotator Rot)
 {
-	SpawnPawn =
-		GetWorld()->SpawnActor<ASM_ShootObjectBullet>(SpawnBulletClass, Loc, Rot);
+	SpawnPawn = GetWorld()->SpawnActor<ASM_ShootObjectBullet>(SpawnBulletClass, Loc, Rot);
 
+}
+
+void ASM_ShootObject::StartAttack()
+{
+	if (!PrimaryActorTick.IsTickFunctionEnabled()) {
+
+	
+		PrimaryActorTick.SetTickFunctionEnable(true);
+	}
+}
+
+void ASM_ShootObject::StopAttack()
+{
+	PrimaryActorTick.SetTickFunctionEnable(false);
 }
 
