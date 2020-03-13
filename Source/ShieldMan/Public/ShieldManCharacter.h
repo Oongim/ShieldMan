@@ -99,8 +99,13 @@ private:	//private 함수
 	void Init_PhysicalAnim();
 
 public:		//public 함수
+	UFUNCTION()
 	bool CanSetShield();
+	
+	UFUNCTION()
 	void SetShield(class ASM_Shield* NewShieldR, class ASM_Shield* NewShieldL);
-
+	
+	UFUNCTION()
+	void AddForceToCharacter(FVector vDirection, float power);
 };
 

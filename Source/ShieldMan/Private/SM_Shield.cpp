@@ -10,8 +10,7 @@ ASM_Shield::ASM_Shield()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
-	RootComponent = Shield;
-
+	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_SHIELD(TEXT(
 		"/Game/Import/Shield.Shield"));
 	if (SK_SHIELD.Succeeded())
@@ -19,8 +18,19 @@ ASM_Shield::ASM_Shield()
 		Shield->SetSkeletalMesh(SK_SHIELD.Object);
 	}
 
-	Shield->SetCollisionProfileName(TEXT("NoCollision"));
-	Shield->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	/*Shield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SHIELD(TEXT(
+		"/Game/Import/SM_Shield.SM_Shield"));
+	if (SM_SHIELD.Succeeded())
+	{
+		Shield->SetStaticMesh(SM_SHIELD.Object);
+	}*/
+
+	RootComponent = Shield;
+	Shield->SetCollisionProfileName(TEXT("Shield"));
+	Shield->SetRelativeScale3D(FVector(3.f, 3.f, 3.f));
+
 }
 
 // Called when the game starts or when spawned

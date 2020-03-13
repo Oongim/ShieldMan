@@ -18,10 +18,16 @@ private:
 		float Speed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
-		FVector Hand_Right;
+		FVector V_Hand_Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
-		FVector Hand_Left;
+		FVector V_Hand_Left;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+		FRotator R_Hand_Right;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+		FRotator R_Hand_Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
 		bool bIsInAir;
@@ -40,6 +46,12 @@ public:
 
 	void SetHand_RightPos(FVector pos);
 	void SetHand_LeftPos(FVector pos);
+
+	void AddHand_RightRot(FRotator rot);
+	void AddHand_LeftRot(FRotator rot);
+
+	void SetHand_RightRot(FRotator rot);
+	void SetHand_LeftRot(FRotator rot);
 
 	const FVector GetHand_RightPos();
 	const FVector GetHand_LeftPos();

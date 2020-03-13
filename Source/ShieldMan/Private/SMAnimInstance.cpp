@@ -28,47 +28,67 @@ void USMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void USMAnimInstance::AddHand_RightPos(FVector pos)
 {
-	Hand_Right += pos;
+	V_Hand_Right += pos;
 	
 }
 
 void USMAnimInstance::AddHand_LeftPos(FVector pos)
 {
-	Hand_Left += pos;
+	V_Hand_Left += pos;
 	
 }
 
 void USMAnimInstance::SetHand_RightPos(FVector pos)
 {
-	Hand_Right = pos;
+	V_Hand_Right = pos;
 
 }
 
 void USMAnimInstance::SetHand_LeftPos(FVector pos) 
 {
-	Hand_Left = pos;
+	V_Hand_Left = pos;
 
+}
+
+void USMAnimInstance::AddHand_RightRot(FRotator rot)
+{
+	R_Hand_Right += rot;
+}
+
+void USMAnimInstance::AddHand_LeftRot(FRotator rot)
+{
+	R_Hand_Left += rot;
+}
+
+void USMAnimInstance::SetHand_RightRot(FRotator rot)
+{
+	R_Hand_Right = rot;
+}
+
+void USMAnimInstance::SetHand_LeftRot(FRotator rot)
+{
+	R_Hand_Left = rot;
 }
 
 const FVector USMAnimInstance::GetHand_RightPos()
 {
-	return Hand_Right;
+	return V_Hand_Right;
 }
 
 const FVector USMAnimInstance::GetHand_LeftPos()
 {
-	return Hand_Left;
+	return V_Hand_Left;
 }
 
 void USMAnimInstance::ClampLHand()
 {
-	Hand_Left.X=FMath::Clamp(Hand_Left.X, -110.f, 10.f);
-	Hand_Left.Y=FMath::Clamp(Hand_Left.Y, -60.f, 60.f);
-	Hand_Left.Z=FMath::Clamp(Hand_Left.Z, -80.f, 35.f);
+	V_Hand_Left.X=FMath::Clamp(V_Hand_Left.X, -110.f, 10.f);
+	V_Hand_Left.Y=FMath::Clamp(V_Hand_Left.Y, -60.f, 60.f);
+	V_Hand_Left.Z=FMath::Clamp(V_Hand_Left.Z, -80.f, 35.f);
 }
 void USMAnimInstance::ClampRHand()
 {
-	Hand_Right.X=FMath::Clamp(Hand_Right.X, -10.f, 110.f);
-	Hand_Right.Y=FMath::Clamp(Hand_Right.Y, -60.f, 60.f);
-	Hand_Right.Z=FMath::Clamp(Hand_Right.Z, -35.f, 80.f);
+	V_Hand_Right.X=FMath::Clamp(V_Hand_Right.X, -10.f, 110.f);
+	V_Hand_Right.Y=FMath::Clamp(V_Hand_Right.Y, -60.f, 60.f);
+	V_Hand_Right.Z=FMath::Clamp(V_Hand_Right.Z, -35.f, 80.f);
 }

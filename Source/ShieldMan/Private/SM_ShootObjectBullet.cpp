@@ -3,17 +3,18 @@
 
 #include "SM_ShootObjectBullet.h"
 #include "..\Public\SM_ShootObjectBullet.h"
+#include "ShieldManCharacter.h"
 
 // Sets default values
 ASM_ShootObjectBullet::ASM_ShootObjectBullet()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	Bullet = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BULLET"));
 
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("COLLISION"));
-	Collision->SetSphereRadius(8.f);
+	Collision->SetSphereRadius(10.f);
 
 	RootComponent = Bullet;
 	Collision->SetupAttachment(RootComponent);
@@ -28,12 +29,20 @@ ASM_ShootObjectBullet::ASM_ShootObjectBullet()
 	//bAlive = true;
 	
 	Bullet->SetSimulatePhysics(true);
-	Bullet->SetCollisionProfileName(TEXT("Shootbullet"));
+	Bullet->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18);
+	Collision->SetCollisionProfileName(TEXT("Shootbullet"));
 
 	DeathMaxCount = 3.f;
-	bDeath = false;
 
-	LifeTime = 0.f;
+	LifeTime = 10.f;
+
+	bDead = false;
+
+	static ConstructorHelpers::FClassFinder<AShieldManCharacter>CHARACTERCLASS(TEXT(
+		"/Game/BP/BP_SMCharacter.BP_SMCharacter_C"
+	));
+	characterClass = CHARACTERCLASS.Class;
+	
 }
 
 // Called when the game starts or when spawned
@@ -45,42 +54,31 @@ void ASM_ShootObjectBullet::BeginPlay()
 	
 	Bullet->SetSimulatePhysics(true);
 	Bullet->AddForce(GetActorRotation().Vector() * -200000);
-}
 
-// Called every frame
-void ASM_ShootObjectBullet::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	if (bDeath)
-	{
-		DeathCount += DeltaTime;
-		if (DeathCount >= DeathMaxCount)
-			Destroy();
-	}
-	else {
-		LifeTime += DeltaTime;
-		if (LifeTime >= 10.f)
-			Destroy();
-	}
+	GetWorldTimerManager().SetTimer(LifeTimerHandle,this,&ASM_ShootObjectBullet::Death, LifeTime);
 }
-
-//bool ASM_ShootObjectBullet::IsAlive()
-//{
-//
-//	return bAlive;
-//}
-//
-//void ASM_ShootObjectBullet::Init()
-//{
-//	//count = 0;
-//	bAlive = true;
-//	
-//	Bullet->AddForce(GetActorRotation().Vector() * -200000);
-//
-//}
 
 void ASM_ShootObjectBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	bDeath = true;
+	if (bDead) return;
+
+	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_ShootObjectBullet::Death, DeathMaxCount);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetClass()->GetName());
+
+	if (OtherActor->GetClass()->GetName() == characterClass->GetName())
+	{
+		auto character = Cast<AShieldManCharacter>(OtherActor);
+
+		character->AddForceToCharacter(GetActorRotation().Vector(), this->GetVelocity().Size());
+		
+		ULog::Number(this->GetVelocity().Size(), "Size: ","",LO_Viewport);
+	}
+
+	bDead = true;
+}
+
+void ASM_ShootObjectBullet::Death()
+{
+	Destroy();
 }
 

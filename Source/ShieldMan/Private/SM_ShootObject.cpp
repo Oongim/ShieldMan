@@ -27,7 +27,13 @@ ASM_ShootObject::ASM_ShootObject()
 	sleepTime = 0;
 	maxSleepTime = 0.2f;
 
-	reloadMaxTime = 5.f;
+	reloadMaxTime = 5.f; 
+
+	//ShootBody->SetCollisionEnabled(ECollisionEnabled::);
+	//ShootBody->SetCollisionObjectType(ECollisionChannel::);
+	//ShootBody->SetCollisionResponseToAllChannels(ECollisionResponse::);
+	//ShootBody->SetCollisionResponseToChannel(ECollisionChannel::,ECollisionResponse::);
+
 }
 
 // Called when the game starts or when spawned
@@ -38,9 +44,9 @@ void ASM_ShootObject::BeginPlay()
 
 	Player = Cast<AShieldManCharacter>(*p);
 
-	SpawnBullet(GetActorLocation(), GetActorRotation());
+	//SpawnBullet(GetActorLocation(), GetActorRotation());
 	PrimaryActorTick.SetTickFunctionEnable(false);
-
+	reloadTime = 4.f;
 }
 
 // Called every frame
@@ -69,8 +75,6 @@ void ASM_ShootObject::Tick(float DeltaTime)
 	{
 		reloadTime = 0.f;
 		SpawnBullet(GetActorLocation(), GetActorRotation());
-		//SpawnPawn->SetActorLocationAndRotation(GetActorLocation(), GetActorRotation());
-		//SpawnPawn->Init();
 		bFire = true;
 	}
 }
@@ -84,8 +88,6 @@ void ASM_ShootObject::SpawnBullet(FVector Loc, FRotator Rot)
 void ASM_ShootObject::StartAttack()
 {
 	if (!PrimaryActorTick.IsTickFunctionEnabled()) {
-
-	
 		PrimaryActorTick.SetTickFunctionEnable(true);
 	}
 }

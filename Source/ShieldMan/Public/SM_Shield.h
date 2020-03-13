@@ -25,4 +25,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 		USkeletalMeshComponent* Shield;
+
+	/*UPROPERTY(VisibleAnywhere, Category = Weapon)
+		UStaticMeshComponent* Shield;*/
 };

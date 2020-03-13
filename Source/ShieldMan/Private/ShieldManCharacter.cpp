@@ -79,6 +79,8 @@ void AShieldManCharacter::SetShield(ASM_Shield* NewShieldR, ASM_Shield* NewShiel
 	}
 }
 
+
+
 void AShieldManCharacter::Init_Mesh()
 {
 	//바닥에 닿을 수 있게 높이 조정과 바라보는 방향 바꿔줌
@@ -203,6 +205,12 @@ void AShieldManCharacter::SetLHandControl()
 	}
 }
 
+void AShieldManCharacter::AddForceToCharacter(FVector vDirection, float power)
+{
+	this->LaunchCharacter(-vDirection * power, true, false);
+
+}
+
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
@@ -272,13 +280,23 @@ void AShieldManCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		if (CurControlMode->isControlMode(BodyControlMode)) {
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
+		//위 아래 이동
+		else if (CurControlMode->isControlMode(RHandControlMode)) {
+			AnimInstance->AddHand_RightRot({ -Value, 0.f, 0.f });
+		}
+		else if (CurControlMode->isControlMode(LHandControlMode)) {
+			AnimInstance->AddHand_LeftRot({ Value, 0.f, 0.f });
+		}
+		
 	}
 }
 
@@ -286,13 +304,24 @@ void AShieldManCharacter::MoveRight(float Value)
 {
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		if (CurControlMode->isControlMode(BodyControlMode)) {
+			// find out which way is right
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get right vector 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			// add movement in that direction
+			AddMovementInput(Direction, Value);
+		}
+		//위 아래 이동
+		else if (CurControlMode->isControlMode(RHandControlMode)) {
+			AnimInstance->AddHand_RightRot({ 0.f, -Value , 0.f});
+		}
+		else if (CurControlMode->isControlMode(LHandControlMode)) {
+			AnimInstance->AddHand_LeftRot({ 0.f, Value, 0.f });
+		}
+		
 	}
 }
+

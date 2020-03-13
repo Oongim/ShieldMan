@@ -20,6 +20,8 @@ UE_LOG(LogTemp, Warning, TEXT("This is test"));
 
 UE_LOG(LogTemp, Warning, TEXT("%f"), Player->GetActorLocation().X);
 
+UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
+
 /////////////////////////////////////////////////////////////
 
 Debug Logging Library 플러그인 
