@@ -87,6 +87,8 @@ protected: //¡∂¿€
 	void SetRHandControl();
 	void SetLHandControl();
 
+	void PossessedBy(AController* NewController);
+
 protected:
 	// APawn interface
 	virtual void PostInitializeComponents() override;

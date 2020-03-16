@@ -56,6 +56,21 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentHP = 80.f;
 	PlayerName = TEXT("KDK");
 
+
+
+	//UWorld* CurrentWorld = GetWorld();		//모든 서브오브젝트 검색
+
+	//for (const auto& Entry : FActorRange(CurrentWorld))
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("Actor : %s"), *Entry->GetName());
+	//	TArray<UObject*> Components;
+	//	Entry->GetDefaultSubobjects(Components);
+
+	//	for (const auto& CEntry : Components)
+	//	{
+	//		UE_LOG(LogTemp, Log, TEXT("-- Components : %s"), *CEntry->GetName());
+	//	}
+	//}
 }
 
 bool AShieldManCharacter::CanSetShield()
@@ -325,3 +340,19 @@ void AShieldManCharacter::MoveRight(float Value)
 	}
 }
 
+void AShieldManCharacter::PossessedBy(AController* NewController)
+{
+
+	// Don't rotate when the controller rotates. Let that just affect the camera.
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
+
+	Camera->SetRelativeLocationAndRotation(  //카메라 초기 위치와 각도 조정
+		FVector(0.0f, 0.0f, 80.0f),
+		FRotator(-5.f, 0.f, 0.f)
+	);
+	//SpringArm->R
+	//SpringArm->ReplicateSubobjects()
+	//SpringArm -> bOnlyAllowAutonomousTickPose = false;
+}
