@@ -57,7 +57,10 @@ AShieldManCharacter::AShieldManCharacter()
 	PlayerName = TEXT("KDK");
 
 
-
+	//Controller1 = Controller;
+	Controller1 = nullptr;
+	Controller2 = nullptr;
+	Controller3 = nullptr;
 	//UWorld* CurrentWorld = GetWorld();		//모든 서브오브젝트 검색
 
 	//for (const auto& Entry : FActorRange(CurrentWorld))
@@ -342,6 +345,75 @@ void AShieldManCharacter::MoveRight(float Value)
 
 void AShieldManCharacter::PossessedBy(AController* NewController)
 {
+	AController* const OldController = Controller;
+	
+	/*Controller = NewController;
+
+	ForceNetUpdate();*/
+
+	if (Controller3 == nullptr)
+	{
+		Controller3 = NewController;
+		if (Controller3->PlayerState != nullptr)
+			SetPlayerState(Controller3->PlayerState);
+		
+
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller3))
+		{
+			SetReplicates(true);
+			SetAutonomousProxy(true);
+
+			UE_LOG(LogTemp, Log, TEXT("Controller3 : %s"), *Controller3->GetName());
+		}
+	}
+	else if (Controller2 == nullptr)
+	{
+		Controller2 = NewController;
+		if (Controller2->PlayerState != nullptr)
+			SetPlayerState(Controller2->PlayerState);
+
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller2))
+		{
+			SetReplicates(true);
+			SetAutonomousProxy(true);
+			UE_LOG(LogTemp, Log, TEXT("Controller2 : %s"), *Controller2->GetName());
+		}
+	}
+
+	else if (Controller1 == nullptr)
+	{
+		Controller1 = NewController;
+		if (Controller1->PlayerState != nullptr)
+			SetPlayerState(Controller1->PlayerState);
+
+		if (APlayerController* PlayerController = Cast<APlayerController>(Controller1))
+		{			
+			SetReplicates(true);
+			SetAutonomousProxy(true);
+
+		UE_LOG(LogTemp, Log, TEXT("Controller1 : %s"), *Controller1->GetName());
+		}
+	}
+		
+	//if (Controller3 != nullptr)
+		//Controller3 = NewController;
+	//Controller = NewController;
+	//ForceNetUpdate();
+
+	//if (Controller->PlayerState != nullptr)
+	//{
+	//	SetPlayerState(Controller->PlayerState);
+	//}
+
+	//if (Controller1 != nullptr)
+	//{
+	//	Controller = Controller2;
+
+	//	ForceNetUpdate();
+
+	//	 ReceivePossessed(Controller);
+
+	//}
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -356,3 +428,138 @@ void AShieldManCharacter::PossessedBy(AController* NewController)
 	//SpringArm->ReplicateSubobjects()
 	//SpringArm -> bOnlyAllowAutonomousTickPose = false;
 }
+
+
+
+
+//void AShieldManCharacter::UnPossessed()
+//{
+//	//폰의 unpossessed
+//	AController* const OldController = Controller;
+//
+//	ForceNetUpdate();
+//
+//	SetPlayerState(nullptr);
+//	SetOwner(nullptr);
+//	Controller = nullptr;
+//
+//	// Unregister input component if we created one
+//	DestroyPlayerInputComponent();
+//
+//	// dispatch Blueprint event if necessary
+//	if (OldController)
+//	{
+//		ReceiveUnpossessed(OldController);
+//	}
+//
+//
+//	ConsumeMovementInputVector();
+//
+//	////캐릭터의 unpossessed
+//	//if (CharacterMovement)
+//	//{
+//	//	CharacterMovement->ResetPredictionData_Client();
+//	//	CharacterMovement->ResetPredictionData_Server();
+//	//}
+//
+//	//// We're no longer controlled remotely, resume regular ticking of animations.
+//	//if (Mesh)
+//	//{
+//	//	Mesh->bOnlyAllowAutonomousTickPose = false;
+//	//}
+//}
+//void AShieldManCharacter::OnUnPossess()	//PlayerController 상속
+//{
+//	if (GetPawn() != NULL)
+//	{
+//		if (Role == ROLE_Authority)
+//		{
+//			GetPawn()->SetReplicates(true);
+//		}
+//		GetPawn()->UnPossessed();
+//
+//		if (GetViewTarget() == GetPawn())
+//		{
+//			SetViewTarget(this);
+//		}
+//	}
+//	SetPawn(NULL);
+//}
+//
+//void AShieldManCharacter::OnPossess(APawn* PawnToPossess)	//PlayerController 상속
+//{
+//	if (PawnToPossess != NULL &&
+//		(PlayerState == NULL || !PlayerState->bOnlySpectator))
+//	{
+//		const bool bNewPawn = (GetPawn() != PawnToPossess);
+//
+//		if (GetPawn() && bNewPawn)
+//		{
+//			UnPossess();
+//		}
+//
+//		if (PawnToPossess->Controller != NULL)
+//		{
+//			PawnToPossess->Controller->UnPossess();
+//		}
+//
+//		PawnToPossess->PossessedBy(this);
+//
+//		// update rotation to match possessed pawn's rotation
+//		SetControlRotation(PawnToPossess->GetActorRotation());
+//
+//		SetPawn(PawnToPossess);
+//		check(GetPawn() != NULL);
+//
+//		if (GetPawn() && GetPawn()->PrimaryActorTick.bStartWithTickEnabled)
+//		{
+//			GetPawn()->SetActorTickEnabled(true);
+//		}
+//
+//		INetworkPredictionInterface* NetworkPredictionInterface = GetPawn() ? Cast<INetworkPredictionInterface>(GetPawn()->GetMovementComponent()) : NULL;
+//		if (NetworkPredictionInterface)
+//		{
+//			NetworkPredictionInterface->ResetPredictionData_Server();
+//		}
+//
+//		AcknowledgedPawn = NULL;
+//
+//		// Local PCs will have the Restart() triggered right away in ClientRestart (via PawnClientRestart()), but the server should call Restart() locally for remote PCs.
+//		// We're really just trying to avoid calling Restart() multiple times.
+//		if (!IsLocalPlayerController())
+//		{
+//			GetPawn()->Restart();
+//		}
+//
+//		ClientRestart(GetPawn());
+//
+//		ChangeState(NAME_Playing);
+//		if (bAutoManageActiveCameraTarget)
+//		{
+//			AutoManageActiveCameraTarget(GetPawn());
+//			ResetCameraMode();
+//		}
+//		// not calling UpdateNavigationComponents() anymore. The
+//		// PathFollowingComponent is now observing newly possessed
+//		// pawns (via OnNewPawn)
+//		// need to broadcast here since we don't call Super::OnPossess
+//		if (bNewPawn)
+//		{
+//			OnNewPawn.Broadcast(GetPawn());
+//		}
+//	}
+//}
+
+//void AShieldManCharacter::OnRep_Controller()
+//{
+//	if ((Controller1 != nullptr) && (Controller1->GetPawn() == nullptr))
+//	{
+//		Controller1->SetPawnFromRep(this);
+//
+//		APlayerController* const PC = Cast<APlayerController>(Controller1);
+//		if ((PC != nullptr) && PC->bAutoManageActiveCameraTarget && (PC->PlayerCameraManager->ViewTarget.Target == Controller1))
+//		{
+//			PC->AutoManageActiveCameraTarget(this);
+//		}
+//	}
+//}

@@ -50,6 +50,8 @@ private:   //private변수들
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
 		//UPhysicalAnimationComponent* PhysicalAnimation;
 
+
+
 public:		//생성자 , public 변수
 	AShieldManCharacter();
 
@@ -87,7 +89,6 @@ protected: //조작
 	void SetRHandControl();
 	void SetLHandControl();
 
-	void PossessedBy(AController* NewController);
 
 protected:
 	// APawn interface
@@ -109,5 +110,34 @@ public:		//public 함수
 	
 	UFUNCTION()
 	void AddForceToCharacter(FVector vDirection, float power);
+
+
+
+	//possess, controller관련
+private:
+
+	/** Controller currently possessing this Actor */
+	UPROPERTY()
+	AController* Controller1;
+
+	UPROPERTY()
+		AController* Controller2;
+
+	UPROPERTY()
+		AController* Controller3;
+
+	//UPROPERTY(replicatedUsing = OnRep_Controller)
+	//	AController* Controller2;
+
+	//UPROPERTY(replicatedUsing = OnRep_Controller)
+	//	AController* Controller3;
+public:
+
+	void PossessedBy(AController* NewController) override;
+	//void OnPossess(APawn* PawnToPossess) override;	//PlayerController 상속
+	//void OnUnPossess() override;	//PlayerController 상속
+	//void UnPossessed() override;
+	//void OnRep_Controller() override;
+
 };
 

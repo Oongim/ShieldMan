@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ShieldMan.h"
+//#include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
 #include "SMPlayerController.generated.h"
 
@@ -23,7 +24,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* HUDOverlay;
 
+
 protected:
 	virtual void BeginPlay() override;
 
+
+private:
+	//UPROPERTY()
+	//AController* Controller1;
 };
