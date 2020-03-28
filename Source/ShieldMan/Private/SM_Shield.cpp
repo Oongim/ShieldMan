@@ -28,8 +28,9 @@ ASM_Shield::ASM_Shield()
 	}*/
 
 	RootComponent = Shield;
-	Shield->SetCollisionProfileName(TEXT("NoCollision"));
-	Shield->SetRelativeScale3D(FVector(1.5f, 1.5f, 1.5f));
+	//Shield->SetCollisionProfileName(TEXT("NoCollision"));
+	Shield->SetCollisionProfileName(TEXT("Shield"));
+	Shield->SetRelativeScale3D(FVector(2.0f, 2.0f, 2.0f));
 
 }
 

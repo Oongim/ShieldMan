@@ -107,5 +107,7 @@ public:		//public ÇÔ¼ö
 	
 	UFUNCTION()
 	void AddForceToCharacter(FVector vDirection, float power);
+
+	void SwitchLevel(FName LevelName);
 };
 

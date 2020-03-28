@@ -19,14 +19,23 @@ private:
 	float maxSleepTime;
 	bool bFire;
 	
-	float reloadMaxTime;
-	float reloadTime;
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category=ShootBody)
 	UStaticMeshComponent* ShootBody;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 	TSubclassOf< class ASM_ShootObjectBullet> SpawnBulletClass;
+
+	UPROPERTY(EditAnywhere, Category = "Shoot")
+	float reloadMaxTime;
+
+	UPROPERTY(EditAnywhere, Category = "Shoot")
+	float reloadTime;
+
+	UPROPERTY(EditAnywhere, Category = "Shoot")
+	float ShootPower;
+
 public:	
 	// Sets default values for this actor's properties
 	ASM_ShootObject();

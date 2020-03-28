@@ -27,7 +27,10 @@ ASM_ShootObject::ASM_ShootObject()
 	sleepTime = 0;
 	maxSleepTime = 0.2f;
 
-	reloadMaxTime = 5.f; 
+	reloadMaxTime = 3; 
+	reloadTime = FMath::Rand() % (int)reloadMaxTime;
+
+	ShootPower = 200000;
 
 	//ShootBody->SetCollisionEnabled(ECollisionEnabled::);
 	//ShootBody->SetCollisionObjectType(ECollisionChannel::);
@@ -44,9 +47,8 @@ void ASM_ShootObject::BeginPlay()
 
 	Player = Cast<AShieldManCharacter>(*p);
 
-	//SpawnBullet(GetActorLocation(), GetActorRotation());
 	PrimaryActorTick.SetTickFunctionEnable(false);
-	reloadTime = 4.f;
+	
 }
 
 // Called every frame
@@ -82,7 +84,7 @@ void ASM_ShootObject::Tick(float DeltaTime)
 void ASM_ShootObject::SpawnBullet(FVector Loc, FRotator Rot)
 {
 	SpawnPawn = GetWorld()->SpawnActor<ASM_ShootObjectBullet>(SpawnBulletClass, Loc, Rot);
-
+	SpawnPawn->AddFroce(ShootPower);
 }
 
 void ASM_ShootObject::StartAttack()

@@ -53,9 +53,14 @@ void ASM_ShootObjectBullet::BeginPlay()
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &ASM_ShootObjectBullet::OnOverlapBegin);
 	
 	Bullet->SetSimulatePhysics(true);
-	Bullet->AddForce(GetActorRotation().Vector() * -200000);
+	
 
 	GetWorldTimerManager().SetTimer(LifeTimerHandle,this,&ASM_ShootObjectBullet::Death, LifeTime);
+}
+
+void ASM_ShootObjectBullet::AddFroce(float power)
+{
+	Bullet->AddForce(GetActorRotation().Vector() * -power);
 }
 
 void ASM_ShootObjectBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

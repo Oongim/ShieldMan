@@ -129,7 +129,7 @@ void AShieldManCharacter::Init_Camera()
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritRoll = true;
 	SpringArm->bInheritYaw = true;
-	SpringArm->bDoCollisionTest = false;
+	SpringArm->bDoCollisionTest = true;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -207,8 +207,22 @@ void AShieldManCharacter::SetLHandControl()
 
 void AShieldManCharacter::AddForceToCharacter(FVector vDirection, float power)
 {
-	this->LaunchCharacter(-vDirection * power, true, false);
+	this->LaunchCharacter(-vDirection * power, false,false);
 
+}
+
+void AShieldManCharacter::SwitchLevel(FName LevelName)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FName CurrentLevelName(*World->GetMapName());
+
+		if (CurrentLevelName != LevelName)
+		{
+			UGameplayStatics::OpenLevel(World, LevelName);
+		}
+	}
 }
 
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -261,7 +275,6 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 	}
 }
 
-
 void AShieldManCharacter::AddControllerRolInput(float Val)
 {
 	Val *= 2;
@@ -273,8 +286,6 @@ void AShieldManCharacter::AddControllerRolInput(float Val)
 	AnimInstance->AddHand_LeftPos({ 0.f, Val, 0.f });
 	}
 }
-
-
 
 void AShieldManCharacter::MoveForward(float Value)
 {
