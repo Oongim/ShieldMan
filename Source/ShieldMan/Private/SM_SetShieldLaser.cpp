@@ -66,12 +66,12 @@ void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp,
 		}
 		else
 		{
-			ULog::Invalid("Can't equip Shield", "", LO_Viewport);
+			//ULog::Invalid("Can't equip Shield", "", LO_Viewport);
 		}
 	}
 	else
 	{
-		ULog::Invalid("Can't OnCharacterOverlap start", "", LO_Viewport);
+		//ULog::Invalid("Can't OnCharacterOverlap start", "", LO_Viewport);
 	}
 
 	

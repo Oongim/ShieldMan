@@ -30,12 +30,12 @@ void ASM_SpawnToPointArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
 
 	if (nullptr != SMCharacter)
 	{
-		ULog::Invalid("Yes Character", "", LO_Viewport);
+		//ULog::Invalid("Yes Character", "", LO_Viewport);
 		SMCharacter->SetActorLocation(GetActorLocation() + SpawnPoint);
 	}
 	else
 	{
-		ULog::Invalid("No Character", "", LO_Viewport);
+		//ULog::Invalid("No Character", "", LO_Viewport);
 	}
 }
 
