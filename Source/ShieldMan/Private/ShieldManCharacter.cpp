@@ -8,9 +8,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "UnrealNetwork.h"
 
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
+
+
 
 //////////////////////////////////////////////////////////////////////////
 // AShieldManCharacter
@@ -56,6 +59,7 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentHP = 80.f;
 	PlayerName = TEXT("KDK");
 
+	bReplicates = true;
 
 	//Controller1 = Controller;
 	Controller1 = nullptr;
@@ -550,16 +554,13 @@ void AShieldManCharacter::PossessedBy(AController* NewController)
 //	}
 //}
 
-//void AShieldManCharacter::OnRep_Controller()
-//{
-//	if ((Controller1 != nullptr) && (Controller1->GetPawn() == nullptr))
-//	{
-//		Controller1->SetPawnFromRep(this);
-//
-//		APlayerController* const PC = Cast<APlayerController>(Controller1);
-//		if ((PC != nullptr) && PC->bAutoManageActiveCameraTarget && (PC->PlayerCameraManager->ViewTarget.Target == Controller1))
-//		{
-//			PC->AutoManageActiveCameraTarget(this);
-//		}
-//	}
-//}
+
+void AShieldManCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AShieldManCharacter, Controller1);
+	DOREPLIFETIME(AShieldManCharacter, Controller2);
+	DOREPLIFETIME(AShieldManCharacter, Controller3);
+}

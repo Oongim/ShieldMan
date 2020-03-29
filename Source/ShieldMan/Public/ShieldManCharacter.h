@@ -117,13 +117,13 @@ public:		//public 함수
 private:
 
 	/** Controller currently possessing this Actor */
-	UPROPERTY()
+	UPROPERTY(replicated)
 	AController* Controller1;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 		AController* Controller2;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 		AController* Controller3;
 
 	//UPROPERTY(replicatedUsing = OnRep_Controller)
@@ -132,12 +132,11 @@ private:
 	//UPROPERTY(replicatedUsing = OnRep_Controller)
 	//	AController* Controller3;
 public:
-
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const;
 	void PossessedBy(AController* NewController) override;
 	//void OnPossess(APawn* PawnToPossess) override;	//PlayerController 상속
 	//void OnUnPossess() override;	//PlayerController 상속
 	//void UnPossessed() override;
-	//void OnRep_Controller() override;
 
 };
 
