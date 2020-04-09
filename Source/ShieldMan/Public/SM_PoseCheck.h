@@ -57,7 +57,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	//BP상의 CollisionBox의 레퍼런스를 받아서 세팅
-	UFUNCTION(BlueprintCallable, Category = VarSetting)
+	UFUNCTION(BlueprintCallable, Category = floatSetting)
 		void SetCollisionFromBP(UBoxComponent* Right,UBoxComponent* Left);
 
 	UFUNCTION()
