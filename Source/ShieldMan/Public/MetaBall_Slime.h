@@ -56,4 +56,7 @@ public:
 
 	void Muitiple_SpringMass_System(float timeStep);
 
+	UFUNCTION(BlueprintCallable, Category = floatSetting)
+	void AddForceToVelocity(FVector vec);
+
 };

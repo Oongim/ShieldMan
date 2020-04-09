@@ -46,10 +46,6 @@ void AMetaBall_Slime::BeginPlay()
 	}
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-		/*Balls_Velocity[i].X = FMath::FRandRange(-1, 1);
-		Balls_Velocity[i].Y = FMath::FRandRange(-1, 1);
-		Balls_Velocity[i].Z = FMath::FRandRange(-1, 1);
-		Balls_Velocity[i].Normalize(1.0f);*/
 		Balls_Velocity[i]= FVector(0.f, 0.f, 0.f);
 		Balls_Position[i] = FVector(0.f,0.f,0.f);
 	}
@@ -119,6 +115,13 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 
 	}
 
+}
+
+void AMetaBall_Slime::AddForceToVelocity(FVector vec)
+{
+	for (int i = 1; i < MAX_NUM_BLOB; ++i) {
+		Balls_Velocity[i] += vec;
+	}
 }
 
 
