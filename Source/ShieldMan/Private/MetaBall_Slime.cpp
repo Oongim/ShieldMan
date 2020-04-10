@@ -2,6 +2,7 @@
 
 
 #include "MetaBall_Slime.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AMetaBall_Slime::AMetaBall_Slime()
@@ -18,12 +19,12 @@ AMetaBall_Slime::AMetaBall_Slime()
 
 	float gap = 40.f;
 	int index=0;
-	Anchor_Position[index++] = { 0,0,0 };
-	Anchor_Position[index++] = { 0,0,-gap };
-	Anchor_Position[index++] = { gap,0,0 };
-	Anchor_Position[index++] = { -gap,0,0 };
-	Anchor_Position[index++] = { 0,gap,0 };
-	Anchor_Position[index++] = { 0,-gap ,0};
+	Anchor_Default_Position[index++] = { 0,0,0 };
+	Anchor_Default_Position[index++] = { 0,0,-gap };
+	Anchor_Default_Position[index++] = { gap,0,0 };
+	Anchor_Default_Position[index++] = { -gap,0,0 };
+	Anchor_Default_Position[index++] = { 0,gap,0 };
+	Anchor_Default_Position[index++] = { 0,-gap ,0};
 	k = 5;
 	damping = 5;
 	gravity = 5;
@@ -57,19 +58,28 @@ void AMetaBall_Slime::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	SetRotation();
+	
 	Update(DeltaTime);
-	ULog::Vector(Balls_Position[5], "location: ", "", LO_Viewport);
+	
 }
 
 void AMetaBall_Slime::Update(float DeltaTime)
 {
 	Muitiple_SpringMass_System(DeltaTime);
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-		//Balls_Position[i] += Balls_Velocity[i] * speed * DeltaTime;
 		Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i], Balls_Position[i]);
-
 	}
 	BoundCheck();
+}
+
+void AMetaBall_Slime::SetRotation()
+{
+	//Anchor_Position[0].RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 1, 0));
+	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
+		Anchor_Position[i]= UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation());
+	}
+	ULog::Vector(Anchor_Position[2], "MyActor location: ", "", LO_Viewport);
 }
 
 void AMetaBall_Slime::BoundCheck()
