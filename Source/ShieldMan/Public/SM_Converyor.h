@@ -11,28 +11,27 @@ UCLASS()
 class SHIELDMAN_API ASM_Converyor : public AActor
 {
 	GENERATED_BODY()
-	
+
 private:
 
 	bool bisOverlap;
 
-	float fSpeed;
 
-
-public:	
+public:
 	// Sets default values for this actor's properties
 	ASM_Converyor();
 
 	UPROPERTY(BlueprintReadWrite, Category = Collision)
 		UBoxComponent* On_Collision;
 
-
+	UPROPERTY(EditAnywhere, Category = "Value")
+		float Speed;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -42,7 +41,7 @@ public:
 	UFUNCTION()
 		void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-		UFUNCTION()
+	UFUNCTION()
 		void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
+
 };
