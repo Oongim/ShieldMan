@@ -79,7 +79,6 @@ void AMetaBall_Slime::SetRotation()
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		Anchor_Position[i]= UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation());
 	}
-	ULog::Vector(Anchor_Position[2], "MyActor location: ", "", LO_Viewport);
 }
 
 void AMetaBall_Slime::BoundCheck()
@@ -130,7 +129,7 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 void AMetaBall_Slime::AddForceToVelocity(FVector vec)
 {
 	for (int i = 1; i < MAX_NUM_BLOB; ++i) {
-		Balls_Velocity[i] += vec;
+		Balls_Velocity[i] = this->GetVelocity();
 	}
 }
 
