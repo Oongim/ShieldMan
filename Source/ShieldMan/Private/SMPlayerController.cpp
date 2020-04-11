@@ -3,6 +3,7 @@
 
 #include "SMPlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void ASMPlayerController::BeginPlay()
 {
@@ -12,6 +13,7 @@ void ASMPlayerController::BeginPlay()
 	{
 		HUDOverlay = CreateWidget<UUserWidget>(this, HUDOverlayAsset);
 	}
-	HUDOverlay->AddToViewport();
-	HUDOverlay->SetVisibility(ESlateVisibility::Visible);
+
+	//HUDOverlay->AddToViewport();
+	//HUDOverlay->SetVisibility(ESlateVisibility::Visible);
 }

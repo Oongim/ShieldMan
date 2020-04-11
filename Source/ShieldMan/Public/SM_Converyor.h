@@ -16,8 +16,6 @@ private:
 
 	bool bisOverlap;
 
-	float fSpeed;
-
 
 public:	
 	// Sets default values for this actor's properties
@@ -26,7 +24,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Collision)
 		UBoxComponent* On_Collision;
 
-
+	UPROPERTY(EditAnywhere, Category = "Value")
+		float Speed;
 
 protected:
 	// Called when the game starts or when spawned
