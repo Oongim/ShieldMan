@@ -34,6 +34,7 @@ private:
 	float mass ;
 
 	FVector Anchor_Position[MAX_NUM_BLOB];
+	FVector Anchor_Default_Position[MAX_NUM_BLOB];
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
 	float k ;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
@@ -52,6 +53,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void Update(float DeltaTime);
+	void SetRotation();
 	void BoundCheck();
 
 	void Muitiple_SpringMass_System(float timeStep);
