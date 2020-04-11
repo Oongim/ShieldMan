@@ -35,11 +35,11 @@ void ASM_Converyor::Tick(float DeltaTime)
 
 		TArray<AActor*> OverlapObject;
 
-
+		
 		On_Collision->GetOverlappingActors(OverlapObject);
-
-		for (int i = 0; i < OverlapObject.Num(); ++i)
-			OverlapObject[i]->AddActorWorldOffset(dir * (DeltaTime * Speed));
+		
+		for(int i=0; i<OverlapObject.Num(); ++i)
+			OverlapObject[i]->AddActorWorldOffset(dir*(DeltaTime*Speed));
 	}
 }
 
