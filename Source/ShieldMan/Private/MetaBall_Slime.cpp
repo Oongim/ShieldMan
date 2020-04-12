@@ -43,7 +43,7 @@ void AMetaBall_Slime::BeginPlay()
 		Name.AppendInt(1 + i);
 		MaterialParamName[i]= FName(*Name);
 
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *MaterialParamName[i].ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *MaterialParamName[i].ToString());
 	}
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
@@ -79,7 +79,7 @@ void AMetaBall_Slime::SetRotation()
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		Anchor_Position[i]= UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation());
 	}
-	ULog::Vector(Anchor_Position[2], "MyActor location: ", "", LO_Viewport);
+	//ULog::Vector(Anchor_Position[2], "MyActor location: ", "", LO_Viewport);
 }
 
 void AMetaBall_Slime::BoundCheck()
