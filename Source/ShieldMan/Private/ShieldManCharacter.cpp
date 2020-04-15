@@ -253,10 +253,10 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 	//좌 우 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
 		
-		AnimInstance->AddHand_RightPos({ 0.f, 0.f, -Val });
+		AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
+		AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f});
 
 	}
 }
@@ -268,7 +268,7 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 	}
 	//위 아래 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f });
+		AnimInstance->AddHand_RightPos({ Val, 0.f, 0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
 		AnimInstance->AddHand_LeftPos({ Val, 0.f, 0.f });
@@ -280,10 +280,10 @@ void AShieldManCharacter::AddControllerRolInput(float Val)
 	Val *= 2;
 	//앞 뒤 이동
 	if (CurControlMode->isControlMode(RHandControlMode)) {
-	AnimInstance->AddHand_RightPos({ 0.f, -Val, 0.f });
+	AnimInstance->AddHand_RightPos({ 0.f, 0.f, Val });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-	AnimInstance->AddHand_LeftPos({ 0.f, Val, 0.f });
+	AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
 	}
 }
 
