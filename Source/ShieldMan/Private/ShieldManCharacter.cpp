@@ -42,11 +42,11 @@ AShieldManCharacter::AShieldManCharacter()
 	CurControlMode = new BodyControl();
 
 	Right_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("RIGHT_COLLISION"));
-	Right_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_r")));
+	Right_Collision->SetupAttachment(GetMesh(), FName(TEXT("Bip001-R-Hand")));
 	Right_Collision->SetSphereRadius(5.f);
 
 	Left_Collision = CreateDefaultSubobject<USphereComponent>(TEXT("LEFT_COLLISION"));
-	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
+	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("Bip001-L-Hand")));
 	Left_Collision->SetSphereRadius(5.f);
 
 	Right_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("RIGHT_SHIELD"));
@@ -56,6 +56,7 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentHP = 80.f;
 	PlayerName = TEXT("KDK");
 
+	CurrentStatus = CharacterStatus::PossibleMove;
 }
 
 bool AShieldManCharacter::CanSetShield()
@@ -225,6 +226,11 @@ void AShieldManCharacter::SwitchLevel(FName LevelName)
 	}
 }
 
+void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
+{
+	CurrentStatus = status;
+}
+
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
@@ -248,15 +254,16 @@ void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 void AShieldManCharacter::AddControllerYawInput(float Val)
 {
 	if (CurControlMode->isControlMode(BodyControlMode)) {
-		Super::AddControllerYawInput(Val);
+		//if(CurrentStatus== CharacterStatus::PossibleMove)
+			Super::AddControllerYawInput(Val);
 	}
 	//좌 우 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		
-		AnimInstance->AddHand_RightPos({ 0.f, 0.f, -Val });
+
+		AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
+		AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
 
 	}
 }
@@ -264,11 +271,12 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 void AShieldManCharacter::AddControllerPitchInput(float Val)
 {
 	if (CurControlMode->isControlMode(BodyControlMode)) {
-		Super::AddControllerPitchInput(Val);
+		//if (CurrentStatus == CharacterStatus::PossibleMove)
+			Super::AddControllerPitchInput(Val);
 	}
 	//위 아래 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ -Val, 0.f, 0.f });
+		AnimInstance->AddHand_RightPos({ Val, 0.f, 0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
 		AnimInstance->AddHand_LeftPos({ Val, 0.f, 0.f });
@@ -280,10 +288,10 @@ void AShieldManCharacter::AddControllerRolInput(float Val)
 	Val *= 2;
 	//앞 뒤 이동
 	if (CurControlMode->isControlMode(RHandControlMode)) {
-	AnimInstance->AddHand_RightPos({ 0.f, -Val, 0.f });
+		AnimInstance->AddHand_RightPos({ 0.f, 0.f, Val });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-	AnimInstance->AddHand_LeftPos({ 0.f, Val, 0.f });
+		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
 	}
 }
 

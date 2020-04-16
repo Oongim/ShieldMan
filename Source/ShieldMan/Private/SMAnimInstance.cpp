@@ -82,13 +82,13 @@ const FVector USMAnimInstance::GetHand_LeftPos()
 
 void USMAnimInstance::ClampLHand()
 {
-	V_Hand_Left.X=FMath::Clamp(V_Hand_Left.X, -110.f, 10.f);
-	V_Hand_Left.Y=FMath::Clamp(V_Hand_Left.Y, -60.f, 60.f);
-	V_Hand_Left.Z=FMath::Clamp(V_Hand_Left.Z, -80.f, 35.f);
+	V_Hand_Left.X = FMath::Clamp(V_Hand_Left.X, -95.f, 0.f);
+	V_Hand_Left.Y = FMath::Clamp(V_Hand_Left.Y, -45.f, 45.f);
+	V_Hand_Left.Z = FMath::Clamp(V_Hand_Left.Z, -130.f, 100.f);
 }
 void USMAnimInstance::ClampRHand()
 {
-	V_Hand_Right.X=FMath::Clamp(V_Hand_Right.X, -10.f, 110.f);
-	V_Hand_Right.Y=FMath::Clamp(V_Hand_Right.Y, -60.f, 60.f);
-	V_Hand_Right.Z=FMath::Clamp(V_Hand_Right.Z, -35.f, 80.f);
+	V_Hand_Right.X = FMath::Clamp(V_Hand_Right.X, -95.f, 0.f);
+	V_Hand_Right.Y = FMath::Clamp(V_Hand_Right.Y, -100.f, 100.f);
+	V_Hand_Right.Z = FMath::Clamp(V_Hand_Right.Z, -130.f, 100.f);
 }

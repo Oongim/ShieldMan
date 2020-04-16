@@ -12,6 +12,11 @@ enum EControlMode {
 	LHandControlMode
 };
 
+enum CharacterStatus {
+	PossibleMove,
+	ImpossibleMove,
+	Death,
+};
 
 /*
 로그 출력

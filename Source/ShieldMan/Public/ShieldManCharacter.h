@@ -35,6 +35,8 @@ private:   //private변수들
 
 	ControlMode* CurControlMode;
 
+	CharacterStatus CurrentStatus;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
 		USphereComponent* Right_Collision;
 
@@ -46,6 +48,7 @@ private:   //private변수들
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
 		class ASM_Shield* Right_Shield;
+
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
 		//UPhysicalAnimationComponent* PhysicalAnimation;
@@ -109,5 +112,7 @@ public:		//public 함수
 	void AddForceToCharacter(FVector vDirection, float power);
 
 	void SwitchLevel(FName LevelName);
+
+	void SetCharacterStatus(CharacterStatus status);
 };
 
