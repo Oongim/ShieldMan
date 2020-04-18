@@ -12,7 +12,8 @@ ASM_Shield::ASM_Shield()
 	Shield = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_SHIELD(TEXT(
-		"/Game/Import/Shield.Shield"));
+		"/Game/Import/Shield1.Shield1"));
+
 	if (SK_SHIELD.Succeeded())
 	{
 		Shield->SetSkeletalMesh(SK_SHIELD.Object);

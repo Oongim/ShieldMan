@@ -105,7 +105,6 @@ void AShieldManCharacter::Init_Mesh()
 	{
 		ULog::Invalid("No Character", "", LO_Viewport);
 	}
-
 	//애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 

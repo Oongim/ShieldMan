@@ -64,7 +64,7 @@ void ASM_PoseCheck::Tick(float DeltaTime)
 
 	fDoorDeltaTime += DeltaTime;
 
-	float fDoorHeight = 200 * DeltaTime;
+	float fDoorHeight = 215 * DeltaTime;
 
 	Door->AddLocalOffset(FVector(0.f, 0.f, -fDoorHeight));
 	if (fDoorDeltaTime >= 0.99f) {
