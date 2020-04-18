@@ -91,15 +91,19 @@ void AShieldManCharacter::Init_Mesh()
 	);
 	
 	//스켈레탈 메쉬 설정
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
-		"/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));
-
 	/*static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
-		"/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Cardboard.SK_CharM_Cardboard"));*/
+		"/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));*/
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
+		"/Game/Import/CharacterMesh/Knight_Final2_Ani-Run_1.Knight_Final2_Ani-Run_1"));
 
 	if (SK_MANNEQUIN.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(SK_MANNEQUIN.Object);
+	}
+	else
+	{
+		ULog::Invalid("No Character", "", LO_Viewport);
 	}
 
 	//애니메이션 설정

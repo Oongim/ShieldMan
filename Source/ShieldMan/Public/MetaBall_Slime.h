@@ -40,6 +40,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
 	float damping ;
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
+		USphereComponent* Collision;
+
 public:	
 	// Sets default values for this actor's properties
 	AMetaBall_Slime();
