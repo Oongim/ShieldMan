@@ -14,37 +14,39 @@ class SHIELDMAN_API AMetaBall_Slime : public AActor
 	GENERATED_BODY()
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Dynamic_Mesh;
+		UStaticMeshComponent* Dynamic_Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
-	float speed;
+		float power;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
-	float min_Clamp;
+		float ShakePower;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
-	float max_Clamp;
+		float min_Clamp;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float max_Clamp;
 
 	FVector Balls_Velocity[MAX_NUM_BLOB];
 	FVector Balls_Position[MAX_NUM_BLOB];
 	FName MaterialParamName[MAX_NUM_BLOB];
 
 	// INITIAL SETTINGS
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
-	float gravity ;
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
-	float mass ;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float gravity;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float mass;
 
 	FVector Anchor_Position[MAX_NUM_BLOB];
 	FVector Anchor_Default_Position[MAX_NUM_BLOB];
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
-	float k ;
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Slime_Option, meta = (AllowPrivateAccess = "true"))
-	float damping ;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float k;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float damping;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
-public:	
+public:
 	// Sets default values for this actor's properties
 	AMetaBall_Slime();
 
@@ -52,7 +54,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -63,6 +65,6 @@ public:
 	void Muitiple_SpringMass_System(float timeStep);
 
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
-	void AddForceToVelocity(FVector vec);
+		void AddForceToVelocity(FVector vec);
 
 };
