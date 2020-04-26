@@ -8,6 +8,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
@@ -49,6 +52,14 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Collision->SetupAttachment(GetMesh(), FName(TEXT("Bip001-L-Hand")));
 	Left_Collision->SetSphereRadius(5.f);
 
+	Right_Shield_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("RIGHT_SHIELD_COLLISION"));
+	Right_Shield_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_rCollision")));
+	Right_Shield_Collision->SetBoxExtent(FVector(5, 2, 15));
+
+	Left_Shield_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("LEFT_SHIELD_COLLISION"));
+	Left_Shield_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_lCollision")));
+	Left_Shield_Collision->SetBoxExtent(FVector(5, 2, 15));
+
 	Right_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("RIGHT_SHIELD"));
 	Left_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("LEFT_SHIELD"));
 
@@ -56,7 +67,15 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentHP = 80.f;
 	PlayerName = TEXT("KDK");
 
+	ArmReflectPower = -1000.f;
+	ShieldBoundPower = 100.f;
+
 	CurrentStatus = CharacterStatus::PossibleMove;
+
+	AttackDelayTime = 1.f;
+	bAttackPossible = true;
+
+	Effect = CreateDefaultSubobject<UParticleSystem>(TEXT("EFFECT"));
 }
 
 bool AShieldManCharacter::CanSetShield()
@@ -79,8 +98,6 @@ void AShieldManCharacter::SetShield(ASM_Shield* NewShieldR, ASM_Shield* NewShiel
 		Right_Shield = NewShieldL;
 	}
 }
-
-
 
 void AShieldManCharacter::Init_Mesh()
 {
@@ -170,6 +187,10 @@ void AShieldManCharacter::Init_PhysicalAnim()
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
 }
 
+void AShieldManCharacter::OnEffectFinished(UParticleSystemComponent* PSystem)
+{
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -182,7 +203,7 @@ void AShieldManCharacter::PostInitializeComponents()
 		UE_LOG(LogTemp, Log, TEXT("why not --"));
 
 	}
-
+	Left_Shield_Collision->OnComponentBeginOverlap.AddDynamic(this, &AShieldManCharacter::OnShieldOverlapBegin);
 }
 
 void AShieldManCharacter::SetBodyControl()
@@ -232,6 +253,64 @@ void AShieldManCharacter::SwitchLevel(FName LevelName)
 void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
 {
 	CurrentStatus = status;
+}
+
+void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (bAttackPossible) {
+		FVector LeftArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-L-Forearm"));
+		FVector RightArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-R-Forearm"));
+		float power = LeftArmVelocity.Size() + RightArmVelocity.Size();
+		LeftArmVelocity.Normalize();
+		RightArmVelocity.Normalize();
+
+		GetMesh()->AddImpulseToAllBodiesBelow(LeftArmVelocity * ArmReflectPower * power, TEXT("Bip001-L-Forearm"));
+		GetMesh()->AddImpulseToAllBodiesBelow(RightArmVelocity * ArmReflectPower * power, TEXT("Bip001-R-Forearm"));
+
+		FVector ImpulsePosition = (Right_Shield_Collision->GetComponentLocation() + Right_Shield_Collision->GetComponentLocation()) / 2;
+
+		TArray<FOverlapResult> OutHits;
+		FCollisionShape MyColSphere = FCollisionShape::MakeSphere(power / 10);
+
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition,FRotator::ZeroRotator,true);
+		bool isHit = GetWorld()->OverlapMultiByChannel(OutHits, ImpulsePosition,
+			FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
+
+		FColor color;
+		/*if (isHit)
+		{
+			color = FColor::Green;
+		}
+		else
+		{
+			color = FColor::Red;
+		}
+
+		DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);*/
+
+		if (isHit)
+		{
+			for (auto& Hit : OutHits)
+			{
+				UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
+				if (MeshComp)
+				{
+					MeshComp->AddRadialImpulse(ImpulsePosition,
+						power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
+				}
+			}
+		}
+
+		ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
+		bAttackPossible = false;
+		GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
+	}
+}
+
+void AShieldManCharacter::ToggleAttackPossible()
+{
+	bAttackPossible = true;
 }
 
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

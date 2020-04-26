@@ -43,13 +43,30 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
 		USphereComponent* Left_Collision;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Right_Shield_Collision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Left_Shield_Collision;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
 		class ASM_Shield* Left_Shield;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
 		class ASM_Shield* Right_Shield;
 
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float ArmReflectPower;
 
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
+		float ShieldBoundPower;
+
+	FTimerHandle AttackTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = AttackTime, meta = (AllowPrivateAccess = "true"))
+	float AttackDelayTime;
+
+	bool bAttackPossible;
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
 		//UPhysicalAnimationComponent* PhysicalAnimation;
 
@@ -72,6 +89,9 @@ public:		//생성자 , public 변수
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Status")
 		FName PlayerName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+		UParticleSystem* Effect;
 
 protected: //조작
 	/** Called for forwards/backward input */
@@ -101,6 +121,9 @@ private:	//private 함수
 	void Init_Camera();
 	void Init_PhysicalAnim();
 
+	UFUNCTION()
+		void OnEffectFinished(class UParticleSystemComponent* PSystem);
+
 public:		//public 함수
 	UFUNCTION()
 	bool CanSetShield();
@@ -114,5 +137,11 @@ public:		//public 함수
 	void SwitchLevel(FName LevelName);
 
 	void SetCharacterStatus(CharacterStatus status);
+
+	UFUNCTION()
+	void OnShieldOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void ToggleAttackPossible();
 };
 

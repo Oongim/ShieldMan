@@ -66,7 +66,7 @@ void AMetaBall_Slime::Tick(float DeltaTime)
 
 	Update(DeltaTime);
 
-	if (this->GetVelocity().Size() <= 10.f) {
+	/*if (this->GetVelocity().Size() <= 10.f) {
 		FRotator NewRotation = FRotator(0.f, FMath::Rand() % 90, 0.f);
 
 		FQuat QuatRotation = FQuat(NewRotation);
@@ -75,7 +75,7 @@ void AMetaBall_Slime::Tick(float DeltaTime)
 
 		AddForceToVelocity(Dynamic_Mesh->GetForwardVector() * power * 10000);
 
-	}
+	}*/
 }
 
 void AMetaBall_Slime::Update(float DeltaTime)
@@ -91,7 +91,7 @@ void AMetaBall_Slime::SetRotation()
 {
 	//Anchor_Position[0].RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 1, 0));
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation());
+		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation()*-1);
 	}
 }
 
