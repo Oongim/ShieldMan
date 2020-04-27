@@ -112,7 +112,7 @@ void AShieldManCharacter::Init_Mesh()
 		"/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));*/
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
-		"/Game/Import/CharacterMesh/Knight_Final2_Ani-Run_1.Knight_Final2_Ani-Run_1"));
+		"/Game/Import/CharacterMesh/Knight_SkeletalMesh.Knight_SkeletalMesh"));
 
 	if (SK_MANNEQUIN.Succeeded())
 	{
@@ -277,7 +277,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 			FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
 
 		FColor color;
-		/*if (isHit)
+		if (isHit)
 		{
 			color = FColor::Green;
 		}
@@ -286,7 +286,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 			color = FColor::Red;
 		}
 
-		DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);*/
+		DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
 
 		if (isHit)
 		{
