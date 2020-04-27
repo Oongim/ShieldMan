@@ -5,7 +5,7 @@
 /Plugins
 /Content/MedievalDungeon
 /Content/InfinityBladeFireLands
-
+/Content/InfinityBladeEffects
 *.sln
 *_BuiltData.uasset
 
