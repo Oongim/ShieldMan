@@ -61,6 +61,7 @@ void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp,
 			auto NewShieldR = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
 			auto NewShieldL = GetWorld()->SpawnActor<ASM_Shield>(FVector::ZeroVector, FRotator::ZeroRotator);
 
+			SMCharacter->ToggleAttackPossible();
 			SMCharacter->SetShield(NewShieldR, NewShieldL);
 			StartAttack();
 		}

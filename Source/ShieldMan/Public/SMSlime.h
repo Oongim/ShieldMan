@@ -8,7 +8,7 @@
 #include "SMSlime.generated.h"
 
 UCLASS()
-class SHIELDMAN_API ASMSlime : public ACharacter
+class SHIELDMAN_API ASMSlime : public APawn
 {
 	GENERATED_BODY()
 

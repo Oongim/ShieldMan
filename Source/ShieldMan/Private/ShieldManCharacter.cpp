@@ -73,7 +73,7 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentStatus = CharacterStatus::PossibleMove;
 
 	AttackDelayTime = 1.f;
-	bAttackPossible = true;
+	bAttackPossible = false;
 
 	Effect = CreateDefaultSubobject<UParticleSystem>(TEXT("EFFECT"));
 }
@@ -185,10 +185,6 @@ void AShieldManCharacter::Init_PhysicalAnim()
 	PhysicalAnimation->ApplyPhysicalAnimationSettingsBelow( BoneName, Data, false);
 
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
-}
-
-void AShieldManCharacter::OnEffectFinished(UParticleSystemComponent* PSystem)
-{
 }
 
 //////////////////////////////////////////////////////////////////////////

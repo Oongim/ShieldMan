@@ -11,6 +11,12 @@ class SHIELDMAN_API ASM_ShootObject : public AActor
 {
 	GENERATED_BODY()
 private:
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		USkeletalMeshComponent* Mesh;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		UCapsuleComponent* Collision;
+
 	class AShieldManCharacter* Player;
 
 	class ASM_ShootObjectBullet* SpawnPawn;
@@ -21,8 +27,7 @@ private:
 	
 	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category=ShootBody)
-	UStaticMeshComponent* ShootBody;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 	TSubclassOf< class ASM_ShootObjectBullet> SpawnBulletClass;

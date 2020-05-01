@@ -12,16 +12,20 @@ ASM_ShootObject::ASM_ShootObject()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ShootBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SHOOT_BODY"));
+	Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("COLLISION"));
 
-	RootComponent = ShootBody;
-	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SHOOTBODY(TEXT(
-		"/Game/1Stage/AttackObject/SM_AttackObject.SM_AttackObject"));
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SHOOT_BODY"));
+
+	RootComponent = Collision;
+	Mesh->SetupAttachment(RootComponent);
+
+	Collision->SetCollisionProfileName(TEXT("NoCollision"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM_SHOOTBODY(TEXT(
+			"/Game/Import/Charlotte/Charlotte.Charlotte"));
 
 	if (SM_SHOOTBODY.Succeeded())
 	{
-		ShootBody->SetStaticMesh(SM_SHOOTBODY.Object);
+		Mesh->SetSkeletalMesh(SM_SHOOTBODY.Object);
 	}
 
 	sleepTime = 0;
@@ -31,11 +35,6 @@ ASM_ShootObject::ASM_ShootObject()
 	reloadTime = FMath::Rand() % (int)reloadMaxTime;
 
 	ShootPower = 200000;
-
-	//ShootBody->SetCollisionEnabled(ECollisionEnabled::);
-	//ShootBody->SetCollisionObjectType(ECollisionChannel::);
-	//ShootBody->SetCollisionResponseToAllChannels(ECollisionResponse::);
-	//ShootBody->SetCollisionResponseToChannel(ECollisionChannel::,ECollisionResponse::);
 
 }
 
@@ -48,7 +47,6 @@ void ASM_ShootObject::BeginPlay()
 	Player = Cast<AShieldManCharacter>(*p);
 
 	PrimaryActorTick.SetTickFunctionEnable(false);
-	
 }
 
 // Called every frame
@@ -57,9 +55,11 @@ void ASM_ShootObject::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (!bFire) {
+		FVector Player_Location = Player->GetActorLocation();
+		Player_Location.Z += 50.f;
 		FRotator ToPlayerInterpRot = 
-			FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player->GetActorLocation()).Rotation(), DeltaTime, 3.f);
-		SetActorRotation(ToPlayerInterpRot);
+			FMath::RInterpTo(GetActorRotation() , (GetActorLocation() - Player_Location).Rotation(), DeltaTime, 3.f);
+		SetActorRotation(ToPlayerInterpRot );
 	}
 	else
 	{ 

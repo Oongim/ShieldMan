@@ -51,7 +51,7 @@ void ASM_FloatingMoveFlatform::Tick(float DeltaTime)
 
 
 		float DistanceTraveld = (GetActorLocation() - StartPoint).Size();
-		if (Distance - DistanceTraveld <= 5.f)
+		if (Distance - DistanceTraveld <= 10.f)
 		{
 			ToggleInterping();
 

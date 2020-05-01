@@ -121,9 +121,6 @@ private:	//private 함수
 	void Init_Camera();
 	void Init_PhysicalAnim();
 
-	UFUNCTION()
-		void OnEffectFinished(class UParticleSystemComponent* PSystem);
-
 public:		//public 함수
 	UFUNCTION()
 	bool CanSetShield();
