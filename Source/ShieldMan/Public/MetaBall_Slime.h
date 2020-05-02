@@ -17,8 +17,6 @@ private:
 		UStaticMeshComponent* Dynamic_Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
-		float power;
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float ShakePower;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float min_Clamp;
@@ -41,6 +39,17 @@ private:
 		float k;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float damping;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float speedPower;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float Health;
+
+	FTimerHandle RepeatTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float RepeatInterval;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
@@ -65,6 +74,10 @@ public:
 	void Muitiple_SpringMass_System(float timeStep);
 
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
-		void AddForceToVelocity(FVector vec);
+		void AddForceToVelocity(FVector vec, float power);
+
+	//FORCEINLINE void SetEnemyMovementStatus(EEnemyMovementStatus stat) { status = stat; }
+
+	void OnRepeatTimer();
 
 };

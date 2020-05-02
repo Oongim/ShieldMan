@@ -3,6 +3,9 @@
 
 #include "MetaBall_Slime.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "NavigationSystem.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "MetaBall_Slime.h"
 
 // Sets default values
 AMetaBall_Slime::AMetaBall_Slime()
@@ -17,7 +20,6 @@ AMetaBall_Slime::AMetaBall_Slime()
 	RootComponent = Dynamic_Mesh;
 	Collision->SetupAttachment(RootComponent);
 
-	power = 3;
 	ShakePower = 3;
 	min_Clamp = -40.f;
 	max_Clamp = 40.f;
@@ -34,6 +36,14 @@ AMetaBall_Slime::AMetaBall_Slime()
 	damping = 5;
 	gravity = 5;
 	mass = 30;
+
+
+
+	Health = 100.0f;
+
+	speedPower = 1.f;
+
+	RepeatInterval = 3.0f;
 }
 
 // Called when the game starts or when spawned
@@ -55,6 +65,8 @@ void AMetaBall_Slime::BeginPlay()
 		Balls_Position[i] = FVector(0.f, 0.f, 0.f);
 	}
 
+
+	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
 }
 
 // Called every frame
@@ -66,16 +78,8 @@ void AMetaBall_Slime::Tick(float DeltaTime)
 
 	Update(DeltaTime);
 
-	/*if (this->GetVelocity().Size() <= 10.f) {
-		FRotator NewRotation = FRotator(0.f, FMath::Rand() % 90, 0.f);
+	//AddForceToVelocity(Dynamic_Mesh->GetForwardVector() , power * 10000);
 
-		FQuat QuatRotation = FQuat(NewRotation);
-
-		AddActorLocalRotation(QuatRotation, false, 0, ETeleportType::None);
-
-		AddForceToVelocity(Dynamic_Mesh->GetForwardVector() * power * 10000);
-
-	}*/
 }
 
 void AMetaBall_Slime::Update(float DeltaTime)
@@ -140,9 +144,15 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 
 }
 
-void AMetaBall_Slime::AddForceToVelocity(FVector vec)
+void AMetaBall_Slime::AddForceToVelocity(FVector vec,float power)
 {
-	Dynamic_Mesh->AddForce(vec, NAME_None, true);
+	ULog::Vector(vec, "MyActor location: ", "", LO_Viewport);
+	vec.Normalize();
+	FQuat QuatRotation= FQuat((vec - GetActorForwardVector()).Rotation());
+
+	AddActorLocalRotation(QuatRotation, false, 0, ETeleportType::None);
+
+	Dynamic_Mesh->AddForce(vec* power, NAME_None, true);
 
 	FVector Velocity = this->GetVelocity() * ShakePower * 10;
 	Velocity.Y /= 2;
@@ -153,3 +163,18 @@ void AMetaBall_Slime::AddForceToVelocity(FVector vec)
 
 
 
+void AMetaBall_Slime::OnRepeatTimer()
+{
+
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (nullptr == NavSystem) return;
+
+	FNavLocation NextLocation;
+	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.f, NextLocation))
+	{
+		//NextLocation.Location.Z = 0.f;
+		//CurrentPawn->AddForceToVelocity(NextLocation.Location, speedPower*10000);
+		AddForceToVelocity(NextLocation.Location, speedPower * 10000);
+		ULog::Vector(NextLocation.Location, "MyActor location: ", "", LO_Viewport);
+	}
+}

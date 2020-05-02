@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ShieldMan.h"
 #include "AIController.h"
 #include "SMSlimeAI.generated.h"
 
@@ -14,10 +14,18 @@ class SHIELDMAN_API ASMSlimeAI : public AAIController
 {
 	GENERATED_BODY()
 	
+private:
+	FTimerHandle RepeatTimerHandle;
+	float RepeatInterval;
+
+private:
+	void OnRepeatTimer();
 
 public:
 	ASMSlimeAI();
 	virtual void PossessedBy(APawn* InPawn);
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 
 	UBlackboardComponent* GetBlackBoard();
 
