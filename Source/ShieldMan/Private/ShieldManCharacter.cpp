@@ -14,6 +14,7 @@
 
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
+#include "MetaBall_Slime.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AShieldManCharacter
@@ -294,6 +295,8 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 				{
 					MeshComp->AddRadialImpulse(ImpulsePosition,
 						power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
+					AMetaBall_Slime* slime = Cast<AMetaBall_Slime>(Hit.GetActor());
+					if(slime)slime->AttackedToggle();
 				}
 			}
 		}

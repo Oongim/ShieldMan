@@ -6,6 +6,7 @@
 #include "NavigationSystem.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "MetaBall_Slime.h"
+#include "ShieldManCharacter.h"
 
 // Sets default values
 AMetaBall_Slime::AMetaBall_Slime()
@@ -44,6 +45,9 @@ AMetaBall_Slime::AMetaBall_Slime()
 	speedPower = 1.f;
 
 	RepeatInterval = 3.0f;
+
+	bAttacked = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -51,6 +55,9 @@ void AMetaBall_Slime::BeginPlay()
 {
 	Super::BeginPlay();
 
+	auto p = GetWorld()->GetPawnIterator();
+
+	Player = Cast<AShieldManCharacter>(*p);
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		MaterialParamName[i] = "";
@@ -89,7 +96,7 @@ void AMetaBall_Slime::Update(float DeltaTime)
 		Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i], Balls_Position[i]);
 	}
 	BoundCheck();
-}
+}	
 
 void AMetaBall_Slime::SetRotation()
 {
@@ -146,18 +153,19 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 
 void AMetaBall_Slime::AddForceToVelocity(FVector vec,float power)
 {
-	ULog::Vector(vec, "MyActor location: ", "", LO_Viewport);
+	//ULog::Vector(vec, "MyActor location: ", "", LO_Viewport);
+	float powersize = vec.Size();
 	vec.Normalize();
 	FQuat QuatRotation= FQuat((vec - GetActorForwardVector()).Rotation());
 
 	AddActorLocalRotation(QuatRotation, false, 0, ETeleportType::None);
 
-	Dynamic_Mesh->AddForce(vec* power, NAME_None, true);
+	Dynamic_Mesh->AddForce(vec* power* powersize, NAME_None, true);
 
 	FVector Velocity = this->GetVelocity() * ShakePower * 10;
 	Velocity.Y /= 2;
 	for (int i = 1; i < MAX_NUM_BLOB; ++i) {
-		Balls_Velocity[i] += Velocity;
+		Balls_Velocity[i] = Velocity;
 	}
 }
 
@@ -165,16 +173,35 @@ void AMetaBall_Slime::AddForceToVelocity(FVector vec,float power)
 
 void AMetaBall_Slime::OnRepeatTimer()
 {
-
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-	if (nullptr == NavSystem) return;
-
-	FNavLocation NextLocation;
-	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.f, NextLocation))
+	
+	FVector RunAwayVec = GetActorLocation() - Player->GetActorLocation();
+	
+	if (bAttacked)
 	{
-		//NextLocation.Location.Z = 0.f;
-		//CurrentPawn->AddForceToVelocity(NextLocation.Location, speedPower*10000);
-		AddForceToVelocity(NextLocation.Location, speedPower * 10000);
-		ULog::Vector(NextLocation.Location, "MyActor location: ", "", LO_Viewport);
+		RunAwayVec.Normalize();
+		AddForceToVelocity(RunAwayVec, speedPower * 15000);
+		ULog::Invalid("bAttacked", "", LO_Viewport);
 	}
+	else if ((RunAwayVec).Size() < 300.f)
+	{
+		RunAwayVec.Normalize();
+		AddForceToVelocity(RunAwayVec, speedPower * 15000);
+		ULog::Invalid("RunAway", "", LO_Viewport);
+	}
+	else {
+		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+		if (nullptr == NavSystem) return;
+		ULog::Invalid("NavSystem", "", LO_Viewport);
+		FNavLocation NextLocation;
+		if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.f, NextLocation))
+		{
+			AddForceToVelocity(NextLocation.Location, speedPower * 30);
+		}
+	}
+}
+
+void AMetaBall_Slime::AttackedToggle()
+{
+	bAttacked = true;
+	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, 2.f, true);
 }

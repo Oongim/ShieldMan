@@ -56,7 +56,7 @@ void ASM_ShootObject::Tick(float DeltaTime)
 
 	if (!bFire) {
 		FVector Player_Location = Player->GetActorLocation();
-		Player_Location.Z += 50.f;
+		//Player_Location.Z += 50.f;
 		FRotator ToPlayerInterpRot = 
 			FMath::RInterpTo(GetActorRotation() , (GetActorLocation() - Player_Location).Rotation(), DeltaTime, 3.f);
 		SetActorRotation(ToPlayerInterpRot );

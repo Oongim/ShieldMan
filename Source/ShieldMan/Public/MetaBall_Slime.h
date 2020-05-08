@@ -16,6 +16,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Dynamic_Mesh;
 
+	class AShieldManCharacter* Player;
+
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float ShakePower;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
@@ -51,6 +53,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
 		float RepeatInterval;
 
+	bool bAttacked;
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
@@ -76,8 +79,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
 		void AddForceToVelocity(FVector vec, float power);
 
-	//FORCEINLINE void SetEnemyMovementStatus(EEnemyMovementStatus stat) { status = stat; }
-
 	void OnRepeatTimer();
+
+	void AttackedToggle();
 
 };
