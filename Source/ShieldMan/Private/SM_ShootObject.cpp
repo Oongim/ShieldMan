@@ -16,16 +16,19 @@ ASM_ShootObject::ASM_ShootObject()
 
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SHOOT_BODY"));
 
+	AttackMagicCircle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MAGIC_CIRCLE"));
+
 	RootComponent = Collision;
 	Mesh->SetupAttachment(RootComponent);
+	AttackMagicCircle->SetupAttachment(RootComponent);
 
-	Collision->SetCollisionProfileName(TEXT("NoCollision"));
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM_SHOOTBODY(TEXT(
-			"/Game/Import/Charlotte/Charlotte.Charlotte"));
+	AttackMagicCircle->SetCollisionProfileName(TEXT("NoCollision"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_ATTACKCIECLE(TEXT(
+			"/Game/Import/MagicCircle.MagicCircle"));
 
-	if (SM_SHOOTBODY.Succeeded())
+	if (SM_ATTACKCIECLE.Succeeded())
 	{
-		Mesh->SetSkeletalMesh(SM_SHOOTBODY.Object);
+		AttackMagicCircle->SetStaticMesh(SM_ATTACKCIECLE.Object);
 	}
 
 	sleepTime = 0;
@@ -45,6 +48,7 @@ void ASM_ShootObject::BeginPlay()
 	auto p = GetWorld()->GetPawnIterator();
 
 	Player = Cast<AShieldManCharacter>(*p);
+	
 
 	PrimaryActorTick.SetTickFunctionEnable(false);
 }
@@ -56,7 +60,7 @@ void ASM_ShootObject::Tick(float DeltaTime)
 
 	if (!bFire) {
 		FVector Player_Location = Player->GetActorLocation();
-		//Player_Location.Z += 50.f;
+		Player_Location.Z += 30.f;
 		FRotator ToPlayerInterpRot = 
 			FMath::RInterpTo(GetActorRotation() , (GetActorLocation() - Player_Location).Rotation(), DeltaTime, 3.f);
 		SetActorRotation(ToPlayerInterpRot );
@@ -64,20 +68,33 @@ void ASM_ShootObject::Tick(float DeltaTime)
 	else
 	{ 
 		sleepTime += DeltaTime;
+
 		if (sleepTime >= maxSleepTime)
 		{
 			bFire = false;
 			sleepTime = 0;
+			
 		}
+		
 	}
 	reloadTime += DeltaTime;
-
-	if (reloadTime>=reloadMaxTime)
+	if (reloadTime >= reloadMaxTime)
 	{
+		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1.0f);
 		reloadTime = 0.f;
 		SpawnBullet(GetActorLocation(), GetActorRotation());
 		bFire = true;
 	}
+	else if (reloadTime <= 0.5f) {
+		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1-reloadTime*2);
+	}
+	else if (reloadTime <= 0.8f) {
+		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 0.f);
+	}
+	else if (reloadTime >= reloadMaxTime - 1.0f) {
+		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), reloadTime-(int)reloadTime);
+	}
+	
 }
 
 void ASM_ShootObject::SpawnBullet(FVector Loc, FRotator Rot)

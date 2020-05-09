@@ -17,6 +17,9 @@ private:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UCapsuleComponent* Collision;
 
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		UStaticMeshComponent* AttackMagicCircle;
+
 	class AShieldManCharacter* Player;
 
 	class ASM_ShootObjectBullet* SpawnPawn;
@@ -24,7 +27,6 @@ private:
 	float sleepTime;
 	float maxSleepTime;
 	bool bFire;
-	
 	
 public:
 

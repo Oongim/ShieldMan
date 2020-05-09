@@ -2,7 +2,6 @@
 
 
 #include "SM_ShootObjectBullet.h"
-#include "..\Public\SM_ShootObjectBullet.h"
 #include "ShieldManCharacter.h"
 
 // Sets default values
@@ -14,7 +13,7 @@ ASM_ShootObjectBullet::ASM_ShootObjectBullet()
 	Bullet = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BULLET"));
 
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("COLLISION"));
-	Collision->SetSphereRadius(10.f);
+	Collision->SetSphereRadius(50.f);
 
 	RootComponent = Bullet;
 	Collision->SetupAttachment(RootComponent);
@@ -29,12 +28,13 @@ ASM_ShootObjectBullet::ASM_ShootObjectBullet()
 	//bAlive = true;
 	
 	Bullet->SetSimulatePhysics(true);
+	//Bullet->SetNotifyRigidBodyCollision(true);
 	Bullet->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18);
 	Collision->SetCollisionProfileName(TEXT("Shootbullet"));
-
+	
 	DeathMaxCount = 3.f;
 
-	LifeTime = 10.f;
+	LifeTime = 30.f;
 
 	bDead = false;
 
@@ -51,6 +51,7 @@ void ASM_ShootObjectBullet::BeginPlay()
 	Super::BeginPlay();
 	
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &ASM_ShootObjectBullet::OnOverlapBegin);
+	Bullet->OnComponentHit.AddDynamic(this, &ASM_ShootObjectBullet::OnHit);
 	
 	Bullet->SetSimulatePhysics(true);
 	
@@ -66,7 +67,6 @@ void ASM_ShootObjectBullet::AddFroce(float power)
 void ASM_ShootObjectBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (bDead) return;
-
 	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_ShootObjectBullet::Death, DeathMaxCount);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetClass()->GetName());
 
@@ -74,16 +74,24 @@ void ASM_ShootObjectBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, 
 	{
 		auto character = Cast<AShieldManCharacter>(OtherActor);
 
-		character->AddForceToCharacter(GetActorRotation().Vector(), this->GetVelocity().Size());
+		character->AddForceToCharacter(GetActorRotation().Vector(), this->GetVelocity().Size()*10);
 		
 		ULog::Number(this->GetVelocity().Size(), "Size: ","",LO_Viewport);
 	}
-
 	bDead = true;
+	StartNiagaraEffect();
 }
 
 void ASM_ShootObjectBullet::Death()
 {
 	Destroy();
 }
+
+void ASM_ShootObjectBullet::OnHit(UPrimitiveComponent* OnHittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (bDead) return;
+	StartNiagaraEffect();
+}
+
+
 
