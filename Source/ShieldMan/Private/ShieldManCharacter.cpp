@@ -272,7 +272,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 		TArray<FOverlapResult> OutHits;
 		FCollisionShape MyColSphere = FCollisionShape::MakeSphere(power / 10);
 
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition,FRotator::ZeroRotator,true);
+		/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition,FRotator::ZeroRotator,true);
 		bool isHit = GetWorld()->OverlapMultiByChannel(OutHits, ImpulsePosition,
 			FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
 
@@ -284,27 +284,27 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 		else
 		{
 			color = FColor::Red;
-		}
+		}*/
 
-		DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
+		//DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
 
-		if (isHit)
-		{
-			for (auto& Hit : OutHits)
-			{
-				UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
-				if (MeshComp)
-				{
-					MeshComp->AddRadialImpulse(ImpulsePosition,
-						power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
-				}
-			}
-		}
+		//if (isHit)
+		//{
+		//	for (auto& Hit : OutHits)
+		//	{
+		//		UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
+		//		UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
+		//		if (MeshComp)
+		//		{
+		//			MeshComp->AddRadialImpulse(ImpulsePosition,
+		//				power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
+		//		}
+		//	}
+		//}
 
-		ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
-		bAttackPossible = false;
-		GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
+		//ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
+		//bAttackPossible = false;
+		//GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
 	}
 }
 
