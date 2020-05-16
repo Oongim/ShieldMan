@@ -7,6 +7,7 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "MetaBall_Slime.h"
 #include "ShieldManCharacter.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AMetaBall_Slime::AMetaBall_Slime()
@@ -18,8 +19,8 @@ AMetaBall_Slime::AMetaBall_Slime()
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("COLLISION"));
 	Collision->SetSphereRadius(80.f);
 
-	RootComponent = Dynamic_Mesh;
-	Collision->SetupAttachment(RootComponent);
+	RootComponent = Collision;
+	Dynamic_Mesh->SetupAttachment(RootComponent);
 
 	ShakePower = 3;
 	min_Clamp = -40.f;
@@ -48,6 +49,17 @@ AMetaBall_Slime::AMetaBall_Slime()
 
 	bAttacked = false;
 
+	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
+
+	HPBarWidget->SetupAttachment(RootComponent);
+	HPBarWidget->SetRelativeLocation(FVector(0.f, 0.f, 180.f));
+	HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/UI/PlayScene/UI_HPBar.UI_HPBar_C"));
+	if (UI_HUD.Succeeded())
+	{
+		HPBarWidget->SetWidgetClass(UI_HUD.Class);
+		HPBarWidget->SetDrawSize(FVector2D(150.f, 50.f));
+	}
 }
 
 // Called when the game starts or when spawned
