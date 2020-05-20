@@ -19,8 +19,8 @@ AMetaBall_Slime::AMetaBall_Slime()
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("COLLISION"));
 	Collision->SetSphereRadius(80.f);
 
-	RootComponent = Collision;
-	Dynamic_Mesh->SetupAttachment(RootComponent);
+	RootComponent = Dynamic_Mesh;
+	Collision->SetupAttachment(RootComponent);
 
 	ShakePower = 3;
 	min_Clamp = -40.f;
@@ -47,6 +47,8 @@ AMetaBall_Slime::AMetaBall_Slime()
 
 	RepeatInterval = 3.0f;
 
+	Ball_Size = 50.f;
+
 	bAttacked = false;
 
 	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
@@ -60,6 +62,8 @@ AMetaBall_Slime::AMetaBall_Slime()
 		HPBarWidget->SetWidgetClass(UI_HUD.Class);
 		HPBarWidget->SetDrawSize(FVector2D(150.f, 50.f));
 	}
+
+	bAlive = true;
 }
 
 // Called when the game starts or when spawned
@@ -85,19 +89,19 @@ void AMetaBall_Slime::BeginPlay()
 	}
 
 
-	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
+
 }
 
 // Called every frame
 void AMetaBall_Slime::Tick(float DeltaTime)
 {
+	if (!bAlive) return;
+
 	Super::Tick(DeltaTime);
 
 	SetRotation();
 
 	Update(DeltaTime);
-
-	//AddForceToVelocity(Dynamic_Mesh->GetForwardVector() , power * 10000);
 
 }
 
@@ -108,13 +112,13 @@ void AMetaBall_Slime::Update(float DeltaTime)
 		Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i], Balls_Position[i]);
 	}
 	BoundCheck();
-}	
+}
 
 void AMetaBall_Slime::SetRotation()
 {
 	//Anchor_Position[0].RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 1, 0));
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation()*-1);
+		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation() * -1);
 	}
 }
 
@@ -163,16 +167,16 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 
 }
 
-void AMetaBall_Slime::AddForceToVelocity(FVector vec,float power)
+void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)
 {
 	//ULog::Vector(vec, "MyActor location: ", "", LO_Viewport);
 	float powersize = vec.Size();
 	vec.Normalize();
-	FQuat QuatRotation= FQuat((vec - GetActorForwardVector()).Rotation());
+	FQuat QuatRotation = FQuat((vec - GetActorForwardVector()).Rotation());
 
 	AddActorLocalRotation(QuatRotation, false, 0, ETeleportType::None);
 
-	Dynamic_Mesh->AddForce(vec* power* powersize, NAME_None, true);
+	Dynamic_Mesh->AddForce(vec * power * powersize, NAME_None, true);
 
 	FVector Velocity = this->GetVelocity() * ShakePower * 10;
 	Velocity.Y /= 2;
@@ -185,9 +189,9 @@ void AMetaBall_Slime::AddForceToVelocity(FVector vec,float power)
 
 void AMetaBall_Slime::OnRepeatTimer()
 {
-	
+	if (!bAlive) return;
 	FVector RunAwayVec = GetActorLocation() - Player->GetActorLocation();
-	
+
 	if (bAttacked)
 	{
 		RunAwayVec.Normalize();
@@ -203,7 +207,6 @@ void AMetaBall_Slime::OnRepeatTimer()
 	else {
 		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 		if (nullptr == NavSystem) return;
-		ULog::Invalid("NavSystem", "", LO_Viewport);
 		FNavLocation NextLocation;
 		if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.f, NextLocation))
 		{
@@ -212,8 +215,29 @@ void AMetaBall_Slime::OnRepeatTimer()
 	}
 }
 
-void AMetaBall_Slime::AttackedToggle()
+// 공격을 받았을 때
+void AMetaBall_Slime::Attacked()
 {
+	if (!bAlive) return;
 	bAttacked = true;
 	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, 2.f, true);
+	Health -= 20.f;
+	Ball_Size -= 10;		//구의 크기를 줄인다.
+	ULog::Number((float)Ball_Size, "The Number is: ", "", LO_Viewport);
+	if (Ball_Size < 20.f) {
+		Ball_Size = 1.f;
+		bAlive = false;
+	}
+	Dynamic_Mesh->SetScalarParameterValueOnMaterials(TEXT("BallSize"), Ball_Size);
+
+}
+
+void AMetaBall_Slime::MoveStart()
+{
+	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
+}
+
+bool AMetaBall_Slime::GetAlive()
+{
+	return bAlive;
 }

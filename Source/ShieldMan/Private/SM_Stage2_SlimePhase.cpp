@@ -54,12 +54,35 @@ void ASM_Stage2_SlimePhase::BeginPlay()
 void ASM_Stage2_SlimePhase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	CeilingRock->AddLocalOffset(FVector(0.f, 0.f, -0.1f));
+	CeilingRock->AddLocalOffset(FVector(0.f, 0.f, -0.2f));
+
+	bool ended=false;
+	for (auto slime : m_SlimeArr)
+	{
+		if (slime->GetAlive()) {
+			ended = true;
+			break;
+		}
+	}
+	if (!ended) {
+		Exit->OpenDoor();
+		PrimaryActorTick.SetTickFunctionEnable(false);
+		if (m_SlimeArr[0] != nullptr) {
+			for (auto slime : m_SlimeArr)
+			{
+				slime->Destroy();
+			}
+		}
+	}
 }
 
 void ASM_Stage2_SlimePhase::OnOpenOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Entrance->OpenDoor();
+	for (auto slime : m_SlimeArr)
+	{
+		slime->MoveStart();
+	}
 }
 
 void ASM_Stage2_SlimePhase::OnStartOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

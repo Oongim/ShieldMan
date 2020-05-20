@@ -53,7 +53,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
 		float RepeatInterval;
 
+	int Ball_Size;
+
 	bool bAttacked;
+
+	bool bAlive;
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
@@ -84,6 +88,9 @@ public:
 
 	void OnRepeatTimer();
 
-	void AttackedToggle();
+	void Attacked();
 
+	void MoveStart();
+
+	bool GetAlive();
 };

@@ -283,7 +283,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 			color = FColor::Red;
 		}
 
-		DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
+		//DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
 
 		if (isHit)
 		{
@@ -296,7 +296,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 					MeshComp->AddRadialImpulse(ImpulsePosition,
 						power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
 					AMetaBall_Slime* slime = Cast<AMetaBall_Slime>(Hit.GetActor());
-					if(slime)slime->AttackedToggle();
+					if(slime)slime->Attacked();
 				}
 			}
 		}
