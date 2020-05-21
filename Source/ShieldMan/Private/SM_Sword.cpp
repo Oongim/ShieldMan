@@ -50,7 +50,9 @@ ASM_Sword::ASM_Sword()
 	On_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("COLLISION"));
 	On_Collision->SetupAttachment(GetMesh(), FName(TEXT("Collision_Socket")));
 	On_Collision->SetBoxExtent(FVector(70.f, 10.f, 18.f));
-
+	On_Collision->BodyInstance.SetCollisionProfileName(TEXT("Sword"));
+	On_Collision->SetSimulatePhysics(true);
+	On_Collision->SetNotifyRigidBodyCollision(true);
 
 	static ConstructorHelpers::FClassFinder<AShieldManCharacter>CHARACTERCLASS(TEXT(
 		"/Game/BP/BP_SMCharacter.BP_SMCharacter_C"
@@ -59,19 +61,20 @@ ASM_Sword::ASM_Sword()
 
 	DynamicCollision();
 
+	isHit = false;
 	EventTrigger = false;
 	Waitingtime = 0.f;
 	isWaiting = true;
 	Rotatetime = 0.f;
-	RadiusX = 100.f;
-	RadiusY = 100.f;
+	RadiusX = 250.f;
+	RadiusY = 250.f;
 	RotateSpeed = 50.f;
 	AttackCount = 0;
 	Speed = 0.f;
 
 
 	GetCharacterMovement()->GravityScale = 0.f;
-	GetMesh()->SetVisibility(false);
+	GetMesh()->SetVisibility(true);
 	GetMesh()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetEnableGravity(false);
 	On_Collision->SetEnableGravity(false);
@@ -85,7 +88,7 @@ void ASM_Sword::BeginPlay()
 	auto p = GetWorld()->GetPawnIterator();
 	Player = Cast<AShieldManCharacter>(*p);
 	PrimaryActorTick.SetTickFunctionEnable(false);
-
+	
 
 }
 
@@ -108,15 +111,13 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 		isWaiting = false;
 		SwordAnimInstance->SetHiding(false);
 		Waitingtime = 0.f;
-		SwordAnimInstance->SetAttackType(rand()%3);
+		SwordAnimInstance->SetAttackType(rand() % 3);
+		AttackCount += 1;
 	}
 	else if (!isWaiting)
 	{
-		
 		isWaiting = true;
 		SwordAnimInstance->SetHiding(true);
-		AttackCount += 1;
-
 		if (AttackCount >= 4)
 		{
 			EventTrigger = false;
@@ -126,26 +127,30 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 			Player->TeleportTo(loc, FRotator(0.f, 0.f, 0.f));
 			PrimaryActorTick.SetTickFunctionEnable(false);
 		}
-
 	}
 	else
 	{
 		Waitingtime += DeltaTime;
 	}
+
+	
 }
 
 void ASM_Sword::Animate(float DeltaTime)
 {
 	FRotator ToPlayerInterpRot =
-		FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player->GetActorLocation()).Rotation(), DeltaTime, 0.55f);
-	FVector loc{ UKismetMathLibrary::DegCos(Rotatetime) * RadiusX, UKismetMathLibrary::DegSin(Rotatetime) * RadiusY, 50.f };
+		FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player->GetActorLocation()).Rotation(), DeltaTime, 0.60f);
+	FVector loc{ UKismetMathLibrary::DegCos(Rotatetime) * RadiusX, UKismetMathLibrary::DegSin(Rotatetime) * RadiusY, 0.f };
 	//UE_LOG(LogTemp, Log, TEXT("AttackType : %d"), SwordAnimInstance->GetAttackType());
 	if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("IDLE"))
 	{
 
 		GetMesh()->SetVisibility(false);
+		SwordAnimInstance->SetGuard(false);
+		isHit = false;
 
 		SetActorLocation(Player->GetActorLocation() + loc);
+		
 		Rotatetime = DeltaTime * RotateSpeed + Rotatetime;
 
 		ToPlayerInterpRot.Pitch = 0.f;
@@ -161,41 +166,28 @@ void ASM_Sword::Animate(float DeltaTime)
 
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("TOPSLASH"))
 	{
-
-		FRotator adjust{ 0.f,45.f, 0.f };
-
-		SetActorRelativeRotation(adjust);
-		//UE_LOG(LogTemp, Log, TEXT("adjust : %s"), *adjust.ToString());
 		GetMesh()->SetVisibility(true);
-
 	}
 	
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("TOPGUARD"))
 	{
 
-		//UE_LOG(LogTemp, Log, TEXT("ToPlayerInterpRot : %s"), *ToPlayerInterpRot.ToString());
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("MIDSLASH"))
 	{
-
 		GetMesh()->SetVisibility(true);
-		//UE_LOG(LogTemp, Log, TEXT("ToPlayerInterpRot : %s"), *ToPlayerInterpRot.ToString());
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("MIDGUARD"))
 	{
 
-		//UE_LOG(LogTemp, Log, TEXT("ToPlayerInterpRot : %s"), *ToPlayerInterpRot.ToString());
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("BOTSLASH"))
 	{
-
 		GetMesh()->SetVisibility(true);
-		//UE_LOG(LogTemp, Log, TEXT("ToPlayerInterpRot : %s"), *ToPlayerInterpRot.ToString());
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("BOTGUARD"))
 	{
 
-		//UE_LOG(LogTemp, Log, TEXT("ToPlayerInterpRot : %s"), *ToPlayerInterpRot.ToString());
 	}
 }
 
@@ -214,8 +206,26 @@ void ASM_Sword::DynamicCollision()
 
 void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SwordAnimInstance->SetGuard(true);
+	if (!isHit)
+	{
+		FString OtherCompName = OtherComp->GetName();
+		//UE_LOG(LogTemp, Log, TEXT("OverlappedComp : %s"), *OtherComp->GetName());			//COLLISIONSylinder
+		if (FString("LEFT_SHIELD_COLLISION") == OtherCompName || FString("RIGHT_SHIELD_COLLISION") == OtherCompName)
+		{
+			
+			SwordAnimInstance->SetGuard(true);
+			
+		}
+		if (FString("CollisionCylinder") == OtherCompName)
+		{
 
+		}
+		isHit = true;
+	}
+	else
+	{
+
+	}
 }
 
 void ASM_Sword::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -231,15 +241,14 @@ void ASM_Sword::PostInitializeComponents()
 	if (SwordAnimInstance != nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SwordAnimInstance not mapping"));
-
 	}
-
 }
 
 
 void ASM_Sword::Begin_StageOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	FVector loc{ -3500.f, -2500.f, -250.f };
+	UE_LOG(LogTemp, Log, TEXT("Begin_StageOverlapBegin"));
+	FVector loc{ -4000.f, -3000.f, 200.f };
 	OtherActor->TeleportTo(loc, FRotator(0.f,0.f,0.f));
 	EventTrigger = true;
 	PrimaryActorTick.SetTickFunctionEnable(true);
@@ -251,12 +260,9 @@ void ASM_Sword::Begin_StageOverlapEnd(UPrimitiveComponent* OverlappedComp, AActo
 }
 
 
-
 void ASM_Sword::SetCollisionFromBP(UBoxComponent* Col)
 {
-
 	Begin_Stage = Col;
-
 	Begin_Stage->OnComponentBeginOverlap.AddDynamic(this, &ASM_Sword::Begin_StageOverlapBegin);
 	Begin_Stage->OnComponentEndOverlap.AddDynamic(this, &ASM_Sword::Begin_StageOverlapEnd);
 }

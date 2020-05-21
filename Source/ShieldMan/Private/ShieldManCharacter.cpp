@@ -254,6 +254,7 @@ void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
 
 void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	bAttackPossible = false;
 	if (bAttackPossible) {
 		FVector LeftArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-L-Forearm"));
 		FVector RightArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-R-Forearm"));

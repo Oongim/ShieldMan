@@ -26,6 +26,8 @@ private:
 	
 	float Rotatetime;
 
+	bool isHit;
+
 public:
 
 	UPROPERTY(EditAnywhere, Category = "Value")
