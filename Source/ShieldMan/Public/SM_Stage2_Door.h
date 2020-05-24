@@ -17,7 +17,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StaticMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Door;
 
-	bool bMoveDoor;
+	bool bClosing;
 
 	float fDoorDeltaTime = 0;
 	
@@ -34,5 +34,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
-	void ToggleDoor();
+	void OpenDoor();
+
+	UFUNCTION(BlueprintCallable, Category = floatSetting)
+	void CloseDoor();
 };

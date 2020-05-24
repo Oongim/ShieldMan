@@ -6,7 +6,7 @@
 // Sets default values
 ASM_Stage2_Door::ASM_Stage2_Door()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	Door_Frame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DOOR_FRAME"));
@@ -15,35 +15,53 @@ ASM_Stage2_Door::ASM_Stage2_Door()
 	RootComponent = Door_Frame;
 	Door->SetupAttachment(RootComponent);
 
-	bMoveDoor = false;
-	PrimaryActorTick.SetTickFunctionEnable(false);
+	bClosing = false;
+
 }
 
 // Called when the game starts or when spawned
 void ASM_Stage2_Door::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	PrimaryActorTick.SetTickFunctionEnable(false);
 }
 
 // Called every frame
 void ASM_Stage2_Door::Tick(float DeltaTime)
 {
-		Super::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
+	fDoorDeltaTime += DeltaTime;
+	float fDoorHeight = 220 * DeltaTime;
 
-		fDoorDeltaTime += DeltaTime;
-
-		float fDoorHeight = 220 * DeltaTime;
-
+	if (bClosing) {
 		Door->AddLocalOffset(FVector(0.f, 0.f, -fDoorHeight));
 		if (fDoorDeltaTime >= 0.99f) {
-
 			PrimaryActorTick.SetTickFunctionEnable(false);
+			fDoorDeltaTime = 0.f;
 		}
+	}
+	else
+	{
+		Door->AddLocalOffset(FVector(0.f, 0.f, fDoorHeight));
+		if (fDoorDeltaTime >= 0.99f) {
+			PrimaryActorTick.SetTickFunctionEnable(false);
+			fDoorDeltaTime = 0.f;
+		}
+	}
 }
 
-void ASM_Stage2_Door::ToggleDoor()
+void ASM_Stage2_Door::OpenDoor()
 {
-	PrimaryActorTick.SetTickFunctionEnable(true);
+	if (!bClosing) {
+		PrimaryActorTick.SetTickFunctionEnable(true);
+		bClosing = true;
+	}
 }
 
+void ASM_Stage2_Door::CloseDoor()
+{
+	if (bClosing) {
+		PrimaryActorTick.SetTickFunctionEnable(true);
+		bClosing = false;
+	}
+}
