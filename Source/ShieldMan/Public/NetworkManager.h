@@ -17,7 +17,7 @@ enum UE_Player_EVENT_TYPE {
 	SM_MOVE, SM_JUMP
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FPutEventDelegate, int32, newPlayerindex, FVector, Position, FRotator, Rotator, float, hp, bool, is_zoom, bool, is_crouch);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FPutEventDelegate, int32, newPlayerindex, FVector, Position, FRotator, Rotator, float, hp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FMoveEventDelegate, APlayerController*, movePlayer, FVector, Position, float, speed, float, direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRotatorEventDelegate, APlayerController*, RotatorPlayer, FRotator, Rotator);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEventPlayerDelegate, APlayerController*, eventPlayer, UE_Player_EVENT_TYPE, type);

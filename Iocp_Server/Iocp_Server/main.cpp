@@ -87,7 +87,7 @@ void Accept_thread() {
 			std::cout << "Accept ERROR" << std::endl;
 		}
 
-		std::cout << "立加" << std::endl;
+		std::cout << reinterpret_cast<char*>(&clientAddr.sin_addr) << "立加" << std::endl;
 
 		int new_id = -1;
 

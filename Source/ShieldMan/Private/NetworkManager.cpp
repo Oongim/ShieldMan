@@ -15,7 +15,14 @@ void UNetworkManager::BeginPlay()
 {
 	
 	//Super::BeginPlay();
-
+	if (ConnectServer("127.0.0.1"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UNetworkManager BeginPlay"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UNetworkManager ConnectServer Error"));
+	}
 	// ...
 
 }
@@ -23,12 +30,12 @@ void UNetworkManager::BeginPlay()
 void UNetworkManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	//Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	// ...
 }
 bool UNetworkManager::ConnectServer(FString IP) {
-	GetIp(TCHAR_TO_ANSI(*IP));
-	//GetIp("127.0.0.1");
+	//GetIp(TCHAR_TO_ANSI(*IP));
+	GetIp("127.0.0.1");
+	//UE_LOG(LogTemp, Warning, TEXT("UNetworkManager ConnectServer"));
 
 	return StartServer();
 }
@@ -342,7 +349,7 @@ void UNetworkManager::PacketProcess(const char* packet) {
 			bool is_zoom = spawnPlayer->is_zoom;
 			bool is_crouch = spawnPlayer->is_crouch;
 
-			PutNewPlayerEvent.Broadcast(spawnPlayer->id, v, r, hp, is_zoom, is_crouch);
+			PutNewPlayerEvent.Broadcast(spawnPlayer->id, v, r, hp);				// Single delegate¿¡¼­´Â Execute
 			break;
 		}
 
