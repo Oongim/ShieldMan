@@ -24,6 +24,9 @@ private:
 	bool bReadyBody;
 	bool bReadyLeft;
 
+	int leftpick;
+	int bodypick;
+	int rightpick;
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UButton* ChoiceButton_Right;
@@ -71,13 +74,13 @@ public:
 		class UTextBlock* ReadyText_Left;
 
 public:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Server")
 		void ChoiceButton_Right_Clicked();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Server")
 		void ChoiceButton_Body_Clicked();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Server")
 		void ChoiceButton_Left_Clicked();
 
 	UFUNCTION()
@@ -88,4 +91,11 @@ public:
 
 	UFUNCTION()
 		void Ready_Left_Clicked();
+
+	UFUNCTION(BlueprintCallable, Category = "Server")
+		void Set_LeftPick(int pick);
+	UFUNCTION(BlueprintCallable, Category = "Server")
+		void Set_RightPick(int pick);
+	UFUNCTION(BlueprintCallable, Category = "Server")
+		void Set_BodyPick(int pick);
 };

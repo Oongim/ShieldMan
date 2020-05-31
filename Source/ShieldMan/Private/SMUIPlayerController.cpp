@@ -8,17 +8,17 @@ void ASMUIPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UIWidgetClass == nullptr)
-		ULog::Invalid("UIWidgetClass", "", LO_Viewport);
-	UIWidgetInstance = CreateWidget<UUserWidget>(this, UIWidgetClass);
+	//if (UIWidgetClass == nullptr)
+	//	ULog::Invalid("UIWidgetClass", "", LO_Viewport);
+	//UIWidgetInstance = CreateWidget<UUserWidget>(this, UIWidgetClass);
 
-	if (UIWidgetInstance == nullptr)
-		ULog::Invalid("UIWidgetInstance", "", LO_Viewport);
-	UIWidgetInstance->AddToViewport();
+	//if (UIWidgetInstance == nullptr)
+	//	ULog::Invalid("UIWidgetInstance", "", LO_Viewport);
+	//UIWidgetInstance->AddToViewport();
 
-	FInputModeUIOnly Mode;
-	Mode.SetWidgetToFocus(UIWidgetInstance->GetCachedWidget());
-	SetInputMode(Mode);
-	bShowMouseCursor = true;
+	//FInputModeUIOnly Mode;
+	//Mode.SetWidgetToFocus(UIWidgetInstance->GetCachedWidget());
+	//SetInputMode(Mode);
+	//bShowMouseCursor = true;
 
 }
