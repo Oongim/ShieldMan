@@ -11,8 +11,12 @@
 UCLASS()
 class SHIELDMAN_API AMetaBall_Ghost : public AActor
 {
+	
 	GENERATED_BODY()
 private:
+	enum STATUS {
+		WAITING, MOVING, ATTACKING
+	};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Dynamic_Mesh;
 
@@ -47,12 +51,29 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
 		float RepeatInterval;
 
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float speedPower;
+
 	FVector EyeR_Pos;
+	FVector EyeR_Default_Pos;
 	FVector EyeL_Pos;
+	FVector EyeL_Default_Pos;
 	float EyeR_Size;
 	float EyeL_Size;
 	bool bEyeR_Toggle;
 	bool bEyeL_Toggle;
+
+	bool bAttacked;
+
+	bool bAlive;
+
+	STATUS m_status;
+	FVector	m_destination;
+
+	FRotator prev_Rot;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
@@ -82,5 +103,12 @@ public:
 		void AddForceToVelocity(FVector vec, float power);
 
 	void Update_EyeScale(float DeltaTime);
-	void SetRotation();
+	void SetRotation(float DeltaTime);
+	void OnRepeatTimer();
+
+	void Attacked();
+
+	void MoveStart();
+
+	bool GetAlive();
 };
