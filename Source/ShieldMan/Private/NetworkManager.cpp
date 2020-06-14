@@ -258,6 +258,30 @@ bool UNetworkManager::PacketProcess(const char* packet)
 
 			break;
 		}
+
+		case S2C_ROTATOR:
+		{
+			const sc_packet_move_mouse* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move_mouse*>(packet);
+			m_recvcid = packet_S2C_ROTATOR->id;
+			//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
+			//{
+				m_playerInfo.m_roll = packet_S2C_ROTATOR->roll;
+				m_playerInfo.m_pitch = packet_S2C_ROTATOR->pitch;
+				m_playerInfo.m_yaw = packet_S2C_ROTATOR->yaw;
+				//m_playerInfo.m_changed = true;
+				//UE_LOG(LogTemp, Warning, TEXT("pitch : %f      yaw : %f"), m_playerInfo.m_pitch, m_playerInfo.m_yaw);
+			//}
+			//else
+			//{
+			//	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
+			//	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
+			//	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
+			//	m_OtherPlayer[0].m_changed = true;
+			//}
+			//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
+			break;
+		}
+
 		default:
 			UE_LOG(LogTemp, Error, TEXT(" %d PacketProcess:: An undefined packet received"), (int)packet[1]);
 			break;
@@ -309,6 +333,20 @@ void UNetworkManager::Send_Connect()
 	packet.size = sizeof(packet);
 	Send_Packet(&packet);
 
+}
+
+void UNetworkManager::Send_MouseMove(FVector rotator)
+{
+	cs_packet_move_mouse packet;
+
+	packet.type = C2S_ROTATOR;
+	packet.size = sizeof(packet);
+
+	packet.pitch = rotator.X;
+	packet.yaw = rotator.Y;
+	packet.roll = rotator.Z;
+	packet.id = m_playerInfo.m_cid;
+	Send_Packet(&packet);
 }
 
 void UNetworkManager::Send_MoveForward_Packet(float axisValue, FVector Position, float Speed, float Direction)

@@ -2,11 +2,17 @@
 
 
 #include "SMPlayerController.h"
+
 #include "Blueprint/UserWidget.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 void ASMPlayerController::BeginPlay()
 {
+	player1 = nullptr;
+	player2 = nullptr;
+
+	player3 = nullptr;
+
 	//Super::BeginPlay();
 
 	//if (HUDOverlayAsset)

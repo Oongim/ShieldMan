@@ -24,9 +24,6 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance, meta = (AllowPrivateAccess = "true"))
-	class USMAnimInstance* AnimInstance;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand, meta = (AllowPrivateAccess = "true"))
 	FVector Hand_Right;
 
@@ -73,6 +70,9 @@ private:   //private변수들
 public:		//생성자 , public 변수
 	AShieldManCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance)
+		class USMAnimInstance* AnimInstance;
+
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
@@ -93,7 +93,11 @@ public:		//생성자 , public 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 		UParticleSystem* Effect;
 
-protected: //조작
+protected:
+
+		
+		
+public://조작
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 

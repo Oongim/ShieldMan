@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ShieldMan.h"
+#include "SM_PlayerPawn.h"
 #include "GameFramework/PlayerController.h"
 #include "SMPlayerController.generated.h"
 
@@ -22,6 +23,10 @@ public:
 	/*위젯을 만든 후 유지하는 변수*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* HUDOverlay;
+
+	ASM_PlayerPawn* player1;
+	ASM_PlayerPawn* player2;
+	ASM_PlayerPawn* player3;
 
 protected:
 	virtual void BeginPlay() override;

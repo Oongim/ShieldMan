@@ -42,6 +42,7 @@ public:
 	float m_speed, m_direction;
 	char m_id[MAX_ID_LEN];
 	int m_cid;
+	bool m_changed;
 	char m_name[MAX_ID_LEN];
 	PLAYER_POSITION_TYPE m_type;
 	UE_Player_EVENT_TYPE m_player_event;
@@ -60,6 +61,7 @@ public:
 	char m_action;
 	char m_id[MAX_ID_LEN];
 	int m_cid;
+	bool m_changed;
 	PLAYER_POSITION_TYPE m_type;
 	SOCKET m_socket;
 	char m_buffer[MAX_BUFFER];
@@ -83,7 +85,7 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SHIELDMAN_API UNetworkManager : public UActorComponent
 {
 	GENERATED_BODY()
-private:
+public:
 	WSADATA m_wsa;
 	SOCKADDR_IN m_serverAddr;
 	BOOL m_connecting = FALSE;
@@ -91,6 +93,7 @@ private:
 	int nTotalSockets = 0;
 	WSANETWORKEVENTS m_netWorkEvents;
 	const char* m_ip = nullptr;
+	int m_recvcid = 0;
 	PlayerInfo m_playerInfo;
 	OtherPlayerInfo m_OtherPlayer[2];
 public:
@@ -141,6 +144,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		void Send_Rotator_Packet(float axisValue, FRotator Rotator);
 
+	UFUNCTION(BlueprintCallable, Category = "IocpServer")
+		void Send_MouseMove(FVector rotator);
+	
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		bool RecvPacket();
 
