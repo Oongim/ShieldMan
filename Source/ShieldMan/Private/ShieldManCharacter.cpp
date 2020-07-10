@@ -65,7 +65,7 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("LEFT_SHIELD"));
 
 	MaxHP=100.f;
-	CurrentHP = 80.f;
+	CurrentHP = 100.f;
 	PlayerName = TEXT("KDK");
 
 	ArmReflectPower = -1000.f;
@@ -310,6 +310,12 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 void AShieldManCharacter::ToggleAttackPossible()
 {
 	bAttackPossible = true;
+}
+
+void AShieldManCharacter::DecreaseHP()
+{
+	CurrentHP -= 20.f;
+	ULog::Number(CurrentHP, "HP: ", "", LO_Viewport);
 }
 
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

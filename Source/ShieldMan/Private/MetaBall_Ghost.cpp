@@ -6,6 +6,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "NavigationSystem.h"
 #include "Components/WidgetComponent.h"
+#include "SM_Ghost_AttackObject.h"
 
 // Sets default values
 AMetaBall_Ghost::AMetaBall_Ghost()
@@ -63,6 +64,12 @@ AMetaBall_Ghost::AMetaBall_Ghost()
 
 	bAlive = true;
 	m_status = WAITING;
+
+
+	MaxHP = 100.f;
+
+	CurrentHP = 100.f;
+
 }
 
 // Called when the game starts or when spawned
@@ -91,6 +98,7 @@ void AMetaBall_Ghost::BeginPlay()
 	}
 	Balls_Position[MAX_NUM_BLOB - 1] = FVector(0, 0, 70.f);
 
+	bRightMove = FMath::RandBool();
 	MoveStart();
 }
 
@@ -101,27 +109,29 @@ void AMetaBall_Ghost::Tick(float DeltaTime)
 
 	SetRotation(DeltaTime);
 	Update(DeltaTime);
-	BoundCheck();
+	BoundCheck(m_status);
 	Update_EyeScale(DeltaTime);
 
 	switch (m_status)
 	{
 	case WAITING:
-		
+
 		break;
 	case MOVING: {
-		FVector dest_direct = m_destination-GetActorLocation();
+		FVector dest_direct = m_destination - GetActorLocation();
 
-		SetActorLocation(GetActorLocation()+dest_direct* DeltaTime/3);
+		SetActorLocation(GetActorLocation() + dest_direct * DeltaTime / 3);
 		if ((m_destination - GetActorLocation()).Size() < 50) {
-			AddForceToVelocity({ 0,0,0 }, 0.f);
-			m_status = WAITING;
-			MoveStart();
+			AddForceToVelocity(0.f);
+			m_status = ATTACKING;
 		}
 
 	}
 			   break;
 	case ATTACKING:
+		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::Attack, 1.f, false);
+
+		m_status = WAITING;
 		break;
 	}
 }
@@ -139,30 +149,49 @@ void AMetaBall_Ghost::SetRotation(float DeltaTime)
 {
 	//Anchor_Position[0].RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 1, 0));
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation()*-1);
+		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation() * -1);
 	}
 	FRotator ToPlayerInterpRot =
 		FMath::RInterpTo(prev_Rot, GetActorRotation(), DeltaTime, 3.f);
-	prev_Rot += ToPlayerInterpRot- prev_Rot;
-	
+	prev_Rot += ToPlayerInterpRot - prev_Rot;
+
 	FVector R_Pos = UKismetMathLibrary::GreaterGreater_VectorRotator(EyeR_Default_Pos, ToPlayerInterpRot);
 	FVector L_Pos = UKismetMathLibrary::GreaterGreater_VectorRotator(EyeL_Default_Pos, ToPlayerInterpRot);
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName("EyeL_Pos"), L_Pos);
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName("EyeR_Pos"), R_Pos);
 }
 
-void AMetaBall_Ghost::AddForceToVelocity(FVector vec, float power)
+void AMetaBall_Ghost::AddForceToVelocity(float power, bool bRandomShake)
 {
 	prev_Rot = GetActorRotation();
-	float powersize = vec.Size();
 	FQuat QuatRotation = FQuat((m_destination - GetActorLocation()).Rotation());
-	
-	vec.Normalize();
+
 	SetActorRotation(QuatRotation);
-	FVector Velocity = /*this->GetVelocity()*/GetActorForwardVector() * power * ShakePower * 10;
-	Velocity.Y /= 2;
-	for (int i = 1; i < MAX_NUM_BLOB; ++i) {
-		Balls_Velocity[i] = Velocity;
+	if (!bRandomShake) {
+		FVector Velocity = GetActorForwardVector() * power * ShakePower * 10;
+		Velocity.Y /= 2;
+		for (int i = 1; i < MAX_NUM_BLOB; ++i) {
+			Balls_Velocity[i] = Velocity;
+		}
+
+	}
+	else
+	{
+		//ULog::Invalid("bRandomShake", "", LO_Viewport);
+		FVector rand_Velocity;
+		for (int i = 1; i < MAX_NUM_BLOB; ++i) {
+			//rand_Velocity = FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f));
+			if (i == 1)
+				rand_Velocity = FVector{ 1,0,0 };
+			if (i == 2)
+				rand_Velocity = FVector{ 0,1,0 };
+			if (i == 3)
+				rand_Velocity = FVector{ 0,0,1 };
+			rand_Velocity.Normalize();
+			//ULog::Vector(rand_Velocity, LO_Viewport);
+			rand_Velocity *= power * ShakePower * 10;
+			Balls_Velocity[i] = rand_Velocity;
+		}
 	}
 }
 void AMetaBall_Ghost::Update_EyeScale(float DeltaTime)
@@ -262,77 +291,96 @@ void AMetaBall_Ghost::Muitiple_SpringMass_System(float timeStep)
 	//ULog::Vector(Balls_Position[MAX_NUM_BLOB - 1], "Balls_Position: ", "", LO_Viewport);
 }
 
-void AMetaBall_Ghost::BoundCheck()
+void AMetaBall_Ghost::BoundCheck(STATUS status)
 {
-	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-		/*if (Balls_Position[i].X < min_Clamp && Balls_Velocity[i].X < 0)
-			Balls_Velocity[i].X *= -1;
-		else if (Balls_Position[i].X > max_Clamp&& Balls_Velocity[i].X > 0)
-			Balls_Velocity[i].X *= -1;
-
-		if (Balls_Position[i].Y < min_Clamp && Balls_Velocity[i].Y < 0)
-			Balls_Velocity[i].Y *= -1;
-		else if (Balls_Position[i].Y > max_Clamp&& Balls_Velocity[i].Y > 0)
-			Balls_Velocity[i].Y *= -1;*/
-		if (i < 4) {
-			Balls_Position[i].X = FMath::Clamp(Balls_Position[i].X, min_Clamp, max_Clamp);
-			Balls_Position[i].Y = FMath::Clamp(Balls_Position[i].Y, min_Clamp, max_Clamp);
-			Balls_Position[i].Z = FMath::Clamp(Balls_Position[i].Z, min_Clamp, max_Clamp);
+	switch (status)
+	{
+	case WAITING:
+	{
+		for (int i = 0; i < MAX_NUM_BLOB; ++i) {
+			if (i < 4) {
+				if (Balls_Position[i].X < min_Clamp || Balls_Velocity[i].X > max_Clamp)
+					Balls_Velocity[i].X *= -1;
+				if (Balls_Position[i].Y < min_Clamp || Balls_Velocity[i].Y > max_Clamp)
+					Balls_Velocity[i].Y *= -1;
+				if (Balls_Position[i].Z < min_Clamp || Balls_Velocity[i].Z > max_Clamp)
+					Balls_Velocity[i].Z *= -1;
+			}
+			else {
+				if (Balls_Position[i].X < min_Clamp * 2 || Balls_Velocity[i].X > max_Clamp * 2)
+					Balls_Velocity[i].X *= -1;
+				if (Balls_Position[i].Y < min_Clamp * 2 || Balls_Velocity[i].Y > max_Clamp * 2)
+					Balls_Velocity[i].Y *= -1;
+				if (Balls_Position[i].Z < min_Clamp * 2 || Balls_Velocity[i].Z > max_Clamp * 2)
+					Balls_Velocity[i].Z *= -1;
+			}
 		}
-		else {
-			Balls_Position[i].X = FMath::Clamp(Balls_Position[i].X, min_Clamp * 2, max_Clamp * 2);
-			Balls_Position[i].Y = FMath::Clamp(Balls_Position[i].Y, min_Clamp * 2, max_Clamp * 2);
-			Balls_Position[i].Z = FMath::Clamp(Balls_Position[i].Z, min_Clamp*2, max_Clamp * 2);
-		}
-		/*if (Balls_Position[i].Z < min_Clamp && Balls_Velocity[i].Z < 0)
-			Balls_Velocity[i].Z *= -1;
-		else if (Balls_Position[i].Z > max_Clamp&& Balls_Velocity[i].Z > 0)
-			Balls_Velocity[i].Z *= -1;*/
 	}
+	break;
+	case MOVING:
+	{
+		for (int i = 0; i < MAX_NUM_BLOB; ++i) {
+			if (i < 4) {
+				Balls_Position[i].X = FMath::Clamp(Balls_Position[i].X, min_Clamp, max_Clamp);
+				Balls_Position[i].Y = FMath::Clamp(Balls_Position[i].Y, min_Clamp, max_Clamp);
+				Balls_Position[i].Z = FMath::Clamp(Balls_Position[i].Z, min_Clamp, max_Clamp);
+			}
+			else {
+				Balls_Position[i].X = FMath::Clamp(Balls_Position[i].X, min_Clamp * 2, max_Clamp * 2);
+				Balls_Position[i].Y = FMath::Clamp(Balls_Position[i].Y, min_Clamp * 2, max_Clamp * 2);
+				Balls_Position[i].Z = FMath::Clamp(Balls_Position[i].Z, min_Clamp * 2, max_Clamp * 2);
+			}
+		}
+	}
+	break;
+	}
+
 }
 
 void AMetaBall_Ghost::OnRepeatTimer()
 {
 	if (!bAlive) return;
-	FVector RunAwayVec = GetActorLocation() - Player->GetActorLocation();
 
-	if (bAttacked)
+	FVector NextLocation;
+	if (bRightMove)
 	{
-		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 15000);
-		ULog::Invalid("bAttacked", "", LO_Viewport);
-	}
-	else if ((RunAwayVec).Size() < 300.f)
-	{
-		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 10);
-		ULog::Invalid("RunAway", "", LO_Viewport);
-	}
-	else {
-		FVector NextLocation{
-					FMath::FRandRange(-3800.f, -2600.f),
-					FMath::FRandRange(-630.f, 1100.f),
-					FMath::FRandRange(100.f, 450.f)
+		NextLocation = {
+				FMath::FRandRange(-3800.f, -2600.f),
+				FMath::FRandRange(-630.f, -100.f),
+				FMath::FRandRange(100.f, 450.f)
 		};
-		m_destination = NextLocation;
-		AddForceToVelocity(m_destination, speedPower * 10);
-		
-		m_status = MOVING;
-		ULog::Invalid("NavSystem", "", LO_Viewport);
+		bRightMove = false;
 	}
+	else
+	{
+		NextLocation = {
+				FMath::FRandRange(-3800.f, -2600.f),
+				FMath::FRandRange(700.f, 1100.f),
+				FMath::FRandRange(100.f, 450.f)
+		};
+		bRightMove = true;
+	}
+
+	m_destination = NextLocation;
+	AddForceToVelocity(speedPower * 10);
+
+	m_status = MOVING;
+
 }
 // 공격을 받았을 때
 void AMetaBall_Ghost::Attacked()
 {
 	if (!bAlive) return;
 	bAttacked = true;
-	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::OnRepeatTimer, 2.f, true);
-	Health -= 20.f;
+	CurrentHP -= 20.f;
+	AddForceToVelocity(15, true);
 
+	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 1.f, 0.f, 0.f });
+	GetWorld()->GetTimerManager().SetTimer(AttackedTimerHandle, this, &AMetaBall_Ghost::ChangeAttackedBaseColor, 0.5f, false);
 }
 
 void AMetaBall_Ghost::MoveStart()
-{
+{ 
 	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::OnRepeatTimer, RepeatInterval, false);
 }
 
@@ -341,87 +389,21 @@ bool AMetaBall_Ghost::GetAlive()
 	return bAlive;
 }
 
+void AMetaBall_Ghost::Attack()
+{
+	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
+		Balls_Position[i] = FVector{ 0 };
+	}
+	m_destination = Player->GetActorLocation();
+	m_destination.Z += 50.f;
+	AddForceToVelocity(30, true);
+	SpawnPawn = GetWorld()->SpawnActor<ASM_Ghost_AttackObject>(SpawnBulletClass, GetActorLocation(), GetActorRotation());
+	SpawnPawn->SetGhost(this);
+	MoveStart();
+}
 
-//bool bSubAlpha = false;
-//
-//struct SDF
-//{
-//	float Sphere(float3 pos, float BallSize)
-//	{
-//		return length(pos) - BallSize;
-//	}
-//
-//	float opUS(float d1, float d2)
-//	{
-//		float h = clamp(0.5 + 0.5 * (d2 - d1) / Smooth, 0.0, 1.0);
-//		return lerp(d2, d1, h) - Smooth * h * (1.0 - h);
-//	}
-//
-//	float3 RMNormal(float3 pos)
-//	{
-//		float2 Off = float2(0.01, 0);
-//		return normalize(float3(
-//			Sphere(pos + Off.xyy, 50) - Sphere(pos - Off.xyy, 50),
-//			Sphere(pos + Off.yxy, 50) - Sphere(pos - Off.yxy, 50),
-//			Sphere(pos + Off.yyx, 50) - Sphere(pos - Off.yyx, 50)
-//		));
-//	}
-//	float scene(float3 pos)
-//	{
-//		bSubAlpha = false;
-//		int numBall = 0;
-//		float balls[10];
-//		balls[numBall++] = Sphere(pos + Ball1, 50);
-//		balls[numBall++] = Sphere(pos + Ball2, 30);
-//		balls[numBall++] = Sphere(pos + Ball3, 30);
-//		balls[numBall++] = Sphere(pos + Ball4, 30);
-//		balls[numBall++] = Sphere(pos + Ball5, 15);
-//		balls[numBall++] = Sphere(pos + Ball6, 15);
-//		balls[numBall++] = Sphere(pos + Ball7, 15);
-//		balls[numBall++] = Sphere(pos + Ball8, 20);
-//
-//		float dis = opUS(balls[0], balls[1]);
-//
-//		for (int i = 2; i < numBall; ++i)
-//		{
-//			dis = opUS(balls[i], dis);
-//		}
-//		float eyeL = Sphere(pos + EyeL_Pos, EyeL_Scale);
-//		float eyeR = Sphere(pos + EyeR_Pos, EyeR_Scale);
-//
-//		dis = max(-eyeL, dis);
-//		dis = max(-eyeR, dis);
-//		if (max(-eyeL, dis) == -eyeL || max(-eyeR, dis) == -eyeR)
-//			bSubAlpha = true;
-//		return dis;
-//	}
-//};
-//
-//SDF MetaBall_SDF;
-//float ray = 0.0;
-//float distance;
-//float4 Col = 0;
-//float3 Normal = 0;
-//
-//for (int i = 0; i < MaxSteps; ++i)
-//{
-//	float3 curPos = CamPos + CamDir * ray;
-//	distance = MetaBall_SDF.scene(curPos - ObjectPos);
-//	if (distance <= threshold)
-//	{
-//		if (bSubAlpha) { 
-//			Col.r = 1;
-//			Col.g = 0.1;
-//			Col.b = 0.1;
-//			Col.a = 0.5
-//		}
-//		else Col = 0.9;
-//		Normal = MetaBall_SDF.RMNormal(curPos - ObjectPos);
-//
-//		break;
-//	}
-//
-//	ray += distance;
-//}
-//
-//return float4(Normal, Col.a);
+void AMetaBall_Ghost::ChangeAttackedBaseColor()
+{
+	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.194, 0.227, 0.675 });
+}
+

@@ -49,7 +49,6 @@ void ASM_ShootObject::BeginPlay()
 
 	Player = Cast<AShieldManCharacter>(*p);
 	
-
 	PrimaryActorTick.SetTickFunctionEnable(false);
 }
 

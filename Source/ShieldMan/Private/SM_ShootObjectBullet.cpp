@@ -42,7 +42,7 @@ ASM_ShootObjectBullet::ASM_ShootObjectBullet()
 		"/Game/BP/BP_SMCharacter.BP_SMCharacter_C"
 	));
 	characterClass = CHARACTERCLASS.Class;
-	
+
 }
 
 // Called when the game starts or when spawned
@@ -54,6 +54,7 @@ void ASM_ShootObjectBullet::BeginPlay()
 	Bullet->OnComponentHit.AddDynamic(this, &ASM_ShootObjectBullet::OnHit);
 	
 	Bullet->SetSimulatePhysics(true);
+	
 	
 
 	GetWorldTimerManager().SetTimer(LifeTimerHandle,this,&ASM_ShootObjectBullet::Death, LifeTime);

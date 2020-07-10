@@ -140,5 +140,8 @@ public:		//public ÇÔ¼ö
 
 	UFUNCTION()
 		void ToggleAttackPossible();
+
+	UFUNCTION()
+		void DecreaseHP();
 };
 

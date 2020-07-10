@@ -52,9 +52,6 @@ private:
 		float RepeatInterval;
 
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
-		float Health;
-
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
 		float speedPower;
 
 	FVector EyeR_Pos;
@@ -70,17 +67,36 @@ private:
 
 	bool bAlive;
 
+	bool bRightMove;
+
 	STATUS m_status;
 	FVector	m_destination;
 
 	FRotator prev_Rot;
 
+	class ASM_Ghost_AttackObject* SpawnPawn;
+
+	FTimerHandle AttackedTimerHandle;
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
-	UPROPERTY(VisibleAnywhere, Category = UI)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UI)
 		class UWidgetComponent* HPBarWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+		TSubclassOf< class ASM_Ghost_AttackObject> SpawnBulletClass;
+
+	UPROPERTY(EditAnywhere, Category = "Shoot")
+		float ShootPower;
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Status")
+		float MaxHP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+		float CurrentHP;
 public:	
 	// Sets default values for this actor's properties
 	AMetaBall_Ghost();
@@ -95,12 +111,12 @@ public:
 
 	void Update(float DeltaTime);
 
-	void BoundCheck();
+	void BoundCheck(STATUS status);
 
 	void Muitiple_SpringMass_System(float timeStep);
 
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
-		void AddForceToVelocity(FVector vec, float power);
+		void AddForceToVelocity(float power, bool bRandomShake = false);
 
 	void Update_EyeScale(float DeltaTime);
 	void SetRotation(float DeltaTime);
@@ -111,4 +127,10 @@ public:
 	void MoveStart();
 
 	bool GetAlive();
+
+	void Attack();
+
+	UFUNCTION()
+		void ChangeAttackedBaseColor();
+
 };
