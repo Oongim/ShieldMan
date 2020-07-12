@@ -60,6 +60,7 @@ private:
 	FVector EyeL_Default_Pos;
 	float EyeR_Size;
 	float EyeL_Size;
+	float Opacity;
 	bool bEyeR_Toggle;
 	bool bEyeL_Toggle;
 

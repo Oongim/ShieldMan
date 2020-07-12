@@ -70,6 +70,7 @@ AMetaBall_Ghost::AMetaBall_Ghost()
 
 	CurrentHP = 100.f;
 
+	Opacity = 0;
 }
 
 // Called when the game starts or when spawned
@@ -111,6 +112,14 @@ void AMetaBall_Ghost::Tick(float DeltaTime)
 	Update(DeltaTime);
 	BoundCheck(m_status);
 	Update_EyeScale(DeltaTime);
+
+	if (!bAlive) { 
+		Opacity -= 0.05;
+		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("Opacity"), Opacity);
+		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeL_Scale"), 0);
+		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeR_Scale"), 0);
+		return; 
+	}
 
 	switch (m_status)
 	{
@@ -372,11 +381,13 @@ void AMetaBall_Ghost::Attacked()
 {
 	if (!bAlive) return;
 	bAttacked = true;
-	CurrentHP -= 20.f;
+	CurrentHP -= 50.f;
 	AddForceToVelocity(15, true);
 
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 1.f, 0.f, 0.f });
 	GetWorld()->GetTimerManager().SetTimer(AttackedTimerHandle, this, &AMetaBall_Ghost::ChangeAttackedBaseColor, 0.5f, false);
+	if (CurrentHP <= 0)
+		bAlive = false;
 }
 
 void AMetaBall_Ghost::MoveStart()

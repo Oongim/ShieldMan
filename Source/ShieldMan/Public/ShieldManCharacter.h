@@ -63,12 +63,14 @@ private:   //private변수들
 
 	FTimerHandle AttackTimer;
 
+	FTimerHandle DeathTimer;
+
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = AttackTime, meta = (AllowPrivateAccess = "true"))
 	float AttackDelayTime;
 
 	bool bAttackPossible;
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
-		//UPhysicalAnimationComponent* PhysicalAnimation;
+	
+	bool bDeath;
 
 public:		//생성자 , public 변수
 	AShieldManCharacter();
@@ -92,6 +94,9 @@ public:		//생성자 , public 변수
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 		UParticleSystem* Effect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+		UAnimationAsset* Anim;
 
 protected: //조작
 	/** Called for forwards/backward input */
@@ -120,6 +125,10 @@ private:	//private 함수
 	void Init_Mesh();
 	void Init_Camera();
 	void Init_PhysicalAnim();
+
+	void Set_DeathCamera();
+
+	void Death();
 
 public:		//public 함수
 	UFUNCTION()

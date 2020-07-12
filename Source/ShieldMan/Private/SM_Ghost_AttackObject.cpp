@@ -26,12 +26,10 @@ ASM_Ghost_AttackObject::ASM_Ghost_AttackObject()
 	{
 		Bullet->SetStaticMesh(SM_BULLET.Object);
 	}
-	//bAlive = true;
 
 	Bullet->SetSimulatePhysics(true);
-	//Bullet->SetNotifyRigidBodyCollision(true);
 	Bullet->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18);
-	Collision->SetCollisionProfileName(TEXT("Shootbullet"));
+	Collision->SetCollisionProfileName(TEXT("GhostBulletStart"));
 
 	DeathMaxCount = 3.f;
 
@@ -57,7 +55,7 @@ ASM_Ghost_AttackObject::ASM_Ghost_AttackObject()
 	{
 		MoveEffect->SetTemplate(ParticleAsset.Object);
 	}
-	
+
 }
 
 // Called when the game starts or when spawned
@@ -71,11 +69,10 @@ void ASM_Ghost_AttackObject::BeginPlay()
 
 	Bullet->SetSimulatePhysics(true);
 
-	Bullet->AddForce(GetActorRotation().Vector() * 10000);
+	Bullet->AddForce(GetActorRotation().Vector() * 20000);
 
-	Collision->SetGenerateOverlapEvents(false);
-	FTimerHandle CollisionTimerHandle;
-	GetWorldTimerManager().SetTimer(CollisionTimerHandle, this, &ASM_Ghost_AttackObject::SetOverlapEvent, 1.f);
+	//Collision->SetGenerateOverlapEvents(false);
+
 
 	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &ASM_Ghost_AttackObject::Death, LifeTime);
 }
@@ -89,15 +86,18 @@ void ASM_Ghost_AttackObject::SetGhost(AMetaBall_Ghost* actor)
 void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (bDead) return;
-	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_Ghost_AttackObject::Death, DeathMaxCount);
-	ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
+	bool bCollisioned = false;
+
 	if (bDefended)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetClass()->GetName());
 		if (OtherActor->GetClass()->GetName() == TargetGhost->GetClass()->GetName())
 		{
-			TargetGhost->Attacked();
-			ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
+			auto ghost = Cast<AMetaBall_Ghost>(OtherActor);
+			if (ghost->GetAlive()) {
+				ghost->Attacked();
+				bCollisioned = true;
+			}
 		}
 	}
 	else if (OtherActor->GetClass()->GetName() == characterClass->GetName())
@@ -106,14 +106,16 @@ void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndEffect, GetActorLocation(), GetActorRotation(), true);
 		auto character = Cast<AShieldManCharacter>(OtherActor);
 
-		character->AddForceToCharacter(GetActorRotation().Vector()*-1, 20.f);
+		character->AddForceToCharacter(GetActorRotation().Vector() * -1, 20.f);
 		character->DecreaseHP();
-		
+		bCollisioned = true;
 	}
-	
-	bDead = true;
-	Bullet->SetSimulatePhysics(false);
-	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &ASM_Ghost_AttackObject::Death, 1.f);
+
+	if (bCollisioned) {
+		GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_Ghost_AttackObject::Death, DeathMaxCount);
+		bDead = true;
+		Bullet->SetSimulatePhysics(false);
+	}
 }
 
 void ASM_Ghost_AttackObject::Death()
@@ -124,27 +126,20 @@ void ASM_Ghost_AttackObject::Death()
 void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (bDead) return;
-	//ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
 
 	if (OtherActor->GetClass()->GetName() == FString("SM_Shield"))
 	{
-	MoveEffect->SetVisibility(false);
-	FVector target_velocity=TargetGhost->GetActorLocation()-GetActorLocation();
-	target_velocity.Normalize();
+		MoveEffect->SetVisibility(false);
+		FVector target_velocity = TargetGhost->GetActorLocation() - GetActorLocation();
+		target_velocity.Normalize();
 
-	Bullet->AddForce(target_velocity * 100000);
-	bDefended = true;
+		Bullet->AddForce(target_velocity * 100000);
+		bDefended = true;
 	}
 	else
 	{
 		Death();
 	}
 }
-
-void ASM_Ghost_AttackObject::SetOverlapEvent()
-{
-	Collision->SetGenerateOverlapEvents(true);
-}
-
 
 

@@ -60,9 +60,6 @@ public:
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* OnHittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	UFUNCTION()
-	void SetOverlapEvent();
-	
 	UFUNCTION(BlueprintImplementableEvent)
 		void StartNiagaraEffect();
 };

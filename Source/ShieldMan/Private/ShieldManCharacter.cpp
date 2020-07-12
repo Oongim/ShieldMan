@@ -68,6 +68,8 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentHP = 100.f;
 	PlayerName = TEXT("KDK");
 
+	bDeath = false;
+
 	ArmReflectPower = -1000.f;
 	ShieldBoundPower = 100.f;
 
@@ -108,10 +110,6 @@ void AShieldManCharacter::Init_Mesh()
 		FRotator(0.0f, -90.0f, 0.0f)
 	);
 	
-	//스켈레탈 메쉬 설정
-	/*static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
-		"/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));*/
-
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
 		"/Game/Import/CharacterMesh/Knight_SkeletalMesh.Knight_SkeletalMesh"));
 
@@ -127,10 +125,7 @@ void AShieldManCharacter::Init_Mesh()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> TP_ANIM(TEXT(
-		"/Game/Mannequin/Animations/ThirdPerson_AnimBP.ThirdPerson_AnimBP_C"));
-
-	/*static ConstructorHelpers::FClassFinder<UAnimInstance> TP_ANIM(TEXT(
-		"/Game/InfinityBladeWarriors/Animation/WarriorAnimBP.WarriorAnimBP_C"));*/
+		"/Game/BP/Animation/BP_SMAnim.BP_SMAnim_C"));
 
 	if (TP_ANIM.Succeeded())
 	{
@@ -163,7 +158,7 @@ void AShieldManCharacter::Init_Camera()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 	Camera->SetRelativeLocationAndRotation(  //카메라 초기 위치와 각도 조정
-		FVector(0.0f, 0.0f, 80.0f),
+		FVector(0.0f, 0.0f, 100.0f),
 		FRotator(-5.f, 0.f, 0.f)
 	);
 }
@@ -186,6 +181,20 @@ void AShieldManCharacter::Init_PhysicalAnim()
 	PhysicalAnimation->ApplyPhysicalAnimationSettingsBelow( BoneName, Data, false);
 
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
+}
+
+void AShieldManCharacter::Set_DeathCamera()
+{
+	GetController()->SetControlRotation(FRotator{FVector(GetActorForwardVector().X, GetActorForwardVector().Y,0).Rotation()});
+	Camera->SetRelativeLocationAndRotation(  
+		FVector(500.0f, 0.0f, 50.0f),
+		FRotator(0.f, 180.f, 0.f)
+	);
+}
+
+void AShieldManCharacter::Death()
+{
+	SwitchLevel(FName("Title"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -315,7 +324,15 @@ void AShieldManCharacter::ToggleAttackPossible()
 void AShieldManCharacter::DecreaseHP()
 {
 	CurrentHP -= 20.f;
-	ULog::Number(CurrentHP, "HP: ", "", LO_Viewport);
+	
+	if (CurrentHP <= 0) {
+		GetMesh()->PlayAnimation(Anim,false);
+		ULog::Number(Anim->GetMaxCurrentTime(),"Time: ","", LO_Viewport);
+		Set_DeathCamera();
+		bDeath = true;
+		GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
+		
+	}
 }
 
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -340,13 +357,13 @@ void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 void AShieldManCharacter::AddControllerYawInput(float Val)
 {
+	if (bDeath) return;
 	if (CurControlMode->isControlMode(BodyControlMode)) {
 		//if(CurrentStatus== CharacterStatus::PossibleMove)
 			Super::AddControllerYawInput(Val);
 	}
 	//좌 우 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-
 		AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
@@ -357,6 +374,7 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 
 void AShieldManCharacter::AddControllerPitchInput(float Val)
 {
+	if (bDeath) return;
 	if (CurControlMode->isControlMode(BodyControlMode)) {
 		//if (CurrentStatus == CharacterStatus::PossibleMove)
 			Super::AddControllerPitchInput(Val);
@@ -372,6 +390,7 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 
 void AShieldManCharacter::AddControllerRolInput(float Val)
 {
+	if (bDeath) return;
 	Val *= 2;
 	//앞 뒤 이동
 	if (CurControlMode->isControlMode(RHandControlMode)) {
@@ -384,6 +403,7 @@ void AShieldManCharacter::AddControllerRolInput(float Val)
 
 void AShieldManCharacter::MoveForward(float Value)
 {
+	if (bDeath) return;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		if (CurControlMode->isControlMode(BodyControlMode)) {
@@ -408,6 +428,7 @@ void AShieldManCharacter::MoveForward(float Value)
 
 void AShieldManCharacter::MoveRight(float Value)
 {
+	if (bDeath) return;
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
 		if (CurControlMode->isControlMode(BodyControlMode)) {

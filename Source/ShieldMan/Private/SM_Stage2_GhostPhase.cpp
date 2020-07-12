@@ -24,7 +24,7 @@ void ASM_Stage2_GhostPhase::BeginPlay()
 {
 	Super::BeginPlay();
 	PrimaryActorTick.SetTickFunctionEnable(false);
-	StartCollision->SetWorldLocation(FVector(-2520.f, 260.f, -61.f));
+	StartCollision->SetWorldLocation(FVector(-2520.f, 260.f, 76.f));
 
 	Entrance = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-2420.f, 260.f, -61.f), FRotator::ZeroRotator);
 	Exit = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-4000.f, 260.f, -61.f), FRotator::ZeroRotator);
@@ -49,6 +49,7 @@ void ASM_Stage2_GhostPhase::Tick(float DeltaTime)
 		}
 	}
 	if (!ended) {
+		ULog::Invalid("End Ghost Phase", "", LO_Viewport);
 		Exit->OpenDoor();
 		PrimaryActorTick.SetTickFunctionEnable(false);
 		if (m_GhostArr[0] != nullptr) {
