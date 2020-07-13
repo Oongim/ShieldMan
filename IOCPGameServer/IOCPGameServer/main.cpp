@@ -249,6 +249,39 @@ void send_rotator(int user_id, int o_id, float pitch, float yaw, float roll)
 	send_packet(user_id, &p);
 }
 
+void send_move(int user_id, int o_id, float x, float y, float z)
+{
+	sc_packet_move p;
+	p.id = o_id;
+	p.size = sizeof(p);
+	p.type = S2C_MOVE;
+	p.x = x;
+	p.y = y;
+	p.z = z;
+	send_packet(user_id, &p);
+}
+
+void do_move(int user_id, float x, float y, float z)
+{
+	CLIENT& g_c = g_clients[user_id];
+
+
+	send_move(user_id, user_id, x, y, z);
+	//cout << "x : " << x << ", y : " << y << ", z : " << z << endl;
+	for (int i = 0; i < MAX_USER; i++)
+	{
+		if (user_id == i) continue;
+		if (ST_ACTIVE == g_clients[i].m_status)
+		{
+			if (i == 0 || i == 2)
+			{
+				send_move(user_id, i, x, y, z);
+				//if (user_id == 0)
+				//	cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", z : " << z << endl;
+			}
+		}
+	}
+}
 void do_rotator(int user_id, float pitch, float yaw, float roll)
 {
 	CLIENT& g_c = g_clients[user_id];
@@ -264,8 +297,8 @@ void do_rotator(int user_id, float pitch, float yaw, float roll)
 			if (i == 0 || i == 2)
 			{
 				send_rotator(user_id, i, pitch, yaw, roll);
-				if (user_id == 2 || user_id == 0)
-					cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
+				//if (user_id == 2 || user_id == 0)
+				//	cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
 			}
 		}
 	}
@@ -316,7 +349,7 @@ void process_packet(int user_id, char* buf)
 	case C2S_MOVE:
 	{
 		cs_packet_move_player* packet = reinterpret_cast<cs_packet_move_player*>(buf);
-		//do_move(user_id, packet->direction);
+		do_move(user_id, packet->x, packet->y, packet->z);
 	}
 	break;
 

@@ -174,6 +174,9 @@ public:
 		void Send_Ready_Position();
 
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
+		void Send_KeyboardMove(float x, float y, float z);
+
+	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		void Send_Connect();
 
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")

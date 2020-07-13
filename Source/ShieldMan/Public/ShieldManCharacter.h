@@ -15,7 +15,7 @@ class AShieldManCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:   //private변수들
+public:   //private변수들
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm;
@@ -24,6 +24,7 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
 
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand, meta = (AllowPrivateAccess = "true"))
 	FVector Hand_Right;
 

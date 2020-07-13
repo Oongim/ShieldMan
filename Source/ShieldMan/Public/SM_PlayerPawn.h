@@ -15,8 +15,8 @@ class SHIELDMAN_API ASM_PlayerPawn : public APawn
 {
 	GENERATED_BODY()
 
-private:
 
+protected:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* SpringArm;
@@ -31,6 +31,12 @@ private:
 	float pit;
 	float rol;
 	float yaw;
+
+	float x_move;
+	float y_move;
+	float z_move;
+
+
 
 	bool connect_networkManager;
 public:
@@ -74,4 +80,11 @@ public:
 
 	void updateArm(int recvcid);
 	int m_cid = 0;
+
+	void updateBody(int recvcid);
+
+	void updateCamera();
+
+	UFUNCTION(BlueprintCallable)
+	void SetInitialLocationCamera(FVector sprloc);
 };

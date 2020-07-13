@@ -94,9 +94,7 @@ struct sc_packet_move
 	char size;
 	char type;
 	int id;
-	float x, y, z;								
-	float direction;
-	float speed;
+	float x, y, z;	
 };
 
 struct sc_packet_move_mouse			//우리 게임에서의 카메라, 팔 움직임
@@ -161,8 +159,6 @@ struct cs_packet_move_player		//in game
 	char type;
 	int id;
 	float x, y, z;								//내 현재 위치?
-	float direction;
-	float speed;
 };
 
 struct cs_packet_move_mouse		//in game	//우리 게임에서의 카메라, 팔 움직임
