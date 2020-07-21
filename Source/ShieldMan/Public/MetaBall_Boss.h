@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "MetaBall_Boss.generated.h"
 
-#define MAX_NUM_BLOB 27
+#define MAX_NUM_ROW 3
 
 UCLASS()
 class SHIELDMAN_API AMetaBall_Boss : public AActor
@@ -15,16 +15,21 @@ class SHIELDMAN_API AMetaBall_Boss : public AActor
 	GENERATED_BODY()
 private:
 	enum STATUS {
-		WAITING, MOVING, ATTACKING
+		WAITING, ROTATING, ATTACKING
+	};
+	enum ROTATE_TARGET {
+		ROTATE_X=0,
+		ROTATE_Y,
+		ROTATE_Z
 	};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Dynamic_Mesh;
 
 	class AShieldManCharacter* Player;
 
-	FVector Balls_Velocity[MAX_NUM_BLOB];
-	FVector Balls_Position[MAX_NUM_BLOB];
-	FName MaterialParamName[MAX_NUM_BLOB];
+	FVector Balls_Velocity[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
+	FVector Balls_Position[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
+	FName MaterialParamName[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
 
 	FTimerHandle RepeatTimerHandle;
 
@@ -41,12 +46,17 @@ private:
 
 	FTimerHandle AttackedTimerHandle;
 
+	float rotate_cnt;
+
+	float rotate_speed;
+
+	ROTATE_TARGET rand_target;
+	int rand_row;
+	bool rand_rigt;
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UI)
-		class UWidgetComponent* HPBarWidget;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf< class ASM_Ghost_AttackObject> SpawnBulletClass;
@@ -73,7 +83,7 @@ public:
 
 	void Update(float DeltaTime);
 
-	void SetRotation(float DeltaTime);
+	void RotateRow(ROTATE_TARGET Target_Row,int row,bool bRight_Rotate,float DeltaTime);
 
 	void OnRepeatTimer();
 
