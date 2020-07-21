@@ -54,6 +54,7 @@ public:
 struct PlayerInfo {
 public:
 	float m_x, m_y, m_z;
+	float m_camerax, m_cameray, m_cameraz;
 	float m_pitch, m_yaw, m_roll;
 	float m_speed, m_direction;
 	char m_index;
@@ -100,6 +101,7 @@ public:
 	// Sets default values for this component's properties
 	UNetworkManager();
 	void SetPlayerPosition(FVector&);
+	void SetPlayerCamera(FVector&);
 	void SetPlayerRotation(FRotator&);
 	void SetPlayerVelocity(float, float);
 	void GetIp(const char*);
@@ -143,9 +145,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		void Send_Rotator_Packet(float axisValue, FRotator Rotator);
-
-	UFUNCTION(BlueprintCallable, Category = "IocpServer")
-		void Send_MouseMove(FVector rotator);
 	
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		bool RecvPacket();
@@ -174,7 +173,7 @@ public:
 		void Send_Ready_Position();
 
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
-		void Send_KeyboardMove(float x, float y, float z);
+		void Send_InGame(float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz);
 
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		void Send_Connect();

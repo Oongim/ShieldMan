@@ -12,10 +12,9 @@ constexpr auto MAX_USER = 1000;
 #define C2S_MATCHING		1
 #define C2S_PICK				2
 #define C2S_READY			3
-#define C2S_MOVE			4
-#define C2S_ROTATOR		5
-#define C2S_ENTER			6
-#define C2S_CONNECT		7
+#define C2S_INGAME			4
+#define C2S_ENTER			5
+#define C2S_CONNECT		6
 
 #define S2C_MATCHING_OK		1
 #define S2C_MATCHING_FAIL		2
@@ -23,11 +22,10 @@ constexpr auto MAX_USER = 1000;
 #define S2C_PICK						3
 #define S2C_READY					4
 #define S2C_START					5
-#define S2C_MOVE					6
-#define S2C_ROTATOR				7
-#define S2C_ENTER					8
-#define S2C_ENTER_OK				9
-#define S2C_CONNECT				10
+#define S2C_INGAME					6
+#define S2C_ENTER					7
+#define S2C_ENTER_OK				8
+#define S2C_CONNECT				9
 enum PLAYER_POSITION_TYPE
 {
 	PPT_NONE = 0, PPT_ARMR, PPT_BODY, PPT_ARML
@@ -89,20 +87,14 @@ struct sc_packet_start		//room
 
 };
 
-struct sc_packet_move
+struct sc_packet_in_game		//우리 게임에서의 카메라, 팔 움직임
 {
 	char size;
 	char type;
 	int id;
-	float x, y, z;	
-};
-
-struct sc_packet_move_mouse			//우리 게임에서의 카메라, 팔 움직임
-{
-	char size;
-	char type;
-	int id;
+	float x, y, z;
 	float yaw, pitch, roll;
+	float cx, cy, cz;
 };
 
 struct sc_packet_enter	
@@ -153,22 +145,6 @@ struct cs_packet_ready_postion		//room
 	char name[MAX_ID_LEN];
 };
 
-struct cs_packet_move_player		//in game
-{
-	char size;
-	char type;
-	int id;
-	float x, y, z;								//내 현재 위치?
-};
-
-struct cs_packet_move_mouse		//in game	//우리 게임에서의 카메라, 팔 움직임
-{
-	char size;
-	char type;
-	int id;
-	float yaw, pitch, roll;
-};
-
 struct cs_packet_enter		//우리 게임에서의 카메라, 팔 움직임
 {
 	char size;
@@ -188,4 +164,16 @@ struct cs_packet_connect
 	char size;
 	char type;
 };
+
+struct cs_packet_in_game	//in game	//우리 게임에서의 카메라, 팔 움직임
+{
+	char size;
+	char type;
+	int id;
+	float x, y, z;
+	float yaw, pitch, roll;
+	float cx, cy, cz;
+};
+
+
 #pragma pack (pop)

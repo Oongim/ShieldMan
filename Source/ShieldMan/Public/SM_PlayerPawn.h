@@ -36,7 +36,9 @@ protected:
 	float y_move;
 	float z_move;
 
-
+	float x_camera;
+	float y_camera;
+	float z_camera;
 
 	bool connect_networkManager;
 public:
@@ -87,4 +89,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetInitialLocationCamera(FVector sprloc);
+
+	void updateRotateCamera(int recvcid);
 };

@@ -259,51 +259,69 @@ bool UNetworkManager::PacketProcess(const char* packet)
 			break;
 		}
 
-		case S2C_ROTATOR:
+		case S2C_INGAME:
 		{
-			const sc_packet_move_mouse* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move_mouse*>(packet);
-			m_recvcid = packet_S2C_ROTATOR->id;
-			//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
-			//{
-				m_playerInfo.m_roll = packet_S2C_ROTATOR->roll;
-				m_playerInfo.m_pitch = packet_S2C_ROTATOR->pitch;
-				m_playerInfo.m_yaw = packet_S2C_ROTATOR->yaw;
-				//m_playerInfo.m_changed = true;
-				//UE_LOG(LogTemp, Warning, TEXT("pitch : %f      yaw : %f"), m_playerInfo.m_pitch, m_playerInfo.m_yaw);
-			//}
-			//else
-			//{
-			//	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
-			//	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
-			//	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
-			//	m_OtherPlayer[0].m_changed = true;
-			//}
-			//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
+			const sc_packet_in_game* packet_S2C_INGAME = reinterpret_cast<const sc_packet_in_game*>(packet);
+			m_recvcid = packet_S2C_INGAME->id;
+
+			m_playerInfo.m_x = packet_S2C_INGAME->x;
+			m_playerInfo.m_y = packet_S2C_INGAME->y;
+			m_playerInfo.m_z = packet_S2C_INGAME->z;
+			m_playerInfo.m_roll = packet_S2C_INGAME->roll;
+			m_playerInfo.m_pitch = packet_S2C_INGAME->pitch;
+			m_playerInfo.m_yaw = packet_S2C_INGAME->yaw;
+			m_playerInfo.m_camerax = packet_S2C_INGAME->cx;
+			m_playerInfo.m_cameray = packet_S2C_INGAME->cy;
+			m_playerInfo.m_cameraz = packet_S2C_INGAME->cz;
+
 			break;
 		}
 
-		case S2C_MOVE:
-		{
-			const sc_packet_move* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move*>(packet);
-			m_recvcid = packet_S2C_ROTATOR->id;
-			//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
-			//{
-			m_playerInfo.m_x = packet_S2C_ROTATOR->x;
-			m_playerInfo.m_y = packet_S2C_ROTATOR->y;
-			m_playerInfo.m_z = packet_S2C_ROTATOR->z;
-			//m_playerInfo.m_changed = true;
-			UE_LOG(LogTemp, Warning, TEXT("x : %f      y : %f"), m_playerInfo.m_x, m_playerInfo.m_y);
-		//}
-		//else
+		//case S2C_MOVE:
 		//{
-		//	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
-		//	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
-		//	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
-		//	m_OtherPlayer[0].m_changed = true;
+		//	const sc_packet_move* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move*>(packet);
+		//	m_recvcid = packet_S2C_ROTATOR->id;
+		//	//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
+		//	//{
+		//	m_playerInfo.m_x = packet_S2C_ROTATOR->x;
+		//	m_playerInfo.m_y = packet_S2C_ROTATOR->y;
+		//	m_playerInfo.m_z = packet_S2C_ROTATOR->z;
+		//	//m_playerInfo.m_changed = true;
+		//	UE_LOG(LogTemp, Warning, TEXT("x : %f      y : %f"), m_playerInfo.m_x, m_playerInfo.m_y);
+		////}
+		////else
+		////{
+		////	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
+		////	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
+		////	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
+		////	m_OtherPlayer[0].m_changed = true;
+		////}
+		////UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
+		//	break;
 		//}
-		//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
-			break;
-		}
+
+		//case S2C_CAMERA:
+		//{
+		//	const sc_packet_move* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move*>(packet);
+		//	m_recvcid = packet_S2C_ROTATOR->id;
+		//	//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
+		//	//{
+		//	m_playerInfo.m_x = packet_S2C_ROTATOR->x;
+		//	m_playerInfo.m_y = packet_S2C_ROTATOR->y;
+		//	m_playerInfo.m_z = packet_S2C_ROTATOR->z;
+		//	//m_playerInfo.m_changed = true;
+		//	UE_LOG(LogTemp, Warning, TEXT("x : %f      y : %f"), m_playerInfo.m_x, m_playerInfo.m_y);
+		//	//}
+		//	//else
+		//	//{
+		//	//	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
+		//	//	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
+		//	//	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
+		//	//	m_OtherPlayer[0].m_changed = true;
+		//	//}
+		//	//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
+		//	break;
+		//}
 
 		default:
 			UE_LOG(LogTemp, Error, TEXT(" %d PacketProcess:: An undefined packet received"), (int)packet[1]);
@@ -358,30 +376,23 @@ void UNetworkManager::Send_Connect()
 
 }
 
-void UNetworkManager::Send_KeyboardMove(float x, float y, float z)
+void UNetworkManager::Send_InGame(float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
 {
-	cs_packet_move_player packet;
+	cs_packet_in_game packet;
 
-	packet.type = C2S_MOVE;
+	packet.type = C2S_INGAME;
 	packet.size = sizeof(packet);
 
 	packet.x = x;
 	packet.y = y;
 	packet.z = z;
-	packet.id = m_playerInfo.m_cid;
-	Send_Packet(&packet);
-}
+	packet.pitch = pitch;
+	packet.yaw = yaw;
+	packet.roll = roll;
+	packet.cx = cx;
+	packet.cy = cy;
+	packet.cz = cz;
 
-void UNetworkManager::Send_MouseMove(FVector rotator)
-{
-	cs_packet_move_mouse packet;
-
-	packet.type = C2S_ROTATOR;
-	packet.size = sizeof(packet);
-
-	packet.pitch = rotator.X;
-	packet.yaw = rotator.Y;
-	packet.roll = rotator.Z;
 	packet.id = m_playerInfo.m_cid;
 	Send_Packet(&packet);
 }
@@ -503,6 +514,12 @@ void UNetworkManager::SetPlayerPosition(FVector& lhs) {
 	m_playerInfo.m_x = lhs.X;
 	m_playerInfo.m_y = lhs.Y;
 	m_playerInfo.m_z = lhs.Z;
+}
+
+void UNetworkManager::SetPlayerCamera(FVector& lhs) {
+	m_playerInfo.m_camerax = lhs.X;
+	m_playerInfo.m_cameray = lhs.Y;
+	m_playerInfo.m_cameraz = lhs.Z;
 }
 
 void UNetworkManager::SetPlayerRotation(FRotator& lhs) {

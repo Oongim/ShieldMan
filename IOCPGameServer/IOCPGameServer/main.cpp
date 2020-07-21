@@ -237,57 +237,33 @@ void send_connect(int user_id)
 	send_packet(user_id, &p);
 }
 
-void send_rotator(int user_id, int o_id, float pitch, float yaw, float roll)
+void send_ingame(int user_id, int o_id, float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
 {
-	sc_packet_move_mouse p;
+	sc_packet_in_game p;
 	p.id = o_id;
 	p.size = sizeof(p);
-	p.type = S2C_ROTATOR;
-	p.yaw = yaw;
-	p.pitch = pitch;
-	p.roll = roll;
-	send_packet(user_id, &p);
-}
-
-void send_move(int user_id, int o_id, float x, float y, float z)
-{
-	sc_packet_move p;
-	p.id = o_id;
-	p.size = sizeof(p);
-	p.type = S2C_MOVE;
+	p.type = S2C_INGAME;
 	p.x = x;
 	p.y = y;
 	p.z = z;
+	p.yaw = yaw;
+	p.pitch = pitch;
+	p.roll = roll;
+	p.cx = cx;
+	p.cy = cy;
+	p.cz = cz;
 	send_packet(user_id, &p);
 }
 
-void do_move(int user_id, float x, float y, float z)
+void do_rotator_and_move(int user_id, float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
 {
 	CLIENT& g_c = g_clients[user_id];
 
 
-	send_move(user_id, user_id, x, y, z);
-	//cout << "x : " << x << ", y : " << y << ", z : " << z << endl;
-	for (int i = 0; i < MAX_USER; i++)
-	{
-		if (user_id == i) continue;
-		if (ST_ACTIVE == g_clients[i].m_status)
-		{
-			if (i == 0 || i == 2)
-			{
-				send_move(user_id, i, x, y, z);
-				//if (user_id == 0)
-				//	cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", z : " << z << endl;
-			}
-		}
-	}
-}
-void do_rotator(int user_id, float pitch, float yaw, float roll)
-{
-	CLIENT& g_c = g_clients[user_id];
-
-
-	send_rotator(user_id, user_id, pitch , yaw, roll);
+	send_ingame(user_id, user_id, x, y, z, pitch , yaw, roll, cx, cy, cz);
+	/*cout << user_id << "번 클라이언트 " <<" x : " << x << ", y : " << y << ", roll : " << z << endl;
+	cout << user_id << "번 클라이언트 " <<" yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
+	cout << user_id << "번 클라이언트 " <<" cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;*/
 	//cout << "yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
 	for (int i = 0; i < MAX_USER; i++)
 	{
@@ -296,9 +272,13 @@ void do_rotator(int user_id, float pitch, float yaw, float roll)
 		{
 			if (i == 0 || i == 2)
 			{
-				send_rotator(user_id, i, pitch, yaw, roll);
-				//if (user_id == 2 || user_id == 0)
-				//	cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
+				send_ingame(user_id, i, x, y, z, pitch, yaw, roll, cx, cy, cz);
+				if (user_id == 0 && i == 2)
+				{
+					//cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
+					//cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
+					//cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;
+				}
 			}
 		}
 	}
@@ -346,20 +326,16 @@ void process_packet(int user_id, char* buf)
 	}
 	break;
 
-	case C2S_MOVE:
+	case C2S_INGAME:
 	{
-		cs_packet_move_player* packet = reinterpret_cast<cs_packet_move_player*>(buf);
-		do_move(user_id, packet->x, packet->y, packet->z);
-	}
-	break;
+		cs_packet_in_game* packet = reinterpret_cast<cs_packet_in_game*>(buf);
+		do_rotator_and_move(packet->id, packet->x, packet->y, packet->z,
+									packet->pitch, packet->yaw, packet->roll,
+									packet->cx, packet->cy, packet->cz);
 
-	case C2S_ROTATOR:
-	{
-		cs_packet_move_mouse* packet = reinterpret_cast<cs_packet_move_mouse*>(buf);
-		do_rotator(user_id, packet->pitch, packet->yaw, packet->roll);
-		//do_move(user_id, packet->direction);
+		
 	}
-	break;
+		break;
 
 	default:
 		cout << "Unknown Packet Type Error!\n";

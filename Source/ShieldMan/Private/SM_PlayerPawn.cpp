@@ -23,6 +23,11 @@ ASM_PlayerPawn::ASM_PlayerPawn()
 	x_move = 0;
 	y_move = 0;
 	z_move = 0;
+
+	x_camera = 0;
+	y_camera = 0;
+	z_camera = 0;
+
 	control_character = NULL;
 }
 
@@ -53,24 +58,31 @@ void ASM_PlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (control_type == PPT_BODY)
-	{
-		networkManager->Send_KeyboardMove(x_move, y_move, z_move);
-	}
-	else
-		networkManager->Send_MouseMove({ pit, yaw, rol});
+
+	networkManager->Send_InGame(x_move, y_move, z_move, pit, yaw, rol, x_camera, y_camera, z_camera);
 
 	if (networkManager->RecvPacket())
 	{
 		updateArm(networkManager->m_recvcid);
 		updateBody(networkManager->m_recvcid);
+		updateRotateCamera(networkManager->m_recvcid);
+		updateCamera();
 		pit = 0.f;
 		yaw = 0.f;
 		rol = 0.f;
 		x_move = 0.f;
 		y_move = 0.f;
 		z_move = 0.f;
+		x_camera = 0;
+		y_camera = 0;
+		z_camera = 0;
 	}
+}
+
+void ASM_PlayerPawn::updateRotateCamera(int recvcid)
+{
+	Super::AddControllerYawInput(networkManager->m_playerInfo.m_cameray);
+	Super::AddControllerPitchInput(networkManager->m_playerInfo.m_camerax);
 }
 
 void ASM_PlayerPawn::updateBody(int recvcid)
@@ -93,6 +105,7 @@ void ASM_PlayerPawn::updateBody(int recvcid)
 		control_character->AddMovementInput(DirectionY, networkManager->m_playerInfo.m_y);
 		//UE_LOG(LogTemp, Warning, TEXT("AddMovementInput x = %f"), networkManager->m_playerInfo.m_x);
 		//SpringArm->AddWorldOffset({ networkManager->m_playerInfo.m_x, networkManager->m_playerInfo.m_y, networkManager->m_playerInfo.m_z });
+
 		break;
 
 
@@ -101,7 +114,6 @@ void ASM_PlayerPawn::updateBody(int recvcid)
 	default:
 		break;
 	}
-	updateCamera();
 }
 void ASM_PlayerPawn::updateCamera()
 {
@@ -111,7 +123,6 @@ void ASM_PlayerPawn::updateCamera()
 void ASM_PlayerPawn::SetInitialLocationCamera(FVector sprloc)
 {
 	RootComponent->SetWorldLocation(sprloc);
-
 	
 	//SpringArm = control_character->SpringArm;
 }
@@ -126,8 +137,8 @@ void ASM_PlayerPawn::updateArm(int recvcid)
 
 		//if (m_cid == recvcid)
 		//{
-		if (m_cid == 2 || m_cid == 0)
-			UE_LOG(LogTemp, Warning, TEXT("self [%d] -> [%d] pitch : %f      yaw : %f"), recvcid, m_cid, networkManager->m_playerInfo.m_pitch, networkManager->m_playerInfo.m_yaw);
+		//if (m_cid == 2 || m_cid == 0)
+			//UE_LOG(LogTemp, Warning, TEXT("self [%d] -> [%d] pitch : %f      yaw : %f"), recvcid, m_cid, networkManager->m_playerInfo.m_pitch, networkManager->m_playerInfo.m_yaw);
 
 
 			control_character->AnimInstance->AddHand_RightPos({ networkManager->m_playerInfo.m_pitch
@@ -195,6 +206,8 @@ void ASM_PlayerPawn::AddControllerYawInput(float Val)
 	{
 		//y_move += Val;
 		//control_character->AddControllerYawInput(Val);
+		y_camera += Val;
+		//Super::AddControllerYawInput(Val);
 		//UE_LOG(LogTemp, Warning, TEXT(" AddControllerYawInput val : %f"), Val);
 		break;
 	}
@@ -216,6 +229,7 @@ void ASM_PlayerPawn::AddControllerYawInput(float Val)
 
 void ASM_PlayerPawn::AddControllerPitchInput(float Val)
 {
+	
 	switch (control_type)
 	{
 	case PPT_ARMR:
@@ -229,6 +243,8 @@ void ASM_PlayerPawn::AddControllerPitchInput(float Val)
 
 		//x_move = +Val;
 		//control_character->AddControllerPitchInput(Val);
+		x_camera += Val;
+		//Super::AddControllerPitchInput(Val);
 		//UE_LOG(LogTemp, Warning, TEXT(" AddControllerPitchInput val : %f"), Val);
 		break;
 	}
@@ -262,7 +278,9 @@ void ASM_PlayerPawn::AddControllerRolInput(float Val)
 
 	case PPT_BODY:
 	{
-		z_move = 0;
+		//control_character->AddControllerRolInput(Val);
+		//Super::AddControllerRolInput(Val);
+		
 		break;
 	}
 
@@ -289,7 +307,7 @@ void ASM_PlayerPawn::MoveForward(float Value)
 	{
 	case PPT_ARMR:
 	{
-		control_character->AnimInstance->AddHand_RightRot({ -Value, 0.f, 0.f });
+		//control_character->AnimInstance->AddHand_RightRot({ -Value, 0.f, 0.f });
 		break;
 	}
 
@@ -304,7 +322,7 @@ void ASM_PlayerPawn::MoveForward(float Value)
 
 	case PPT_ARML:
 	{
-		control_character->AnimInstance->AddHand_LeftRot({ Value, 0.f, 0.f });
+		//control_character->AnimInstance->AddHand_LeftRot({ Value, 0.f, 0.f });
 		break;
 	}
 
@@ -323,7 +341,7 @@ void ASM_PlayerPawn::MoveRight(float Value)
 	{
 	case PPT_ARMR:
 	{
-		control_character->AnimInstance->AddHand_RightRot({ 0.f, -Value , 0.f });
+		//control_character->AnimInstance->AddHand_RightRot({ 0.f, -Value , 0.f });
 		break;
 	}
 
@@ -335,7 +353,7 @@ void ASM_PlayerPawn::MoveRight(float Value)
 
 	case PPT_ARML:
 	{
-		control_character->AnimInstance->AddHand_LeftRot({ 0.f, Value, 0.f });
+		//control_character->AnimInstance->AddHand_LeftRot({ 0.f, Value, 0.f });
 		break;
 	}
 
@@ -413,46 +431,4 @@ void ASM_PlayerPawn::Init_Camera()
 		FVector(0.0f, 0.0f, 80.0f),
 		FRotator(-5.f, 0.f, 0.f)
 	);
-	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-	//SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	//SpringArm->SetupAttachment(RootComponent);
-	//SpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-60.0f, 0.0f, 0.0f));
-	//SpringArm->TargetArmLength = 400.f;
-	//SpringArm->bEnableCameraLag = true;
-	//SpringArm->CameraLagSpeed = 3.0f;
-
-	// Create a camera boom (pulls in towards the player if there is a collision)
-	//SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
-	////SpringArm->SetupAttachment(control_character->GetMesh());
-	////SpringArm->SetupAttachment(Cast<USceneComponent>control_character));
-	//SpringArm->TargetArmLength = 150.0f; // The camera follows at this distance behind the character	
-	//SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
-	//SpringArm->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-	//SpringArm->bInheritPitch = true;
-	//SpringArm->bInheritRoll = true;
-	//SpringArm->bInheritYaw = true;
-	//SpringArm->bDoCollisionTest = false;
-
-	////SpringArm->SetWorldLocation(control_character->GetActorLocation());
-	//SpringArm->SetRelativeLocationAndRotation(
-	//	FVector(0.0f, 0.0f, 80.0f),
-	//	FRotator(-5.f, 0.f, 0.f)
-	//);
-
-	//// Don't rotate when the controller rotates. Let that just affect the camera.
-	//bUseControllerRotationPitch = false;
-	//bUseControllerRotationYaw = true;
-	//bUseControllerRotationRoll = false;
-
-	//// Create a follow camera
-	//Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
-	//Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	////Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
-	////Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	//Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-	////Camera->SetWorldLocation(control_character->GetActorLocation());
-	//Camera->SetRelativeLocationAndRotation(  //카메라 초기 위치와 각도 조정
-	//	FVector(0.0f, 0.0f, 80.0f),
-	//	FRotator(-5.f, 0.f, 0.f)
-	//);
 }
