@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ShieldMan.h"
+
 #include "GameFramework/Actor.h"
 #include "MetaBall_Boss.generated.h"
 
@@ -54,12 +55,24 @@ private:
 	int rand_row;
 	bool rand_rigt;
 
+	//////////////공격 관련//////////////////////////////
+	//공격관련 배열
+	vector<FName> v_Octahedron;
+
+	//소환할 발판
+	
+		
+	class ASM_BossAttackFloor* Floors[9];
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-		TSubclassOf< class ASM_Ghost_AttackObject> SpawnBulletClass;
+		TSubclassOf< class ASM_BossAttackFloor> AttackFloorClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+		TSubclassOf< class ASM_BossAttackFloor> FloorClass;
 
 	UPROPERTY(EditAnywhere, Category = "Shoot")
 		float ShootPower;
@@ -69,6 +82,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
 		float CurrentHP;
+
+
 public:
 	// Sets default values for this actor's properties
 	AMetaBall_Boss();
@@ -89,4 +104,5 @@ public:
 
 	void Attack();
 
+	void spawn_floor();
 };
