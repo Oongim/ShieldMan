@@ -460,7 +460,8 @@ void UNetworkManager::Send_Packet(const void* data) {
 
 }
 
-void UNetworkManager::Send_PlayerMove_packet() {
+void UNetworkManager::Send_PlayerMove_packet()
+{
 	//Cs_packet_move_player packet;
 
 	//packet.type = CS_MOVE_PLAYER;
@@ -509,6 +510,14 @@ void UNetworkManager::Send_Rotator_Packet(float axisValue, FRotator rotator)
 //	}
 //	EventPlayerEvent.Broadcast(player, ue_type);
 //}
+
+void UNetworkManager::SetPlayerID(FString id)
+{
+	char *t = TCHAR_TO_ANSI(*id);
+	strcpy_s(m_playerInfo.m_id,t);
+}
+
+
 
 void UNetworkManager::SetPlayerPosition(FVector& lhs) {
 	m_playerInfo.m_x = lhs.X;

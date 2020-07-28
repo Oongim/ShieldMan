@@ -91,4 +91,6 @@ public:
 	void SetInitialLocationCamera(FVector sprloc);
 
 	void updateRotateCamera(int recvcid);
+
+
 };

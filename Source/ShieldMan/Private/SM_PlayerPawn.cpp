@@ -81,6 +81,10 @@ void ASM_PlayerPawn::Tick(float DeltaTime)
 
 void ASM_PlayerPawn::updateRotateCamera(int recvcid)
 {
+	if(recvcid == 0 || recvcid == 2)
+	UE_LOG(LogTemp, Warning, TEXT("updateRotateCamera [%d] -> [%d] pitch : %f      yaw : %f"),
+		recvcid, m_cid, networkManager->m_playerInfo.m_camerax, networkManager->m_playerInfo.m_cameray);
+
 	Super::AddControllerYawInput(networkManager->m_playerInfo.m_cameray);
 	Super::AddControllerPitchInput(networkManager->m_playerInfo.m_camerax);
 }
@@ -137,8 +141,8 @@ void ASM_PlayerPawn::updateArm(int recvcid)
 
 		//if (m_cid == recvcid)
 		//{
-		//if (m_cid == 2 || m_cid == 0)
-			//UE_LOG(LogTemp, Warning, TEXT("self [%d] -> [%d] pitch : %f      yaw : %f"), recvcid, m_cid, networkManager->m_playerInfo.m_pitch, networkManager->m_playerInfo.m_yaw);
+		//if (m_cid == 2)
+			UE_LOG(LogTemp, Warning, TEXT("self [%d] -> [%d] pitch : %f      yaw : %f"), recvcid, m_cid, networkManager->m_playerInfo.m_pitch, networkManager->m_playerInfo.m_yaw);
 
 
 			control_character->AnimInstance->AddHand_RightPos({ networkManager->m_playerInfo.m_pitch

@@ -183,4 +183,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "IocpServer")
 		void SetType(int pick);
+
+	UFUNCTION(BlueprintCallable)
+		void SetPlayerID(FString id);
 };

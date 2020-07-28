@@ -145,7 +145,7 @@ struct cs_packet_ready_postion		//room
 	char name[MAX_ID_LEN];
 };
 
-struct cs_packet_enter		//우리 게임에서의 카메라, 팔 움직임
+struct cs_packet_enter
 {
 	char size;
 	char type;

@@ -267,17 +267,17 @@ void do_rotator_and_move(int user_id, float x, float y, float z, float pitch, fl
 	//cout << "yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
 	for (int i = 0; i < MAX_USER; i++)
 	{
-		if (user_id == i) continue;
+		//if (user_id == i) continue;
 		if (ST_ACTIVE == g_clients[i].m_status)
 		{
 			if (i == 0 || i == 2)
 			{
 				send_ingame(user_id, i, x, y, z, pitch, yaw, roll, cx, cy, cz);
-				if (user_id == 0 && i == 2)
+				if (user_id == 0 || user_id == 2)
 				{
 					//cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
 					//cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
-					//cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;
+					cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;
 				}
 			}
 		}
@@ -297,6 +297,7 @@ void process_packet(int user_id, char* buf)
 	case C2S_ENTER:
 	{
 		cs_packet_enter* packet = reinterpret_cast<cs_packet_enter*>(buf);
+		//cout << user_id << "g_clients[user_id].m_id : " << packet->name << endl;
 		cout << g_clients[user_id].m_id << "번 클라이언트의 msg : C2S_ENTER" << endl;
 		enter_game(user_id, packet->name);
 	}
