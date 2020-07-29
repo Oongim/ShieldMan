@@ -41,6 +41,7 @@ AMetaBall_Boss::AMetaBall_Boss()
 	v_Octahedron.emplace_back("Ball15");
 	v_Octahedron.emplace_back("Ball19");
 	v_Octahedron.emplace_back("Ball21");
+	v_Octahedron.emplace_back("Ball25");
 	v_Octahedron.emplace_back("Ball27");
 
 }
@@ -80,7 +81,8 @@ void AMetaBall_Boss::BeginPlay()
 	}
 
 	rotate_cnt = 0;
-	rotate_speed = 3;
+	rotate_speed = 180.f;
+	num_rotate = 0;
 
 	rand_target = (ROTATE_TARGET)(rand() % 3);
 	rand_row = rand() % 3;
@@ -127,38 +129,32 @@ void AMetaBall_Boss::Update(float DeltaTime)
 void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Rotate, float DeltaTime)
 {
 	if (rotate_cnt >= 90.f) return;
-	if (bRight_Rotate) {
-		rotate_speed = abs(rotate_speed);
-	}
-	else
-	{
-		rotate_speed = abs(rotate_speed)*-1;
-	}
 
+	float turn_rate = rotate_speed* DeltaTime;
 
 	if (Target_Row == ROTATE_X) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
-				Balls_Position[row][j][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[row][j][k], FRotator{0.f,0.f, rotate_speed });
+				Balls_Position[row][j][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[row][j][k], FRotator{0.f,0.f, -turn_rate });
 			}
 		}
 	}
 	if (Target_Row == ROTATE_Y) {
 		for (int i = 0; i < MAX_NUM_ROW; ++i) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
-				Balls_Position[i][row][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][row][k], FRotator{ rotate_speed,0.f,0.f });
+				Balls_Position[i][row][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][row][k], FRotator{ -turn_rate,0.f,0.f });
 			}
 		}
 	}
 	if (Target_Row == ROTATE_Z) {
 		for (int i = 0; i < MAX_NUM_ROW; ++i) {
 			for (int j = 0; j < MAX_NUM_ROW; ++j) {
-				Balls_Position[i][j][row] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][j][row], FRotator{0.f,rotate_speed,0.f });
+				Balls_Position[i][j][row] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][j][row], FRotator{0.f,-turn_rate,0.f });
 			}
 		}
 	}
 
-	rotate_cnt += (abs(rotate_speed));
+	rotate_cnt += turn_rate;
 
 	if (rotate_cnt >= 90.f) {
 		FVector temp[MAX_NUM_ROW][MAX_NUM_ROW];
@@ -212,18 +208,21 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 			}
 		}
 
-		rotate_cnt = 0.f;
+	
 		rand_target = (ROTATE_TARGET)(rand() % 3);
 		rand_row = rand() % 3;
 		rand_rigt = false;// static_cast<bool>(rand() % 2);
 
-		/*for (int i = 0; i < MAX_NUM_ROW; ++i) {
-			for (int j = 0; j < MAX_NUM_ROW; ++j) {
-				Balls_Position[1][i][j] = FVector(0, 0, 0);
-				Balls_Position[2][i][j] = FVector(0, 0, 0);
-			}
-		}*/
-		spawn_floor();
+		
+		num_rotate++;
+		if (num_rotate == 3)
+		{
+			GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::spawn_Effect, 1.0f);
+		}
+		else
+		{
+			rotate_cnt = 0.f;
+		}
 	}
 	/*FRotator ToPlayerInterpRot =
 		FMath::RInterpTo(prev_Rot, GetActorRotation(), DeltaTime, 3.f);
@@ -247,27 +246,37 @@ void AMetaBall_Boss::Attack()
 	//}
 }
 
-void AMetaBall_Boss::spawn_floor()
+void AMetaBall_Boss::spawn_Effect()
 {
-	for (int i = 0; i < MAX_NUM_ROW * MAX_NUM_ROW; ++i) {
-		if (Floors[i] != nullptr) {
-			Floors[i]->Destroy();
-			Floors[i] = nullptr;
-		}
-	}
+
 	FVector Pos = GetActorLocation();
-	Pos.Y += 500.f;
+	float gab = 200.f;
+	float between_dis = 750.f;
+
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
-			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[0][i][j]) == v_Octahedron.end()) {
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *MaterialParamName[0][i][j].ToString());
-				Floors[i * 3 + j] = GetWorld()->SpawnActor<ASM_BossAttackFloor>(FloorClass, FVector(Pos.X + i * 200, Pos.Y + j * 200, 650), FRotator::ZeroRotator);
+			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][0][j]) != v_Octahedron.end()) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X+ gab - i * gab, Pos.Y+ between_dis + j * gab, 650), FRotator::ZeroRotator, true);
+			}
+			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[0][i][j]) != v_Octahedron.end()) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X + between_dis + j * gab, Pos.Y+ gab - i * gab, 650), FRotator::ZeroRotator, true);
+			}
+			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][2][j]) != v_Octahedron.end()) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X + gab - i * gab, Pos.Y - between_dis - j * gab, 650), FRotator::ZeroRotator, true);
+			}
+			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[2][i][j]) != v_Octahedron.end()) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - between_dis - j * gab, Pos.Y + gab - i * gab, 650), FRotator::ZeroRotator, true);
 			}
 		}
 	}
-	
-	
+	num_rotate = 0;
+	GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::RotateReset, 2.0f);
+}
 
+void AMetaBall_Boss::RotateReset()
+{
+
+	rotate_cnt = 0.f;
 }
 
 

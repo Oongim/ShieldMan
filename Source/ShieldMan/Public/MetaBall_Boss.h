@@ -55,24 +55,21 @@ private:
 	int rand_row;
 	bool rand_rigt;
 
+	int num_rotate;
+
 	//////////////공격 관련//////////////////////////////
 	//공격관련 배열
 	vector<FName> v_Octahedron;
 
-	//소환할 발판
 	
-		
-	class ASM_BossAttackFloor* Floors[9];
+	FTimerHandle RotateTimerHandle;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-		TSubclassOf< class ASM_BossAttackFloor> AttackFloorClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-		TSubclassOf< class ASM_BossAttackFloor> FloorClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+		UParticleSystem* Effect;
 
 	UPROPERTY(EditAnywhere, Category = "Shoot")
 		float ShootPower;
@@ -104,5 +101,7 @@ public:
 
 	void Attack();
 
-	void spawn_floor();
+	void spawn_Effect();
+
+	void RotateReset();
 };
