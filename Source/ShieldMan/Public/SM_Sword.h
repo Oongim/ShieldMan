@@ -26,7 +26,15 @@ private:
 	
 	float Rotatetime;
 
+	bool isHit;
+
 public:
+
+	UPROPERTY(EditAnywhere, Category = "Value")
+		FVector Startto;
+
+	UPROPERTY(EditAnywhere, Category = "Value")
+		FVector Endto;
 
 	UPROPERTY(EditAnywhere, Category = "Value")
 		float Speed;
@@ -64,6 +72,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Value")
 		int AttackCount;
 
+	UPROPERTY(EditAnywhere, Category = "Value")
+		int MaxGuardCount;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Value")
+		int GuardCount;
+
 public:
 	// Sets default values for this character's properties
 	ASM_Sword();
@@ -92,5 +106,8 @@ public:
 		void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void StartNiagaraEffect();
 
 };

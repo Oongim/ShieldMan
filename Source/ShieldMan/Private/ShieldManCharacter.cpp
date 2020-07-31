@@ -61,6 +61,14 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Shield_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_lCollision")));
 	Left_Shield_Collision->SetBoxExtent(FVector(5, 2, 15));
 
+	Right_Shield_Gaurd_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("RIGHT_SHIELD_GUARD_COLLISION"));
+	Right_Shield_Gaurd_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_rCollision")));
+	Right_Shield_Gaurd_Collision->SetBoxExtent(FVector(20, 2, 20));
+
+	Left_Shield_Gaurd_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("LEFT_SHIELD_GUARD_COLLISION"));
+	Left_Shield_Gaurd_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_lCollision")));
+	Left_Shield_Gaurd_Collision->SetBoxExtent(FVector(20, 2, 20));
+
 	Right_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("RIGHT_SHIELD"));
 	Left_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("LEFT_SHIELD"));
 
@@ -248,7 +256,7 @@ void AShieldManCharacter::SwitchLevel(FName LevelName)
 	if (World)
 	{
 		FName CurrentLevelName(*World->GetMapName());
-
+		
 		if (CurrentLevelName != LevelName)
 		{
 			UGameplayStatics::OpenLevel(World, LevelName);

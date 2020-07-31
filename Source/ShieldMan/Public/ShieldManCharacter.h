@@ -49,6 +49,12 @@ private:   //privateº¯¼öµé
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
 		UBoxComponent* Left_Shield_Collision;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Right_Shield_Gaurd_Collision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Left_Shield_Gaurd_Collision;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
 		class ASM_Shield* Left_Shield;
 
