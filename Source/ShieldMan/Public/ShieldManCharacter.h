@@ -157,6 +157,16 @@ public:		//public ÇÔ¼ö
 		void ToggleAttackPossible();
 
 	UFUNCTION()
-		void DecreaseHP();
+		void DecreaseHP(float val);
+
+	UFUNCTION()
+		void ChangeDeath();
+
+	UFUNCTION()
+		void ChangeMagmaDeath();
+
+	UFUNCTION()
+		bool isDeath();
+
 };
 

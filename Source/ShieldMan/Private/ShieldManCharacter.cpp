@@ -329,18 +329,40 @@ void AShieldManCharacter::ToggleAttackPossible()
 	bAttackPossible = true;
 }
 
-void AShieldManCharacter::DecreaseHP()
+void AShieldManCharacter::DecreaseHP(float val)
 {
-	CurrentHP -= 20.f;
-	
-	if (CurrentHP <= 0) {
-		GetMesh()->PlayAnimation(Anim,false);
-		ULog::Number(Anim->GetMaxCurrentTime(),"Time: ","", LO_Viewport);
-		Set_DeathCamera();
-		bDeath = true;
-		GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
-		
+	CurrentHP -= val;
+	if (CurrentHP <= 0)
+	{
+		ChangeDeath();
 	}
+}
+
+void AShieldManCharacter::ChangeDeath()
+{
+	GetMesh()->PlayAnimation(Anim, false);
+	ULog::Number(Anim->GetMaxCurrentTime(), "Time: ", "", LO_Viewport);
+	Set_DeathCamera();
+	bDeath = true;
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
+}
+
+void AShieldManCharacter::ChangeMagmaDeath()
+{
+	
+	GetController()->SetControlRotation(FRotator{ FVector(GetActorForwardVector().X, GetActorForwardVector().Y,0).Rotation() });
+	Camera->SetRelativeLocationAndRotation(
+		FVector(0.0f, 0.0f, 500.0f),
+		FRotator(-60.f, 0.f, 0.f)
+	);
+	bDeath = true;
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
+}
+
+
+bool AShieldManCharacter::isDeath()
+{
+	return bDeath;
 }
 
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

@@ -113,11 +113,6 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 		SwordAnimInstance->SetHiding(false);
 		Waitingtime = 0.f;
 		SwordAnimInstance->SetAttackType(rand() % 3);
-	}
-	else if (!isWaiting)
-	{
-		isWaiting = true;
-		SwordAnimInstance->SetHiding(true);
 		if (GuardCount >= MaxGuardCount)
 		{
 			EventTrigger = false;
@@ -126,7 +121,13 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 			//FVector loc{ -4000.f, -4360.f, 150.f };
 			Player->TeleportTo(Endto, FRotator(0.f, 0.f, 0.f));
 			PrimaryActorTick.SetTickFunctionEnable(false);
+			Destroy();
 		}
+	}
+	else if (!isWaiting)
+	{
+		isWaiting = true;
+		SwordAnimInstance->SetHiding(true);
 	}
 	else
 	{
@@ -145,8 +146,8 @@ void ASM_Sword::Animate(float DeltaTime)
 	if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("IDLE"))
 	{
 
-		GetMesh()->SetVisibility(true);
-		//GetMesh()->SetVisibility(false);
+		//GetMesh()->SetVisibility(true);
+		GetMesh()->SetVisibility(false);
 		SwordAnimInstance->SetGuard(false);
 		isHit = false;
 
@@ -172,7 +173,7 @@ void ASM_Sword::Animate(float DeltaTime)
 	
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("TOPGUARD"))
 	{
-		++GuardCount;
+		
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("MIDSLASH"))
 	{
@@ -180,7 +181,7 @@ void ASM_Sword::Animate(float DeltaTime)
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("MIDGUARD"))
 	{
-		++GuardCount;
+		
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("BOTSLASH"))
 	{
@@ -188,7 +189,7 @@ void ASM_Sword::Animate(float DeltaTime)
 	}
 	else if (SwordAnimInstance->GetCurrentStateName(0).ToString() == FString("BOTGUARD"))
 	{
-		++GuardCount;
+		
 	}
 }
 
@@ -211,16 +212,56 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 	{
 		FString OtherCompName = OtherComp->GetName();
 		UE_LOG(LogTemp, Log, TEXT("OverlappedComp : %s"), *OtherComp->GetName());			//COLLISIONSylinder
-		/*if (FString("RIGHT_SHIELD_GUARD_COLLISION") == OtherCompName || FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName
-			|| (FString("RIGHT_SHIELD_COLLISION") == OtherCompName || FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName))*/
+		if (FString("RIGHT_SHIELD_GUARD_COLLISION") == OtherCompName || FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
 		{
+			++GuardCount;
 			SwordAnimInstance->SetGuard(true);
+
+			float ArmReflectPower = -1000.f;
+			FVector dir = Player->GetActorLocation() - GetActorLocation();
+			dir.Normalize();
+			if (FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
+			{
+				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * ArmReflectPower * 100, TEXT("Bip001-L-Forearm"));
+
+				//auto t = dir * ArmReflectPower * 1000;
+				//UE_LOG(LogTemp, Log, TEXT("LEFT t : %s"), *t.ToString());
+			}
+			else
+			{
+				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * ArmReflectPower * 100, TEXT("Bip001-R-Forearm"));
+				auto t = dir * ArmReflectPower * 1000;
+				UE_LOG(LogTemp, Log, TEXT("Right t : %s"), *t.ToString());
+			}
+
 			StartNiagaraEffect();
 		}
-		//else if (FString("CollisionCylinder") == OtherCompName)
-		//{
-		//	Player->DecreaseHP();
-		//}
+		else if (FString("CollisionCylinder") == OtherCompName)
+		{
+			Player->DecreaseHP(20.f);
+
+			FVector dir = Player->GetActorLocation() - GetActorLocation();
+			dir.Normalize();
+			float BodyReflectPower = -1000.f;
+			if (FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
+			{
+				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * BodyReflectPower * 100, TEXT("Bip001-L-UpperArm"));
+
+				//auto t = dir * ArmReflectPower * 1000;
+				//UE_LOG(LogTemp, Log, TEXT("LEFT t : %s"), *t.ToString());
+			}
+			else
+			{
+				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * BodyReflectPower * 100, TEXT("Bip001-R-UpperArm"));
+			}
+			StartNiagaraEffect();
+
+			if (true == Player->isDeath())
+			{
+				PrimaryActorTick.SetTickFunctionEnable(false);
+				Destroy();
+			}
+		}
 		isHit = true;
 	}
 	else
@@ -248,11 +289,14 @@ void ASM_Sword::PostInitializeComponents()
 
 void ASM_Sword::Begin_StageOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Log, TEXT("Begin_StageOverlapBegin"));
+	if (EventTrigger == false)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Begin_StageOverlapBegin"));
 
-	OtherActor->TeleportTo(Startto, FRotator(0.f,0.f,0.f));
-	EventTrigger = true;
-	PrimaryActorTick.SetTickFunctionEnable(true);
+		OtherActor->TeleportTo(Startto, FRotator(0.f, 0.f, 0.f));
+		EventTrigger = true;
+		PrimaryActorTick.SetTickFunctionEnable(true);
+	}
 }
 
 void ASM_Sword::Begin_StageOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

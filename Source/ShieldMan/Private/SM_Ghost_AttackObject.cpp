@@ -105,10 +105,12 @@ void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 		MoveEffect->SetVisibility(false);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndEffect, GetActorLocation(), GetActorRotation(), true);
 		auto character = Cast<AShieldManCharacter>(OtherActor);
-
-		character->AddForceToCharacter(GetActorRotation().Vector() * -1, 20.f);
-		character->DecreaseHP();
-		bCollisioned = true;
+		if (false == character->isDeath())
+		{
+			character->AddForceToCharacter(GetActorRotation().Vector() * -1, 20.f);
+			character->DecreaseHP(20.f);
+			bCollisioned = true;
+		}
 	}
 
 	if (bCollisioned) {
