@@ -49,6 +49,12 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
 		UBoxComponent* Left_Shield_Collision;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Right_Shield_Gaurd_Collision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Left_Shield_Gaurd_Collision;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
 		class ASM_Shield* Left_Shield;
 
@@ -151,6 +157,16 @@ public:		//public 함수
 		void ToggleAttackPossible();
 
 	UFUNCTION()
-		void DecreaseHP();
+		void DecreaseHP(float val);
+
+	UFUNCTION()
+		void ChangeDeath();
+
+	UFUNCTION()
+		void ChangeMagmaDeath();
+
+	UFUNCTION()
+		bool isDeath();
+
 };
 

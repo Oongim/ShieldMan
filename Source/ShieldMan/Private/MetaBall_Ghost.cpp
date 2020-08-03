@@ -108,40 +108,44 @@ void AMetaBall_Ghost::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+
 	SetRotation(DeltaTime);
 	Update(DeltaTime);
 	BoundCheck(m_status);
 	Update_EyeScale(DeltaTime);
 
-	if (!bAlive) { 
+	if (!bAlive) {
 		Opacity -= 0.05;
 		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("Opacity"), Opacity);
 		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeL_Scale"), 0);
 		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeR_Scale"), 0);
-		return; 
+		return;
 	}
 
-	switch (m_status)
+	if (false == Player->isDeath())
 	{
-	case WAITING:
+		switch (m_status)
+		{
+		case WAITING:
 
-		break;
-	case MOVING: {
-		FVector dest_direct = m_destination - GetActorLocation();
+			break;
+		case MOVING: {
+			FVector dest_direct = m_destination - GetActorLocation();
 
-		SetActorLocation(GetActorLocation() + dest_direct * DeltaTime / 3);
-		if ((m_destination - GetActorLocation()).Size() < 50) {
-			AddForceToVelocity(0.f);
-			m_status = ATTACKING;
+			SetActorLocation(GetActorLocation() + dest_direct * DeltaTime / 3);
+			if ((m_destination - GetActorLocation()).Size() < 50) {
+				AddForceToVelocity(0.f);
+				m_status = ATTACKING;
+			}
 		}
+				   break;
+		case ATTACKING:
+			GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::Attack, 1.f, false);
 
-	}
-			   break;
-	case ATTACKING:
-		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::Attack, 1.f, false);
-
-		m_status = WAITING;
-		break;
+			m_status = WAITING;
+			break;
+		}
 	}
 }
 
