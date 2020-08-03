@@ -12,7 +12,6 @@
 UCLASS()
 class SHIELDMAN_API AMetaBall_Boss : public AActor
 {
-
 	GENERATED_BODY()
 private:
 	enum STATUS {
@@ -32,24 +31,11 @@ private:
 	FVector Balls_Position[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
 	FName MaterialParamName[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
 
-	FTimerHandle RepeatTimerHandle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
-		float RepeatInterval;
-
-	float Opacity;
-
-	bool bAttacked;
-
 	STATUS m_status;
-
-	FRotator prev_Rot;
 
 	FTimerHandle AttackedTimerHandle;
 
 	float rotate_cnt;
-
-	float rotate_speed;
 
 	ROTATE_TARGET rand_target;
 	int rand_row;
@@ -57,8 +43,6 @@ private:
 
 	int num_rotate;
 
-	//////////////공격 관련//////////////////////////////
-	//공격관련 배열
 	vector<FName> v_Octahedron;
 
 	
@@ -71,16 +55,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 		UParticleSystem* Effect;
 
-	UPROPERTY(EditAnywhere, Category = "Shoot")
-		float ShootPower;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+		int Max_Rotate;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Status")
-		float MaxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+		float avoid_term;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
-		float CurrentHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+		float attack_term;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+		float rotate_speed;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+		TSubclassOf< class AMetaBall_Ghost> GhostClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+		TSubclassOf< class AMetaBall_Slime> SlimeClass;
 public:
 	// Sets default values for this actor's properties
 	AMetaBall_Boss();
@@ -96,10 +87,6 @@ public:
 	void Update(float DeltaTime);
 
 	void RotateRow(ROTATE_TARGET Target_Row,int row,bool bRight_Rotate,float DeltaTime);
-
-	void OnRepeatTimer();
-
-	void Attack();
 
 	void spawn_Effect();
 

@@ -8,15 +8,17 @@
 
 #define MAX_NUM_BLOB 8
 
+enum STATUS {
+	WAITING, MOVING, ATTACKING
+};
+
 UCLASS()
 class SHIELDMAN_API AMetaBall_Ghost : public AActor
 {
 	
 	GENERATED_BODY()
 private:
-	enum STATUS {
-		WAITING, MOVING, ATTACKING
-	};
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Dynamic_Mesh;
 
@@ -46,7 +48,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float damping;
 
-	FTimerHandle RepeatTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
 		float RepeatInterval;
@@ -80,6 +81,8 @@ private:
 	FTimerHandle AttackedTimerHandle;
 
 public:
+	FTimerHandle RepeatTimerHandle;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
@@ -121,17 +124,25 @@ public:
 
 	void Update_EyeScale(float DeltaTime);
 	void SetRotation(float DeltaTime);
-	void OnRepeatTimer();
+	virtual void OnRepeatTimer();
 
 	void Attacked();
 
-	void MoveStart();
+	virtual void MoveStart();
+	void SetStatus(const STATUS status);
+	void SetDestination(FVector destination);
+	void SetAlive(bool alive);
 
+	STATUS GetStatus() const;
 	bool GetAlive();
+	float GetOpacity();
 
 	void Attack();
 
 	UFUNCTION()
 		void ChangeAttackedBaseColor();
+
+	
+
 
 };

@@ -62,9 +62,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
-	UPROPERTY(VisibleAnywhere, Category = UI)
-		class UWidgetComponent* HPBarWidget;
-
+	float ShakeClamp;
 public:
 	// Sets default values for this actor's properties
 	AMetaBall_Slime();
@@ -93,4 +91,6 @@ public:
 	void MoveStart();
 
 	bool GetAlive();
+
+	void setSpeedPower(float power);
 };

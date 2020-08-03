@@ -395,9 +395,19 @@ void AMetaBall_Ghost::MoveStart()
 	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::OnRepeatTimer, RepeatInterval, false);
 }
 
+void AMetaBall_Ghost::SetAlive(bool alive)
+{
+	bAlive = alive;
+}
+
 bool AMetaBall_Ghost::GetAlive()
 {
 	return bAlive;
+}
+
+float AMetaBall_Ghost::GetOpacity()
+{
+	return Opacity;
 }
 
 void AMetaBall_Ghost::Attack()
@@ -409,12 +419,27 @@ void AMetaBall_Ghost::Attack()
 	m_destination.Z += 50.f;
 	AddForceToVelocity(30, true);
 	SpawnPawn = GetWorld()->SpawnActor<ASM_Ghost_AttackObject>(SpawnBulletClass, GetActorLocation(), GetActorRotation());
-	SpawnPawn->SetGhost(this);
+	SpawnPawn->SetTarget(this);
 	MoveStart();
 }
 
 void AMetaBall_Ghost::ChangeAttackedBaseColor()
 {
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.194, 0.227, 0.675 });
+}
+
+void AMetaBall_Ghost::SetStatus(STATUS status)
+{
+	m_status = status;
+}
+
+STATUS AMetaBall_Ghost::GetStatus() const
+{
+	return m_status;
+}
+
+void AMetaBall_Ghost::SetDestination(FVector destination)
+{
+	m_destination = destination;
 }
 

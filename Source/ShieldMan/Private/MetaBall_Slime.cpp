@@ -51,19 +51,9 @@ AMetaBall_Slime::AMetaBall_Slime()
 
 	bAttacked = false;
 
-	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
-
-	HPBarWidget->SetupAttachment(RootComponent);
-	HPBarWidget->SetRelativeLocation(FVector(0.f, 0.f, 180.f));
-	HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/UI/PlayScene/UI_HPBar.UI_HPBar_C"));
-	if (UI_HUD.Succeeded())
-	{
-		HPBarWidget->SetWidgetClass(UI_HUD.Class);
-		HPBarWidget->SetDrawSize(FVector2D(150.f, 50.f));
-	}
-
 	bAlive = true;
+
+	ShakeClamp = 500.f;
 }
 
 // Called when the game starts or when spawned
@@ -87,9 +77,6 @@ void AMetaBall_Slime::BeginPlay()
 		Balls_Velocity[i] = FVector(0.f, 0.f, 0.f);
 		Balls_Position[i] = FVector(0.f, 0.f, 0.f);
 	}
-
-
-
 }
 
 // Called every frame
@@ -169,7 +156,7 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 
 void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)
 {
-	//ULog::Vector(vec, "MyActor location: ", "", LO_Viewport);
+	
 	float powersize = vec.Size();
 	vec.Normalize();
 	FQuat QuatRotation = FQuat((vec - GetActorForwardVector()).Rotation());
@@ -180,6 +167,10 @@ void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)
 
 	FVector Velocity = this->GetVelocity() * ShakePower * 10;
 	Velocity.Y /= 2;
+
+	Velocity.X = FMath::Clamp(Velocity.X, 0.f, ShakeClamp);
+	Velocity.Y = FMath::Clamp(Velocity.Y, 0.f, ShakeClamp);
+	Velocity.Z = FMath::Clamp(Velocity.Z, 0.f, ShakeClamp);
 	for (int i = 1; i < MAX_NUM_BLOB; ++i) {
 		Balls_Velocity[i] = Velocity;
 	}
@@ -195,13 +186,13 @@ void AMetaBall_Slime::OnRepeatTimer()
 	if (bAttacked)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 15000);
+		AddForceToVelocity(RunAwayVec, speedPower * 1500);
 		ULog::Invalid("bAttacked", "", LO_Viewport);
 	}
 	else if ((RunAwayVec).Size() < 300.f)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 15000);
+		AddForceToVelocity(RunAwayVec, speedPower * 1500);
 		ULog::Invalid("RunAway", "", LO_Viewport);
 	}
 	else {
@@ -240,4 +231,9 @@ void AMetaBall_Slime::MoveStart()
 bool AMetaBall_Slime::GetAlive()
 {
 	return bAlive;
+}
+
+void AMetaBall_Slime::setSpeedPower(float power)
+{
+	speedPower = power;
 }

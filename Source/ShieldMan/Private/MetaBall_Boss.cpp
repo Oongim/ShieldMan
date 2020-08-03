@@ -8,6 +8,8 @@
 #include "Components/WidgetComponent.h"
 #include "SM_BossAttackFloor.h"
 #include "SM_Ghost_AttackObject.h"
+#include "MetaBall_Slime.h"
+#include "MetaBall_Ghost.h"
 
 // Sets default values
 AMetaBall_Boss::AMetaBall_Boss()
@@ -22,15 +24,7 @@ AMetaBall_Boss::AMetaBall_Boss()
 	RootComponent = Dynamic_Mesh;
 	Collision->SetupAttachment(RootComponent);
 
-	RepeatInterval = 3.0f;
-
 	m_status = WAITING;
-
-	MaxHP = 100.f;
-
-	CurrentHP = 100.f;
-
-	Opacity = 0;
 
 	v_Octahedron.emplace_back("Ball1");
 	v_Octahedron.emplace_back("Ball3");
@@ -44,6 +38,10 @@ AMetaBall_Boss::AMetaBall_Boss()
 	v_Octahedron.emplace_back("Ball25");
 	v_Octahedron.emplace_back("Ball27");
 
+	attack_term = 3.0f;
+	avoid_term = 2.f;
+	Max_Rotate = 10;
+	rotate_speed = 480.f;
 }
 
 // Called when the game starts or when spawned
@@ -81,12 +79,14 @@ void AMetaBall_Boss::BeginPlay()
 	}
 
 	rotate_cnt = 0;
-	rotate_speed = 180.f;
+	
 	num_rotate = 0;
 
 	rand_target = (ROTATE_TARGET)(rand() % 3);
 	rand_row = rand() % 3;
 	rand_rigt = false;//static_cast<bool>(rand() % 2);
+
+	
 }
 
 // Called every frame
@@ -108,9 +108,7 @@ void AMetaBall_Boss::Tick(float DeltaTime)
 	}
 				   break;
 	case ATTACKING:
-		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Boss::Attack, 1.f, false);
 
-		m_status = WAITING;
 		break;
 	}
 }
@@ -129,54 +127,66 @@ void AMetaBall_Boss::Update(float DeltaTime)
 void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Rotate, float DeltaTime)
 {
 	if (rotate_cnt >= 90.f) return;
+	bool bResetCnt = false;
 
 	float turn_rate = rotate_speed* DeltaTime;
 
-	if (Target_Row == ROTATE_X) {
+	rotate_cnt += turn_rate;
+	if (rotate_cnt >= 90.f) {
+		float sulplus = rotate_cnt - 90.f;
+		turn_rate -= sulplus;
+
+		bResetCnt = true;
+	}
+
+	switch (Target_Row) {
+	case ROTATE_X:
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
-				Balls_Position[row][j][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[row][j][k], FRotator{0.f,0.f, -turn_rate });
+				Balls_Position[row][j][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[row][j][k], FRotator{ 0.f,0.f, -turn_rate });
 			}
 		}
-	}
-	if (Target_Row == ROTATE_Y) {
+		break;
+	case ROTATE_Y:
 		for (int i = 0; i < MAX_NUM_ROW; ++i) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
 				Balls_Position[i][row][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][row][k], FRotator{ -turn_rate,0.f,0.f });
 			}
 		}
-	}
-	if (Target_Row == ROTATE_Z) {
+		break;
+	case ROTATE_Z:
 		for (int i = 0; i < MAX_NUM_ROW; ++i) {
 			for (int j = 0; j < MAX_NUM_ROW; ++j) {
-				Balls_Position[i][j][row] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][j][row], FRotator{0.f,-turn_rate,0.f });
+				Balls_Position[i][j][row] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][j][row], FRotator{ 0.f,-turn_rate,0.f });
 			}
 		}
+		break;
+	default:
+		ULog::Invalid("Target_Row", "", LO_Viewport);
+		break;
 	}
 
-	rotate_cnt += turn_rate;
-
-	if (rotate_cnt >= 90.f) {
+	if (bResetCnt) {
 		FVector temp[MAX_NUM_ROW][MAX_NUM_ROW];
 		FName temp_name[MAX_NUM_ROW][MAX_NUM_ROW];
-
-		if (Target_Row == ROTATE_X) {
+		switch (Target_Row) {
+		case ROTATE_X:
 			for (int j = 0; j < MAX_NUM_ROW; ++j) {
 				for (int k = 0; k < MAX_NUM_ROW; ++k) {
 					temp[j][k] = Balls_Position[row][j][k];
 					temp_name[j][k] = MaterialParamName[row][j][k];
 				}
 			}
-			
+
 			for (int j = 0; j < MAX_NUM_ROW; ++j) {
-				for (int k = 0; k < MAX_NUM_ROW; ++k) {	
+				for (int k = 0; k < MAX_NUM_ROW; ++k) {
 					Balls_Position[row][k][MAX_NUM_ROW - 1 - j] = temp[j][k];
 					MaterialParamName[row][k][MAX_NUM_ROW - 1 - j] = temp_name[j][k];
-					
+
 				}
 			}
-		}
-		if (Target_Row == ROTATE_Y) {
+			break;
+		case ROTATE_Y:
 			for (int i = 0; i < MAX_NUM_ROW; ++i) {
 				for (int k = 0; k < MAX_NUM_ROW; ++k) {
 					temp[i][k] = Balls_Position[i][row][k];
@@ -190,8 +200,8 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 					MaterialParamName[MAX_NUM_ROW - 1 - k][row][i] = temp_name[i][k];
 				}
 			}
-		}
-		if (Target_Row == ROTATE_Z) {
+			break;
+		case ROTATE_Z:
 			for (int i = 0; i < MAX_NUM_ROW; ++i) {
 				for (int j = 0; j < MAX_NUM_ROW; ++j) {
 					temp[i][j] = Balls_Position[i][j][row];
@@ -200,77 +210,66 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 			}
 			for (int i = 0; i < MAX_NUM_ROW; ++i) {
 				for (int j = 0; j < MAX_NUM_ROW; ++j) {
-					UE_LOG(LogTemp, Warning, TEXT("%s %s"), *Balls_Position[j][MAX_NUM_ROW - 1 - i][row].ToString(), *temp[i][j].ToString());
 					Balls_Position[j][MAX_NUM_ROW - 1 - i][row] = temp[i][j];
 					MaterialParamName[j][MAX_NUM_ROW - 1 - i][row] = temp_name[i][j];
-	
+
 				}
 			}
+			break;
+		default:
+			ULog::Invalid("Target_Row", "", LO_Viewport);
+			break;
 		}
 
-	
 		rand_target = (ROTATE_TARGET)(rand() % 3);
 		rand_row = rand() % 3;
-		rand_rigt = false;// static_cast<bool>(rand() % 2);
-
+		rand_rigt = false;
 		
 		num_rotate++;
-		if (num_rotate == 3)
+		if (num_rotate == Max_Rotate)
 		{
-			GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::spawn_Effect, 1.0f);
+			GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::spawn_Effect, avoid_term);
 		}
 		else
 		{
 			rotate_cnt = 0.f;
 		}
 	}
-	/*FRotator ToPlayerInterpRot =
-		FMath::RInterpTo(prev_Rot, GetActorRotation(), DeltaTime, 3.f);
-	prev_Rot += ToPlayerInterpRot - prev_Rot;
-	*/
-}
 
-void AMetaBall_Boss::OnRepeatTimer()
-{
-
-	FVector NextLocation;
-
-	m_status = ROTATING;
-
-}
-
-void AMetaBall_Boss::Attack()
-{
-	//for (int i = 0; i < MAX_NUM_BLOB; ++i) {
-	//	Balls_Position[i] = FVector{ 0 };
-	//}
 }
 
 void AMetaBall_Boss::spawn_Effect()
 {
-
+	bool bAttackSuccess=false;
 	FVector Pos = GetActorLocation();
-	float gab = 200.f;
-	float between_dis = 750.f;
+	float gab = 560.f;
+	float between_dis = 70.f;
+	Pos.X += gab;
+	Pos.Y += between_dis;
+	FVector taget_Pos = Player->GetActorLocation();
 
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][0][j]) != v_Octahedron.end()) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X+ gab - i * gab, Pos.Y+ between_dis + j * gab, 650), FRotator::ZeroRotator, true);
-			}
-			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[0][i][j]) != v_Octahedron.end()) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X + between_dis + j * gab, Pos.Y+ gab - i * gab, 650), FRotator::ZeroRotator, true);
-			}
-			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][2][j]) != v_Octahedron.end()) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X + gab - i * gab, Pos.Y - between_dis - j * gab, 650), FRotator::ZeroRotator, true);
-			}
-			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[2][i][j]) != v_Octahedron.end()) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - between_dis - j * gab, Pos.Y + gab - i * gab, 650), FRotator::ZeroRotator, true);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW-j) * gab), 600), FRotator::ZeroRotator, true);
+				if (!bAttackSuccess) {
+					if (Pos.X - (i * gab) + (gab / 2) >= taget_Pos.X && Pos.X  - (i * gab) - (gab / 2) < taget_Pos.X) {
+						if (Pos.Y + ((MAX_NUM_ROW - j) * gab) + (gab / 2) >= taget_Pos.Y && Pos.Y + ((MAX_NUM_ROW - j) * gab) - (gab / 2) < taget_Pos.Y) {
+							bAttackSuccess = true;
+							AMetaBall_Slime* slime =GetWorld()->SpawnActor<AMetaBall_Slime>(SlimeClass, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600.f), FRotator::ZeroRotator);
+							Player->DecreaseHP();
+						}
+					}
+				}
 			}
 		}
 	}
+	if (!bAttackSuccess){
+		GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(0.f, 40.f, 1000.f), FRotator::ZeroRotator);
+	}
+	
 	num_rotate = 0;
-	GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::RotateReset, 2.0f);
+	GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::RotateReset, attack_term);
 }
 
 void AMetaBall_Boss::RotateReset()
@@ -278,113 +277,3 @@ void AMetaBall_Boss::RotateReset()
 
 	rotate_cnt = 0.f;
 }
-
-
-//////////////////////////////////////////////////////
-//struct SDF
-//{
-//	float Sphere(float3 pos, float BallSize)
-//	{
-//		return length(pos) - BallSize;
-//	}
-//
-//
-//	float sdTorus(float3 p, float2 t)
-//	{
-//		float2 q = float2(length(p.xz) - t.x, p.y);
-//		return length(q) - t.y;
-//	}
-//	float sdOctahedron(float3 p, float s)
-//	{
-//		p = abs(p);
-//		float m = p.x + p.y + p.z - s;
-//		float3 q;
-//		if (3.0 * p.x < m) q = p.xyz;
-//		else if (3.0 * p.y < m) q = p.yzx;
-//		else if (3.0 * p.z < m) q = p.zxy;
-//		else return m * 0.57735027;
-//
-//		float k = clamp(0.5 * (q.z - q.y + s), 0.0, s);
-//		return length(float3(q.x, q.y - s + k, q.z - k));
-//	}
-//	float opUS(float d1, float d2)
-//	{
-//		float h = clamp(0.5 + 0.5 * (d2 - d1) / Smooth, 0.0, 1.0);
-//		return lerp(d2, d1, h) - Smooth * h * (1.0 - h);
-//	}
-//
-//	float3 RMNormal(float3 pos)
-//	{
-//		float2 Off = float2(0.01, 0);
-//		return normalize(float3(
-//			Sphere(pos + Off.xyy, 100) - Sphere(pos - Off.xyy, 100),
-//			Sphere(pos + Off.yxy, 100) - Sphere(pos - Off.yxy, 100),
-//			Sphere(pos + Off.yyx, 100) - Sphere(pos - Off.yyx, 100)
-//		));
-//	}
-//	float scene(float3 pos)
-//	{
-//
-//		int numBall = 0;
-//		float balls[30];
-//		balls[numBall++] = sdOctahedron(pos + Ball1, 100);
-//		balls[numBall++] = Sphere(pos + Ball2, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball3, 100);
-//		balls[numBall++] = Sphere(pos + Ball4, 100);
-//		balls[numBall++] = Sphere(pos + Ball5, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball6, 100);
-//		balls[numBall++] = Sphere(pos + Ball7, 100);
-//		balls[numBall++] = Sphere(pos + Ball8, 100);
-//		balls[numBall++] = Sphere(pos + Ball9, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball10, 100);
-//		balls[numBall++] = Sphere(pos + Ball11, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball12, 100);
-//		balls[numBall++] = Sphere(pos + Ball13, 100);
-//		balls[numBall++] = Sphere(pos + Ball14, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball15, 100);
-//		balls[numBall++] = Sphere(pos + Ball16, 100);
-//		balls[numBall++] = Sphere(pos + Ball17, 100);
-//		balls[numBall++] = Sphere(pos + Ball18, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball19, 100);
-//		balls[numBall++] = Sphere(pos + Ball20, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball21, 100);
-//		balls[numBall++] = Sphere(pos + Ball22, 100);
-//		balls[numBall++] = Sphere(pos + Ball23, 100);
-//		balls[numBall++] = Sphere(pos + Ball24, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball25, 100);
-//		balls[numBall++] = Sphere(pos + Ball26, 100);
-//		balls[numBall++] = sdOctahedron(pos + Ball27, 100);
-//
-//		float dis = opUS(balls[0], balls[1]);
-//
-//		for (int i = 2; i < numBall; ++i)
-//		{
-//			dis = opUS(balls[i], dis);
-//		}
-//		return dis;
-//	}
-//};
-//
-//SDF MetaBall_SDF;
-//float ray = 0.0;
-//float distance;
-//float4 Col = 0;
-//float3 Normal = 0;
-//
-//for (int i = 0; i < MaxSteps; ++i)
-//{
-//	float3 curPos = CamPos + CamDir * ray;
-//	distance = MetaBall_SDF.scene(curPos - ObjectPos);
-//	if (distance <= threshold)
-//	{
-//		
-//		Col = 1;
-//
-//		Normal = MetaBall_SDF.RMNormal(curPos - ObjectPos);
-//
-//		break;
-//	}
-//
-//	ray += distance;
-//}
-//return float4(Normal, Col.a);
