@@ -257,7 +257,7 @@ void AMetaBall_Boss::spawn_Effect()
 						if (Pos.Y + ((MAX_NUM_ROW - j) * gab) + (gab / 2) >= taget_Pos.Y && Pos.Y + ((MAX_NUM_ROW - j) * gab) - (gab / 2) < taget_Pos.Y) {
 							bAttackSuccess = true;
 							AMetaBall_Slime* slime =GetWorld()->SpawnActor<AMetaBall_Slime>(SlimeClass, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600.f), FRotator::ZeroRotator);
-							Player->DecreaseHP();
+							Player->DecreaseHP(20.f);
 						}
 					}
 				}

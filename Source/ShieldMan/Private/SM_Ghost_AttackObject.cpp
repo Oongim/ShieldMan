@@ -126,6 +126,9 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 {
 	if (bDead) return;
 
+	if (OtherActor == NULL)
+		return;
+
 	if (OtherActor->GetClass()->GetName() == FString("SM_Shield"))
 	{
 		ULog::Invalid("OnHit", "", LO_Viewport);
