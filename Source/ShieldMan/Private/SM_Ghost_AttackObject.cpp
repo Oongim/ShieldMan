@@ -87,7 +87,9 @@ void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 
 	if (bDefended)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetClass()->GetName());
+		if (OtherActor->GetClass()->GetName() == "BP_MetaBall_Boss_C") {
+			return;
+		}
 		if (OtherActor->GetClass()->GetName() == Target->GetClass()->GetName())
 		{
 			auto ghost = Cast<AMetaBall_Ghost>(OtherActor);
@@ -119,14 +121,18 @@ void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 
 void ASM_Ghost_AttackObject::Death()
 {
+	ULog::Invalid("Death", "", LO_Viewport);
 	Destroy();
 }
 
 void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (bDead) return;
-
-	if (OtherActor->GetClass()->GetName() == FString("SM_Shield"))
+	
+	if (OtherActor == nullptr)return;
+	ULog::Invalid(OtherComp->GetClass()->GetName(), "", LO_Viewport);
+	if (OtherActor->GetClass()->GetName() == FString("SM_Shield")||
+		OtherComp->GetClass()->GetName() == FString("BoxComponent"))
 	{
 		ULog::Invalid("OnHit", "", LO_Viewport);
 		MoveEffect->SetVisibility(false);
@@ -138,6 +144,7 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 	}
 	else
 	{
+		ULog::Invalid(OtherComp->GetName(), "", LO_Viewport);
 		Death();
 	}
 }

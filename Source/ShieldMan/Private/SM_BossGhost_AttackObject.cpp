@@ -11,6 +11,4 @@ void ASM_BossGhost_AttackObject::SetTarget(AActor* actor)
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), BossClass, Actors);
 	Target = Actors[0];
-	ULog::Invalid("SetTarget", "", LO_Viewport);
-	ULog::Vector(Actors[0]->GetActorLocation(), "MyActor location: ", "", LO_Viewport);
 }
