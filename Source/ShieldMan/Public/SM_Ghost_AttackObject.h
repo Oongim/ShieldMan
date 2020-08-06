@@ -19,7 +19,7 @@ private:
 	FTimerHandle LifeTimerHandle;
 
 	bool bDead;
-	bool bDefended;
+	
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = ShootBody)
@@ -38,7 +38,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 		UParticleSystem* EndEffect;
 
-
+	bool bDefended;
 public:
 	// Sets default values for this actor's properties
 	ASM_Ghost_AttackObject();
@@ -52,7 +52,7 @@ public:
 		virtual void SetTarget(AActor* actor);
 
 	UFUNCTION()
-		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		virtual void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 		void Death();

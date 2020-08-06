@@ -385,7 +385,7 @@ void AMetaBall_Ghost::Attacked()
 {
 	if (!bAlive) return;
 	bAttacked = true;
-	CurrentHP -= 50.f;
+	CurrentHP -= 20.f;
 	AddForceToVelocity(15, true);
 
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 1.f, 0.f, 0.f });

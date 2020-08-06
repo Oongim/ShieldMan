@@ -41,7 +41,7 @@ AMetaBall_Slime::AMetaBall_Slime()
 
 
 
-	Health = 100.0f;
+	Health = 100.0f; 
 
 	speedPower = 1.f;
 
@@ -151,7 +151,6 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 		Balls_Position[i] += Balls_Velocity[i] * timeStep;
 
 	}
-
 }
 
 void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)

@@ -7,7 +7,7 @@
 #include "NavigationSystem.h"
 #include "Components/WidgetComponent.h"
 #include "SM_BossAttackFloor.h"
-#include "SM_Ghost_AttackObject.h"
+#include "SM_BossGhost_AttackObject.h"
 #include "MetaBall_Slime.h"
 #include "MetaBall_Ghost.h"
 
@@ -18,13 +18,10 @@ AMetaBall_Boss::AMetaBall_Boss()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Dynamic_Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DYNAMIC_MESH"));
-	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("COLLISION"));
-	Collision->SetSphereRadius(80.f);
 
 	RootComponent = Dynamic_Mesh;
-	Collision->SetupAttachment(RootComponent);
 
-	m_status = WAITING;
+	
 
 	v_Octahedron.emplace_back("Ball1");
 	v_Octahedron.emplace_back("Ball3");
@@ -42,6 +39,16 @@ AMetaBall_Boss::AMetaBall_Boss()
 	avoid_term = 2.f;
 	Max_Rotate = 10;
 	rotate_speed = 480.f;
+
+	k = 5;
+	damping = 5;
+	mass = 30;
+	ShakePower = 20.f;
+
+	BoombPower = 20.f;
+
+	HP = 27;
+
 }
 
 // Called when the game starts or when spawned
@@ -72,21 +79,24 @@ void AMetaBall_Boss::BeginPlay()
 					-ball_size + i * ball_size,
 					-ball_size + j * ball_size,
 					ball_size - k * ball_size);
-
+				Anchor_Position[i][j][k] = FVector(
+					-ball_size + i * ball_size,
+					-ball_size + j * ball_size,
+					ball_size - k * ball_size);
 				Balls_Velocity[i][j][k] = FVector(0.f, 0.f, 0.f);
 			}
 		}
 	}
 
 	rotate_cnt = 0;
-	
+
 	num_rotate = 0;
 
 	rand_target = (ROTATE_TARGET)(rand() % 3);
 	rand_row = rand() % 3;
 	rand_rigt = false;//static_cast<bool>(rand() % 2);
 
-	
+	m_status = WAITING;
 }
 
 // Called every frame
@@ -94,8 +104,7 @@ void AMetaBall_Boss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	RotateRow(rand_target, rand_row, rand_rigt, DeltaTime);
-	
+	Muitiple_SpringMass_System(DeltaTime);
 
 	Update(DeltaTime);
 
@@ -105,10 +114,11 @@ void AMetaBall_Boss::Tick(float DeltaTime)
 
 		break;
 	case ROTATING: {
+		RotateRow(rand_target, rand_row, rand_rigt, DeltaTime);
 	}
-				   break;
-	case ATTACKING:
-
+		break;
+	case DEAD:
+		BoundCheck();
 		break;
 	}
 }
@@ -118,7 +128,6 @@ void AMetaBall_Boss::Update(float DeltaTime)
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
-
 				Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i][j][k], Balls_Position[i][j][k]);
 			}
 		}
@@ -129,7 +138,7 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 	if (rotate_cnt >= 90.f) return;
 	bool bResetCnt = false;
 
-	float turn_rate = rotate_speed* DeltaTime;
+	float turn_rate = rotate_speed * DeltaTime;
 
 	rotate_cnt += turn_rate;
 	if (rotate_cnt >= 90.f) {
@@ -224,7 +233,7 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 		rand_target = (ROTATE_TARGET)(rand() % 3);
 		rand_row = rand() % 3;
 		rand_rigt = false;
-		
+
 		num_rotate++;
 		if (num_rotate == Max_Rotate)
 		{
@@ -240,7 +249,7 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 
 void AMetaBall_Boss::spawn_Effect()
 {
-	bool bAttackSuccess=false;
+	bool bAttackSuccess = false;
 	FVector Pos = GetActorLocation();
 	float gab = 560.f;
 	float between_dis = 70.f;
@@ -251,12 +260,17 @@ void AMetaBall_Boss::spawn_Effect()
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][0][j]) != v_Octahedron.end()) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW-j) * gab), 600), FRotator::ZeroRotator, true);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600), FRotator::ZeroRotator, true);
 				if (!bAttackSuccess) {
-					if (Pos.X - (i * gab) + (gab / 2) >= taget_Pos.X && Pos.X  - (i * gab) - (gab / 2) < taget_Pos.X) {
+					if (Pos.X - (i * gab) + (gab / 2) >= taget_Pos.X && Pos.X - (i * gab) - (gab / 2) < taget_Pos.X) {
 						if (Pos.Y + ((MAX_NUM_ROW - j) * gab) + (gab / 2) >= taget_Pos.Y && Pos.Y + ((MAX_NUM_ROW - j) * gab) - (gab / 2) < taget_Pos.Y) {
 							bAttackSuccess = true;
+<<<<<<< HEAD
 							AMetaBall_Slime* slime =GetWorld()->SpawnActor<AMetaBall_Slime>(SlimeClass, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600.f), FRotator::ZeroRotator);
+=======
+							AMetaBall_Slime* slime = GetWorld()->SpawnActor<AMetaBall_Slime>(SlimeClass, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600.f), FRotator::ZeroRotator);
+							Player->AddForceToCharacter(FVector{ 0.f,0.f,-1.f }, BoombPower);
+>>>>>>> origin/BossStage
 							Player->DecreaseHP(20.f);
 						}
 					}
@@ -264,10 +278,10 @@ void AMetaBall_Boss::spawn_Effect()
 			}
 		}
 	}
-	if (!bAttackSuccess){
+	if (!bAttackSuccess) {
 		GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(0.f, 40.f, 1000.f), FRotator::ZeroRotator);
 	}
-	
+
 	num_rotate = 0;
 	GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::RotateReset, attack_term);
 }
@@ -276,4 +290,99 @@ void AMetaBall_Boss::RotateReset()
 {
 
 	rotate_cnt = 0.f;
+}
+
+void AMetaBall_Boss::Attacked()
+{
+	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.9f, 0.1f, 0.1f });
+	GetWorld()->GetTimerManager().SetTimer(AttackedTimerHandle, this, &AMetaBall_Boss::ChangeAttackedBaseColor, 0.25f, false);
+
+	RandShakeBall(ShakePower);
+	
+	HP--;
+	if (HP == 0)
+		Dead();
+}
+void AMetaBall_Boss::Dead()
+{
+	m_status = DEAD;
+	RandShakeBall(1000);
+	for (int i = 0; i < MAX_NUM_ROW; ++i) {
+		for (int j = 0; j < MAX_NUM_ROW; ++j) {
+			for (int k = 0; k < MAX_NUM_ROW; ++k) {
+				Anchor_Position[i][j][k] = FVector::ZeroVector;
+			}
+		}
+	}
+}
+
+void AMetaBall_Boss::RandShakeBall(float power)
+{
+	for (int i = 0; i < MAX_NUM_ROW; ++i) {
+		for (int j = 0; j < MAX_NUM_ROW; ++j) {
+			for (int k = 0; k < MAX_NUM_ROW; ++k) {
+				FVector Velocity = FMath::VRand() * power;
+				Balls_Velocity[i][j][k] = Velocity;
+			}
+		}
+	}
+}
+
+void AMetaBall_Boss::ChangeAttackedBaseColor()
+{
+	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.5, 0.1, 0.8 });
+}
+
+void AMetaBall_Boss::Muitiple_SpringMass_System(float timeStep)
+{
+	for (int i = 0; i < MAX_NUM_ROW; ++i) {
+		for (int j = 0; j < MAX_NUM_ROW; ++j) {
+			for (int w = 0; w < MAX_NUM_ROW; ++w) {
+				// Mass 1 Spring Force
+				FVector massSpringForce = -k * (Balls_Position[i][j][w] - Anchor_Position[i][j][w]);
+
+				// Mass daming
+				FVector massDampingForce = Balls_Velocity[i][j][w] * damping;
+
+				// Mass net force
+				FVector massForce = massSpringForce - massDampingForce + mass;
+
+				// Mass acceleration
+				FVector massAcceleration = massForce / mass;
+
+				// Mass velocity
+				Balls_Velocity[i][j][w] += massAcceleration * timeStep;
+
+				// Mass position
+				Balls_Position[i][j][w] += Balls_Velocity[i][j][w] * timeStep;
+			}
+		}
+	}
+}
+
+void AMetaBall_Boss::BoundCheck()
+{
+
+	float min_Clamp = -350.f;
+	float max_Clamp = 350.f;
+	for (int i = 0; i < MAX_NUM_ROW; ++i) {
+		for (int j = 0; j < MAX_NUM_ROW; ++j) {
+			for (int k = 0; k < MAX_NUM_ROW; ++k) {
+				Balls_Position[i][j][k] = UKismetMathLibrary::GreaterGreater_VectorRotator(Balls_Position[i][j][k], FRotator{ 0.5f,0.2f, 0.1f });
+
+				if (Balls_Position[i][j][k].X < min_Clamp || Balls_Position[i][j][k].X > max_Clamp)
+					Balls_Velocity[i][j][k].X *= -1;
+				else if (Balls_Position[i][j][k].Y < min_Clamp || Balls_Position[i][j][k].Y > max_Clamp)
+					Balls_Velocity[i][j][k].Y *= -1;
+				else if (Balls_Position[i][j][k].Z < min_Clamp || Balls_Position[i][j][k].Z > max_Clamp)
+					Balls_Velocity[i][j][k].Z *= -1;
+
+			}
+		}
+	}
+}
+
+void AMetaBall_Boss::SetStatus(int status)
+{
+	m_status = static_cast<STATUS>(status);
 }

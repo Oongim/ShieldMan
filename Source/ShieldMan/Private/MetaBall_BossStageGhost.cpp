@@ -37,7 +37,7 @@ void AMetaBall_BossStageGhost::OnRepeatTimer()
 
 		NextLocation = {
 				FMath::FRandRange(-840.f, 840.f),
-				FMath::FRandRange(-800.f, 880.f),
+				FMath::FRandRange(-800.f, 200.f),
 				1000.f
 		};
 	SetDestination(NextLocation);
