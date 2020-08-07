@@ -63,6 +63,8 @@ public:
 		USphereComponent* Collision;
 
 	float ShakeClamp;
+
+	float RunAwayPower;
 public:
 	// Sets default values for this actor's properties
 	AMetaBall_Slime();

@@ -54,6 +54,8 @@ AMetaBall_Slime::AMetaBall_Slime()
 	bAlive = true;
 
 	ShakeClamp = 500.f;
+
+	RunAwayPower = 1500.f;
 }
 
 // Called when the game starts or when spawned
@@ -185,14 +187,12 @@ void AMetaBall_Slime::OnRepeatTimer()
 	if (bAttacked)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 1500);
-		ULog::Invalid("bAttacked", "", LO_Viewport);
+		AddForceToVelocity(RunAwayVec, speedPower * RunAwayPower);
 	}
 	else if ((RunAwayVec).Size() < 300.f)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 1500);
-		ULog::Invalid("RunAway", "", LO_Viewport);
+		AddForceToVelocity(RunAwayVec, speedPower * RunAwayPower);
 	}
 	else {
 		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());

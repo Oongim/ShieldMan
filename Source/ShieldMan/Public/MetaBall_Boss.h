@@ -87,6 +87,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf< class AMetaBall_Slime> SlimeClass;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UCameraShake> AttackedCameraShake;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UCameraShake>InfiniteCameraShake;
+
 public:
 	// Sets default values for this actor's properties
 	AMetaBall_Boss();

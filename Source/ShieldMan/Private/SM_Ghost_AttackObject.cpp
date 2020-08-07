@@ -130,9 +130,10 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 	if (bDead) return;
 	
 	if (OtherActor == nullptr)return;
-	ULog::Invalid(OtherComp->GetClass()->GetName(), "", LO_Viewport);
+	ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
+	
 	if (OtherActor->GetClass()->GetName() == FString("SM_Shield")||
-		OtherComp->GetClass()->GetName() == FString("BoxComponent"))
+		(OtherComp->GetClass()->GetName() == FString("BoxComponent")&& OtherActor->GetClass()->GetName()== FString("BP_SMCharacter_C")))
 	{
 		ULog::Invalid("OnHit", "", LO_Viewport);
 		MoveEffect->SetVisibility(false);
@@ -144,7 +145,7 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 	}
 	else
 	{
-		ULog::Invalid(OtherComp->GetName(), "", LO_Viewport);
+		//ULog::Invalid(OtherComp->GetName(), "", LO_Viewport);
 		Death();
 	}
 }

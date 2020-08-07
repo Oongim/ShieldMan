@@ -10,6 +10,7 @@ void AMetaBall_BossStageSlime::BeginPlay()
 	MoveStart();
 	setSpeedPower(0.8f);
 	ShakeClamp = 200.f;
+	RunAwayPower = 30.f;
 }
 
 void AMetaBall_BossStageSlime::Tick(float DeltaTime)

@@ -292,6 +292,7 @@ void AMetaBall_Boss::Attacked()
 {
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.9f, 0.1f, 0.1f });
 	GetWorld()->GetTimerManager().SetTimer(AttackedTimerHandle, this, &AMetaBall_Boss::ChangeAttackedBaseColor, 0.25f, false);
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(AttackedCameraShake, 1.0f);
 
 	RandShakeBall(ShakePower);
 	
@@ -301,8 +302,10 @@ void AMetaBall_Boss::Attacked()
 }
 void AMetaBall_Boss::Dead()
 {
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(InfiniteCameraShake, 1.0f);
 	m_status = DEAD;
 	RandShakeBall(1000);
+	k *= 3;
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
@@ -359,8 +362,8 @@ void AMetaBall_Boss::Muitiple_SpringMass_System(float timeStep)
 void AMetaBall_Boss::BoundCheck()
 {
 
-	float min_Clamp = -350.f;
-	float max_Clamp = 350.f;
+	float min_Clamp = -300.f;
+	float max_Clamp = 300.f;
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
