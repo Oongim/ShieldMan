@@ -425,6 +425,7 @@ void AMetaBall_Ghost::Attack()
 	SpawnPawn = GetWorld()->SpawnActor<ASM_Ghost_AttackObject>(SpawnBulletClass, GetActorLocation(), GetActorRotation());
 	SpawnPawn->SetTarget(this);
 	MoveStart();
+	Scream();
 }
 
 void AMetaBall_Ghost::ChangeAttackedBaseColor()
