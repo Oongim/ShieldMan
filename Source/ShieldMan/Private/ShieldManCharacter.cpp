@@ -87,6 +87,8 @@ AShieldManCharacter::AShieldManCharacter()
 	bAttackPossible = false;
 
 	Effect = CreateDefaultSubobject<UParticleSystem>(TEXT("EFFECT"));
+
+	HPlock = false;
 }
 
 bool AShieldManCharacter::CanSetShield()
@@ -211,6 +213,7 @@ void AShieldManCharacter::Death()
 void AShieldManCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	stage = GetWorld()->GetMapName();
 	AnimInstance = Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance != nullptr)
 	{
@@ -331,10 +334,13 @@ void AShieldManCharacter::ToggleAttackPossible()
 
 void AShieldManCharacter::DecreaseHP(float val)
 {
-	CurrentHP -= val;
-	if (CurrentHP <= 0)
+	if (false == HPlock)
 	{
-		ChangeDeath();
+		CurrentHP -= val;
+		if (CurrentHP <= 0)
+		{
+			ChangeDeath();
+		}
 	}
 }
 
