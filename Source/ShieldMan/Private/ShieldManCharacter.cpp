@@ -442,7 +442,7 @@ void AShieldManCharacter::MoveForward(float Value)
 	if (bDeath) return;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		if (CurControlMode->isControlMode(BodyControlMode)) {
+		{
 			// find out which way is forward
 			const FRotator Rotation = Controller->GetControlRotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -452,7 +452,7 @@ void AShieldManCharacter::MoveForward(float Value)
 			AddMovementInput(Direction, Value);
 		}
 		//위 아래 이동
-		else if (CurControlMode->isControlMode(RHandControlMode)) {
+		if (CurControlMode->isControlMode(RHandControlMode)) {
 			AnimInstance->AddHand_RightRot({ -Value, 0.f, 0.f });
 		}
 		else if (CurControlMode->isControlMode(LHandControlMode)) {
@@ -467,7 +467,7 @@ void AShieldManCharacter::MoveRight(float Value)
 	if (bDeath) return;
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
-		if (CurControlMode->isControlMode(BodyControlMode)) {
+		{
 			// find out which way is right
 			const FRotator Rotation = Controller->GetControlRotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -478,7 +478,7 @@ void AShieldManCharacter::MoveRight(float Value)
 			AddMovementInput(Direction, Value);
 		}
 		//위 아래 이동
-		else if (CurControlMode->isControlMode(RHandControlMode)) {
+		if (CurControlMode->isControlMode(RHandControlMode)) {
 			AnimInstance->AddHand_RightRot({ 0.f, -Value , 0.f});
 		}
 		else if (CurControlMode->isControlMode(LHandControlMode)) {

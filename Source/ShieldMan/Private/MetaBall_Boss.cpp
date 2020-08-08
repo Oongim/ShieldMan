@@ -313,6 +313,7 @@ void AMetaBall_Boss::Dead()
 			}
 		}
 	}
+	StageClear();
 }
 
 void AMetaBall_Boss::RandShakeBall(float power)

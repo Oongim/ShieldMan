@@ -129,4 +129,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void SetStatus(int status);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void StageClear();
 };
