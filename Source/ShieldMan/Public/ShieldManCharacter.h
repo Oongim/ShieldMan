@@ -95,6 +95,9 @@ public:		//생성자 , public 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
 		float CurrentHP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+		bool HPlock;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Status")
 		FName PlayerName;
 
@@ -103,6 +106,9 @@ public:		//생성자 , public 변수
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 		UAnimationAsset* Anim;
+
+	UPROPERTY(BlueprintReadOnly, Category = UI)
+		FString stage;
 
 protected: //조작
 	/** Called for forwards/backward input */
@@ -167,6 +173,9 @@ public:		//public 함수
 
 	UFUNCTION()
 		bool isDeath();
+
+
+
 
 };
 

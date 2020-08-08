@@ -41,7 +41,7 @@ AMetaBall_Slime::AMetaBall_Slime()
 
 
 
-	Health = 100.0f; 
+	Health = 100.0f;
 
 	speedPower = 1.f;
 
@@ -116,17 +116,17 @@ void AMetaBall_Slime::BoundCheck()
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		if (Balls_Position[i].X < min_Clamp && Balls_Velocity[i].X < 0)
 			Balls_Velocity[i].X *= -1;
-		else if (Balls_Position[i].X > max_Clamp&& Balls_Velocity[i].X > 0)
+		else if (Balls_Position[i].X > max_Clamp && Balls_Velocity[i].X > 0)
 			Balls_Velocity[i].X *= -1;
 
 		if (Balls_Position[i].Y < min_Clamp && Balls_Velocity[i].Y < 0)
 			Balls_Velocity[i].Y *= -1;
-		else if (Balls_Position[i].Y > max_Clamp&& Balls_Velocity[i].Y > 0)
+		else if (Balls_Position[i].Y > max_Clamp && Balls_Velocity[i].Y > 0)
 			Balls_Velocity[i].Y *= -1;
 
 		if (Balls_Position[i].Z < min_Clamp && Balls_Velocity[i].Z < 0)
 			Balls_Velocity[i].Z *= -1;
-		else if (Balls_Position[i].Z > max_Clamp&& Balls_Velocity[i].Z > 0)
+		else if (Balls_Position[i].Z > max_Clamp && Balls_Velocity[i].Z > 0)
 			Balls_Velocity[i].Z *= -1;
 	}
 }
@@ -157,7 +157,7 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 
 void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)
 {
-	
+
 	float powersize = vec.Size();
 	vec.Normalize();
 	FQuat QuatRotation = FQuat((vec - GetActorForwardVector()).Rotation());

@@ -139,10 +139,12 @@ public:
 
 	void Attack();
 
+
 	UFUNCTION()
 		void ChangeAttackedBaseColor();
 
-	
+	UFUNCTION(BlueprintImplementableEvent)
+		void Scream();
 
 
 };
