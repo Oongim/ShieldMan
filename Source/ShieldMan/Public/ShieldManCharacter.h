@@ -152,6 +152,7 @@ public:		//public ÇÔ¼ö
 	UFUNCTION()
 	void AddForceToCharacter(FVector vDirection, float power);
 
+	UFUNCTION(BlueprintCallable)
 	void SwitchLevel(FName LevelName);
 
 	void SetCharacterStatus(CharacterStatus status);

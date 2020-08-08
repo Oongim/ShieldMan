@@ -54,8 +54,6 @@ AMetaBall_Slime::AMetaBall_Slime()
 	bAlive = true;
 
 	ShakeClamp = 500.f;
-
-	RunAwayPower = 1500.f;
 }
 
 // Called when the game starts or when spawned
@@ -116,17 +114,17 @@ void AMetaBall_Slime::BoundCheck()
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		if (Balls_Position[i].X < min_Clamp && Balls_Velocity[i].X < 0)
 			Balls_Velocity[i].X *= -1;
-		else if (Balls_Position[i].X > max_Clamp && Balls_Velocity[i].X > 0)
+		else if (Balls_Position[i].X > max_Clamp&& Balls_Velocity[i].X > 0)
 			Balls_Velocity[i].X *= -1;
 
 		if (Balls_Position[i].Y < min_Clamp && Balls_Velocity[i].Y < 0)
 			Balls_Velocity[i].Y *= -1;
-		else if (Balls_Position[i].Y > max_Clamp && Balls_Velocity[i].Y > 0)
+		else if (Balls_Position[i].Y > max_Clamp&& Balls_Velocity[i].Y > 0)
 			Balls_Velocity[i].Y *= -1;
 
 		if (Balls_Position[i].Z < min_Clamp && Balls_Velocity[i].Z < 0)
 			Balls_Velocity[i].Z *= -1;
-		else if (Balls_Position[i].Z > max_Clamp && Balls_Velocity[i].Z > 0)
+		else if (Balls_Position[i].Z > max_Clamp&& Balls_Velocity[i].Z > 0)
 			Balls_Velocity[i].Z *= -1;
 	}
 }
@@ -187,12 +185,14 @@ void AMetaBall_Slime::OnRepeatTimer()
 	if (bAttacked)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * RunAwayPower);
+		AddForceToVelocity(RunAwayVec, speedPower * 1500);
+		ULog::Invalid("bAttacked", "", LO_Viewport);
 	}
 	else if ((RunAwayVec).Size() < 300.f)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * RunAwayPower);
+		AddForceToVelocity(RunAwayVec, speedPower * 1500);
+		ULog::Invalid("RunAway", "", LO_Viewport);
 	}
 	else {
 		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());

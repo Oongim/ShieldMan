@@ -117,9 +117,7 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 		{
 			EventTrigger = false;
 			GuardCount = 0;
-
-			//FVector loc{ -4000.f, -4360.f, 150.f };
-			Player->TeleportTo(Endto, FRotator(0.f, 0.f, 0.f));
+			Player->SetActorLocation(Endto);
 			PrimaryActorTick.SetTickFunctionEnable(false);
 			Destroy();
 		}
@@ -293,7 +291,7 @@ void ASM_Sword::Begin_StageOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	{
 		UE_LOG(LogTemp, Log, TEXT("Begin_StageOverlapBegin"));
 
-		OtherActor->TeleportTo(Startto, FRotator(0.f, 0.f, 0.f));
+		OtherActor->SetActorLocation(Startto);
 		EventTrigger = true;
 		PrimaryActorTick.SetTickFunctionEnable(true);
 	}
