@@ -121,7 +121,7 @@ void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 
 void ASM_Ghost_AttackObject::Death()
 {
-	ULog::Invalid("Death", "", LO_Viewport);
+	//ULog::Invalid("Death", "", LO_Viewport);
 	Destroy();
 }
 
@@ -130,12 +130,12 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 	if (bDead) return;
 	
 	if (OtherActor == nullptr)return;
-	ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
+	//ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
 	
 	if (OtherActor->GetClass()->GetName() == FString("SM_Shield")||
 		(OtherComp->GetClass()->GetName() == FString("BoxComponent")&& OtherActor->GetClass()->GetName()== FString("BP_SMCharacter_C")))
 	{
-		ULog::Invalid("OnHit", "", LO_Viewport);
+		//ULog::Invalid("OnHit", "", LO_Viewport);
 		MoveEffect->SetVisibility(false);
 		FVector target_velocity = Target->GetActorLocation() - GetActorLocation();
 		target_velocity.Normalize();

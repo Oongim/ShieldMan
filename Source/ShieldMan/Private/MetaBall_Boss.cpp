@@ -171,7 +171,7 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 		}
 		break;
 	default:
-		ULog::Invalid("Target_Row", "", LO_Viewport);
+		//ULog::Invalid("Target_Row", "", LO_Viewport);
 		break;
 	}
 
@@ -226,7 +226,7 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 			}
 			break;
 		default:
-			ULog::Invalid("Target_Row", "", LO_Viewport);
+			//ULog::Invalid("Target_Row", "", LO_Viewport);
 			break;
 		}
 

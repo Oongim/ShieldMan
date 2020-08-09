@@ -69,15 +69,14 @@ void ASM_ShootObjectBullet::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, 
 {
 	if (bDead) return;
 	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_ShootObjectBullet::Death, DeathMaxCount);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetClass()->GetName());
-
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetClass()->GetName());
+	
 	if (OtherActor->GetClass()->GetName() == characterClass->GetName())
 	{
 		auto character = Cast<AShieldManCharacter>(OtherActor);
-
 		character->AddForceToCharacter(GetActorRotation().Vector(), this->GetVelocity().Size()*10);
-		
-		ULog::Number(this->GetVelocity().Size(), "Size: ","",LO_Viewport);
+
+		//ULog::Number(this->GetVelocity().Size(), "Size: ","",LO_Viewport);
 	}
 	bDead = true;
 	StartNiagaraEffect();

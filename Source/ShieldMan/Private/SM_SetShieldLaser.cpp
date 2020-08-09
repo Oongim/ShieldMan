@@ -38,7 +38,7 @@ ASM_SetShieldLaser::ASM_SetShieldLaser()
 void ASM_SetShieldLaser::BeginPlay()
 {
 	Super::BeginPlay();
-	ULog::Hello();
+	//ULog::Hello();
 }
 
 void ASM_SetShieldLaser::PostInitializeComponents()
@@ -50,7 +50,7 @@ void ASM_SetShieldLaser::PostInitializeComponents()
 
 void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ULog::Hello();
+	//ULog::Hello();
 	
 	auto SMCharacter = Cast<AShieldManCharacter>(OtherActor);
 
@@ -80,7 +80,7 @@ void ASM_SetShieldLaser::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp,
 
 void ASM_SetShieldLaser::StartAttack()
 {
-	ULog::Hello(LO_Viewport);
+	//ULog::Hello(LO_Viewport);
 
 	for (auto shootObject : GetWorld()->GetCurrentLevel()->Actors)
 	{
@@ -90,7 +90,7 @@ void ASM_SetShieldLaser::StartAttack()
 
 		for (auto d : FoundActors)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *d->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("%s"), *d->GetName());
 			auto shooter = Cast< ASM_ShootObject>(d);
 			shooter->StartAttack();
 		}

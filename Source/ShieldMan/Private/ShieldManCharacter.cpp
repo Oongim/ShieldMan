@@ -129,7 +129,7 @@ void AShieldManCharacter::Init_Mesh()
 	}
 	else
 	{
-		ULog::Invalid("No Character", "", LO_Viewport);
+		//ULog::Invalid("No Character", "", LO_Viewport);
 	}
 	//애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -217,7 +217,7 @@ void AShieldManCharacter::PostInitializeComponents()
 	AnimInstance = Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance != nullptr)
 	{
-		UE_LOG(LogTemp, Log, TEXT("why not --"));
+		//UE_LOG(LogTemp, Log, TEXT("why not --"));
 
 	}
 	Left_Shield_Collision->OnComponentBeginOverlap.AddDynamic(this, &AShieldManCharacter::OnShieldOverlapBegin);
@@ -310,7 +310,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 			for (auto& Hit : OutHits)
 			{
 				UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
+				//UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
 				if (MeshComp)
 				{
 					MeshComp->AddRadialImpulse(ImpulsePosition,
@@ -321,7 +321,7 @@ void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedCo
 			}
 		}
 
-		ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
+		//ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
 		bAttackPossible = false;
 		GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
 	}
@@ -347,7 +347,7 @@ void AShieldManCharacter::DecreaseHP(float val)
 void AShieldManCharacter::ChangeDeath()
 {
 	GetMesh()->PlayAnimation(Anim, false);
-	ULog::Number(Anim->GetMaxCurrentTime(), "Time: ", "", LO_Viewport);
+	//ULog::Number(Anim->GetMaxCurrentTime(), "Time: ", "", LO_Viewport);
 	Set_DeathCamera();
 	bDeath = true;
 	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());

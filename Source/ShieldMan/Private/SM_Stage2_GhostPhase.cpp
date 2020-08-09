@@ -49,7 +49,7 @@ void ASM_Stage2_GhostPhase::Tick(float DeltaTime)
 		}
 	}
 	if (!ended) {
-		ULog::Invalid("End Ghost Phase", "", LO_Viewport);
+		//ULog::Invalid("End Ghost Phase", "", LO_Viewport);
 		Exit->OpenDoor();
 		PrimaryActorTick.SetTickFunctionEnable(false);
 		if (m_GhostArr[0] != nullptr) {

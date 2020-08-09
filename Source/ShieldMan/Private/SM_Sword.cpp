@@ -29,7 +29,7 @@ ASM_Sword::ASM_Sword()
 	}
 	else
 	{
-		ULog::Invalid("Sword Skeletal Not Loaded", "", LO_Viewport);
+		//ULog::Invalid("Sword Skeletal Not Loaded", "", LO_Viewport);
 	}
 
 	//애니메이션 설정
@@ -44,7 +44,7 @@ ASM_Sword::ASM_Sword()
 	}
 	else
 	{
-		ULog::Invalid("Sword Anim Not Loaded", "", LO_Viewport);
+		//ULog::Invalid("Sword Anim Not Loaded", "", LO_Viewport);
 	}
 
 	On_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("COLLISION"));
@@ -209,7 +209,7 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 	if (!isHit)
 	{
 		FString OtherCompName = OtherComp->GetName();
-		UE_LOG(LogTemp, Log, TEXT("OverlappedComp : %s"), *OtherComp->GetName());			//COLLISIONSylinder
+		//UE_LOG(LogTemp, Log, TEXT("OverlappedComp : %s"), *OtherComp->GetName());			//COLLISIONSylinder
 		if (FString("RIGHT_SHIELD_GUARD_COLLISION") == OtherCompName || FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
 		{
 			++GuardCount;
@@ -229,7 +229,7 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			{
 				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * ArmReflectPower * 100, TEXT("Bip001-R-Forearm"));
 				auto t = dir * ArmReflectPower * 1000;
-				UE_LOG(LogTemp, Log, TEXT("Right t : %s"), *t.ToString());
+				//UE_LOG(LogTemp, Log, TEXT("Right t : %s"), *t.ToString());
 			}
 
 			StartNiagaraEffect();
@@ -280,7 +280,7 @@ void ASM_Sword::PostInitializeComponents()
 	SwordAnimInstance = Cast<USM_SwordAnimInstance>(GetMesh()->GetAnimInstance());
 	if (SwordAnimInstance != nullptr)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SwordAnimInstance not mapping"));
+		//UE_LOG(LogTemp, Log, TEXT("SwordAnimInstance not mapping"));
 	}
 }
 
@@ -289,7 +289,7 @@ void ASM_Sword::Begin_StageOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 {
 	if (EventTrigger == false)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Begin_StageOverlapBegin"));
+		//UE_LOG(LogTemp, Log, TEXT("Begin_StageOverlapBegin"));
 
 		OtherActor->SetActorLocation(Startto);
 		EventTrigger = true;

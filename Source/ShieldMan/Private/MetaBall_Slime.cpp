@@ -186,13 +186,13 @@ void AMetaBall_Slime::OnRepeatTimer()
 	{
 		RunAwayVec.Normalize();
 		AddForceToVelocity(RunAwayVec, speedPower * 1500);
-		ULog::Invalid("bAttacked", "", LO_Viewport);
+		//ULog::Invalid("bAttacked", "", LO_Viewport);
 	}
 	else if ((RunAwayVec).Size() < 300.f)
 	{
 		RunAwayVec.Normalize();
 		AddForceToVelocity(RunAwayVec, speedPower * 1500);
-		ULog::Invalid("RunAway", "", LO_Viewport);
+		//ULog::Invalid("RunAway", "", LO_Viewport);
 	}
 	else {
 		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
@@ -213,7 +213,7 @@ void AMetaBall_Slime::Attacked()
 	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, 2.f, true);
 	Health -= 20.f;
 	Ball_Size -= 10;		//구의 크기를 줄인다.
-	ULog::Number((float)Ball_Size, "The Number is: ", "", LO_Viewport);
+	//ULog::Number((float)Ball_Size, "The Number is: ", "", LO_Viewport);
 	if (Ball_Size < 20.f) {
 		Ball_Size = 1.f;
 		bAlive = false;
