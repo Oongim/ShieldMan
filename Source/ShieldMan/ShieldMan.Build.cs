@@ -10,6 +10,6 @@ public class ShieldMan : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay","UMG", "AIModule", "GameplayTasks","NavigationSystem","Niagara"});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate","SlateCore" , "Debug"});
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate","SlateCore"});
     }
 }

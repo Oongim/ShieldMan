@@ -7,7 +7,6 @@
 #include <algorithm>
 
 #include "EngineMinimal.h"
-#include "Log.h"
 
 using namespace std;
 
