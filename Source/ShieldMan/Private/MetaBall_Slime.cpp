@@ -217,22 +217,21 @@ void AMetaBall_Slime::Attacked()
 	if (Ball_Size < 20.f) {
 		Ball_Size = 1.f;
 		bAlive = false;
+		Dynamic_Mesh->SetScalarParameterValueOnMaterials(TEXT("BallSize"), Ball_Size);
+
 	}
-	Dynamic_Mesh->SetScalarParameterValueOnMaterials(TEXT("BallSize"), Ball_Size);
-
 }
+	void AMetaBall_Slime::MoveStart()
+	{
+		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
+	}
 
-void AMetaBall_Slime::MoveStart()
-{
-	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
-}
+	bool AMetaBall_Slime::GetAlive()
+	{
+		return bAlive;
+	}
 
-bool AMetaBall_Slime::GetAlive()
-{
-	return bAlive;
-}
-
-void AMetaBall_Slime::setSpeedPower(float power)
-{
-	speedPower = power;
-}
+	void AMetaBall_Slime::setSpeedPower(float power)
+	{
+		speedPower = power;
+	}
