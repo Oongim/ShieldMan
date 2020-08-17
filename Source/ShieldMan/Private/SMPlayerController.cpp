@@ -9,10 +9,10 @@ void ASMPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HUDOverlayAsset)
-	{
-		HUDOverlay = CreateWidget<UUserWidget>(this, HUDOverlayAsset);
-	}
-	HUDOverlay->AddToViewport();
-	HUDOverlay->SetVisibility(ESlateVisibility::Visible);
+	//if (HUDOverlayAsset)
+	//{
+	//	HUDOverlay = CreateWidget<UUserWidget>(this, HUDOverlayAsset);
+	//}
+	//HUDOverlay->AddToViewport();
+	//HUDOverlay->SetVisibility(ESlateVisibility::Visible);
 }

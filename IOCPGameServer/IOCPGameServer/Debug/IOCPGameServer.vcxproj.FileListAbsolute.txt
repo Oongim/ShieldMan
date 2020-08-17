@@ -1,0 +1,2 @@
+C:\UE_project\ShieldMan\ShieldMan\IOCPGameServer\IOCPGameServer\Debug\IOCPGameServer.exe
+C:\UE_project\ShieldMan\ShieldMan\IOCPGameServer\IOCPGameServer\Debug\IOCPGameServer.pdb
