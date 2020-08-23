@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ShieldMan.h"
 #include "GameFramework/GameModeBase.h"
 #include "ShieldManGameMode.generated.h"
 
@@ -13,6 +13,16 @@ class AShieldManGameMode : public AGameModeBase
 
 public:
 	AShieldManGameMode();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Class)
+	TSubclassOf<class AShieldManCharacter> MainCharacterClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Class)
+	TSubclassOf<class ASM_PlayerPawn> ArmCharacterClass;
+
+public:
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
 };
 
 

@@ -46,4 +46,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetTimeStage3();
 
+public:
+	UFUNCTION(BlueprintCallable, Exec)
+		void Host();
+
+	UFUNCTION(BlueprintCallable, Exec)
+		void Join(const  FString& Address);
+
 };

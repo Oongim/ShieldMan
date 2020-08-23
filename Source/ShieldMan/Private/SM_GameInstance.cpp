@@ -3,6 +3,8 @@
 
 #include "SM_GameInstance.h"
 
+
+
 USM_GameInstance::USM_GameInstance()
 {
 	Stage1 = 0;
@@ -36,4 +38,30 @@ float USM_GameInstance::GetTimeStage2()
 float USM_GameInstance::GetTimeStage3()
 {
 	return Stage3;
+}
+
+void USM_GameInstance::Host()
+{
+    UEngine* Engine = GetEngine();
+    if (!ensure(Engine != nullptr)) return;
+
+    Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Hosting")));
+
+    UWorld* World = GetWorld();
+    if (!ensure(World != nullptr)) return;
+
+    World->ServerTravel("/Game/1Stage/Stage1?listen");
+}
+
+void USM_GameInstance::Join(const FString& Address)
+{
+    UEngine* Engine = GetEngine();
+    if (!ensure(Engine != nullptr)) return;
+
+    APlayerController* PlayerController = GetFirstLocalPlayerController();
+
+    if (!ensure(Engine != nullptr)) return;
+    Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
+
+    PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 }

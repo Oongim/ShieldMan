@@ -17,7 +17,6 @@ ASM_PlayerPawn::ASM_PlayerPawn()
 	rol = 0;
 	yaw = 0;
 
-
 	Init_Camera();
 
 	x_move = 0;
@@ -41,16 +40,8 @@ void ASM_PlayerPawn::BeginPlay()
 
 	for (auto FA : FoundActors)
 	{
-		//FA->GetClass()
 		control_character = Cast<AShieldManCharacter>(FA);
-		//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), Cast<AShieldManCharacter>(FA)->GetName());
-		//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), *control_character->GetName());
-		//Camera = control_character->Camera;
-		//SpringArm = control_character->SpringArm;
-
-
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), *control_character->GetName());
 }
 
 // Called every frame
@@ -59,24 +50,24 @@ void ASM_PlayerPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	networkManager->Send_InGame(x_move, y_move, z_move, pit, yaw, rol, x_camera, y_camera, z_camera);
+	//networkManager->Send_InGame(x_move, y_move, z_move, pit, yaw, rol, x_camera, y_camera, z_camera);
 
-	if (networkManager->RecvPacket())
-	{
-		updateArm(networkManager->m_recvcid);
-		updateBody(networkManager->m_recvcid);
-		updateRotateCamera(networkManager->m_recvcid);
-		updateCamera();
-		pit = 0.f;
-		yaw = 0.f;
-		rol = 0.f;
-		x_move = 0.f;
-		y_move = 0.f;
-		z_move = 0.f;
-		x_camera = 0;
-		y_camera = 0;
-		z_camera = 0;
-	}
+	//if (networkManager->RecvPacket())
+	//{
+	//	updateArm(networkManager->m_recvcid);
+	//	updateBody(networkManager->m_recvcid);
+	//	updateRotateCamera(networkManager->m_recvcid);
+	//	updateCamera();
+	//	pit = 0.f;
+	//	yaw = 0.f;
+	//	rol = 0.f;
+	//	x_move = 0.f;
+	//	y_move = 0.f;
+	//	z_move = 0.f;
+	//	x_camera = 0;
+	//	y_camera = 0;
+	//	z_camera = 0;
+	//}
 }
 
 void ASM_PlayerPawn::updateRotateCamera(int recvcid)
