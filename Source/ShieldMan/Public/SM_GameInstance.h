@@ -27,6 +27,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Stage3;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int PlayerNumber;
 	
 	UFUNCTION(BlueprintCallable)
 	void SetTimeStage1(float time);
@@ -46,4 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetTimeStage3();
 
+	UFUNCTION(BlueprintCallable)
+		void SetPlayerNumber(int num);
+
+	UFUNCTION(BlueprintCallable)
+		int GetPlayerNumber();
 };

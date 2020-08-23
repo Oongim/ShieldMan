@@ -8,9 +8,18 @@ USM_GameInstance::USM_GameInstance()
 	Stage1 = 0;
 	Stage2 = 0;
 	Stage3 = 0;
+	PlayerNumber = 0;
 }
 
 
+void USM_GameInstance::SetPlayerNumber(int num)
+{
+	PlayerNumber = num;
+}
+int USM_GameInstance::GetPlayerNumber()
+{
+	return PlayerNumber;
+}
 
 void USM_GameInstance::SetTimeStage1(float time)
 {

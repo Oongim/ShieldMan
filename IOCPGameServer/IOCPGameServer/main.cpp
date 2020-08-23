@@ -270,14 +270,14 @@ void do_rotator_and_move(int user_id, float x, float y, float z, float pitch, fl
 		//if (user_id == i) continue;
 		if (ST_ACTIVE == g_clients[i].m_status)
 		{
-			if (i == 0 || i == 2)
+			if (i == 4 || i == 5)
 			{
 				send_ingame(user_id, i, x, y, z, pitch, yaw, roll, cx, cy, cz);
-				if (user_id == 0 || user_id == 2)
+				if (user_id == 4 || user_id == 5)
 				{
-					//cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
+					cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
 					//cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
-					cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;
+					cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", cz : " << cz << endl;
 				}
 			}
 		}

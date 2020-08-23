@@ -47,10 +47,8 @@ void ASM_PlayerPawn::BeginPlay()
 		//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), *control_character->GetName());
 		//Camera = control_character->Camera;
 		//SpringArm = control_character->SpringArm;
-
-
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), *control_character->GetName());
+
 }
 
 // Called every frame

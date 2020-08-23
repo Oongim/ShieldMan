@@ -45,9 +45,23 @@ ASM_ShootObject::ASM_ShootObject()
 void ASM_ShootObject::BeginPlay()
 {
 	Super::BeginPlay();
-	auto p = GetWorld()->GetPawnIterator();
 
-	Player = Cast<AShieldManCharacter>(*p);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+
+	for (auto FA : FoundActors)
+	{
+		//FA->GetClass()
+		Player = Cast<AShieldManCharacter>(FA);
+		//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), Cast<AShieldManCharacter>(FA)->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("control_character->GetName() = %s"), *control_character->GetName());
+		//Camera = control_character->Camera;
+		//SpringArm = control_character->SpringArm;
+	}
+
+	//auto p = GetWorld()->GetPawnIterator();
+
+	//Player = Cast<AShieldManCharacter>(*p);
 	
 	PrimaryActorTick.SetTickFunctionEnable(false);
 }
