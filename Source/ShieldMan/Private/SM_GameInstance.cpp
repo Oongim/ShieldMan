@@ -2,7 +2,7 @@
 
 
 #include "SM_GameInstance.h"
-
+#include "NetworkManager.h"
 
 
 USM_GameInstance::USM_GameInstance()
@@ -10,6 +10,9 @@ USM_GameInstance::USM_GameInstance()
 	Stage1 = 0;
 	Stage2 = 0;
 	Stage3 = 0;
+
+    networkManager= CreateDefaultSubobject<UNetworkManager>(TEXT("NETWORKMANAGER"));
+
 }
 
 
@@ -50,6 +53,7 @@ void USM_GameInstance::Host()
     UWorld* World = GetWorld();
     if (!ensure(World != nullptr)) return;
 
+   // networkManager->ConnectServer(FString{"127.0.0.1"});
     World->ServerTravel("/Game/1Stage/Stage1?listen");
 }
 
@@ -62,6 +66,12 @@ void USM_GameInstance::Join(const FString& Address)
 
     if (!ensure(Engine != nullptr)) return;
     Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
-
+   // networkManager->ConnectServer(Address);
     PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+
+}
+
+UNetworkManager* USM_GameInstance::GetNetworkManager()
+{
+    return networkManager;
 }

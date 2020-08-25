@@ -23,10 +23,15 @@ private:   //private변수들
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
-
+	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated,VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance, meta = (AllowPrivateAccess = "true"))
 	class USMAnimInstance* AnimInstance;
+
+	UPROPERTY(Replicated)
+		FVector RightHandPos;
+	UPROPERTY(Replicated)
+		FVector LeftHandPos;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand, meta = (AllowPrivateAccess = "true"))
@@ -73,12 +78,22 @@ private:
 
 	FTimerHandle DeathTimer;
 
+	FTimerHandle PlayerStateTimer;
+
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = AttackTime, meta = (AllowPrivateAccess = "true"))
 	float AttackDelayTime;
 
 	bool bAttackPossible;
 	
 	bool bDeath;
+
+	class ASM_PlayerState* PS;
+
+	class ASM_GameState* GS;
+
+	class AGameModeBase* GM;
+
+	bool bStateExist;
 
 public:		//생성자 , public 변수
 	AShieldManCharacter();
@@ -121,7 +136,6 @@ protected: //조작
 
 	/*팔 앞뒤 조종*/
 	void AddControllerRolInput(float Val);
-
 	virtual void AddControllerYawInput(float Val) override;
 	virtual void AddControllerPitchInput(float Val) override;
 
@@ -177,8 +191,8 @@ public:		//public 함수
 	UFUNCTION()
 		bool isDeath();
 
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
-
-
+	virtual void Tick(float DeltaTime) override;
 };
 

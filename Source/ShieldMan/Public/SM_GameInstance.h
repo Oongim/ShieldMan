@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Stage3;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Network)
+	class UNetworkManager* networkManager;
+
 	
 	UFUNCTION(BlueprintCallable)
 	void SetTimeStage1(float time);
@@ -46,6 +49,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetTimeStage3();
 
+
+
 public:
 	UFUNCTION(BlueprintCallable, Exec)
 		void Host();
@@ -53,4 +58,6 @@ public:
 	UFUNCTION(BlueprintCallable, Exec)
 		void Join(const  FString& Address);
 
+	UFUNCTION(BlueprintCallable)
+		UNetworkManager* GetNetworkManager();
 };

@@ -11,6 +11,9 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
+#include "SM_PlayerState.h"
+#include "SM_GameState.h"
 
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
@@ -38,7 +41,6 @@ AShieldManCharacter::AShieldManCharacter()
 	Init_Mesh();
 
 	Init_Camera();
-
 	//Init_PhysicalAnim();
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
@@ -89,6 +91,30 @@ AShieldManCharacter::AShieldManCharacter()
 	Effect = CreateDefaultSubobject<UParticleSystem>(TEXT("EFFECT"));
 
 	HPlock = false;
+
+	SetReplicates(true);
+	bReplicates = true;
+	GetMesh()->SetIsReplicated(true);
+}
+
+void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AShieldManCharacter, RightHandPos);
+	DOREPLIFETIME(AShieldManCharacter, LeftHandPos);
+	DOREPLIFETIME(AShieldManCharacter, AnimInstance);
+}
+
+void AShieldManCharacter::Tick(float DeltaTime)
+{
+	if (nullptr == AnimInstance) {
+		if(GetMesh()->GetAnimInstance() != nullptr)
+			AnimInstance=Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
+		return; 
+	}
+	AnimInstance->SetHand_RightPos(RightHandPos);
+	AnimInstance->SetHand_LeftPos(LeftHandPos);
 }
 
 bool AShieldManCharacter::CanSetShield()
@@ -126,10 +152,6 @@ void AShieldManCharacter::Init_Mesh()
 	if (SK_MANNEQUIN.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(SK_MANNEQUIN.Object);
-	}
-	else
-	{
-		//ULog::Invalid("No Character", "", LO_Viewport);
 	}
 	//애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -221,6 +243,8 @@ void AShieldManCharacter::PostInitializeComponents()
 
 	}
 	Left_Shield_Collision->OnComponentBeginOverlap.AddDynamic(this, &AShieldManCharacter::OnShieldOverlapBegin);
+
+	//GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &AShieldManCharacter::SetPlayerState, 0.5f);
 }
 
 void AShieldManCharacter::SetBodyControl()
@@ -265,6 +289,7 @@ void AShieldManCharacter::SwitchLevel(FName LevelName)
 			UGameplayStatics::OpenLevel(World, LevelName);
 		}
 	}
+
 }
 
 void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
@@ -397,13 +422,23 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 	if (CurControlMode->isControlMode(BodyControlMode)) {
 		//if(CurrentStatus== CharacterStatus::PossibleMove)
 			Super::AddControllerYawInput(Val);
+			if (nullptr != GetPlayerState()) {
+				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
+				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
+
+				PS->ControllerRot = GetController()->GetControlRotation();
+			}
 	}
 	//좌 우 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
+		RightHandPos.Y += Val;
+		AnimInstance->SetHand_RightPos(RightHandPos);
+		//AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
+		LeftHandPos.Y -= Val;
+		AnimInstance->SetHand_LeftPos(LeftHandPos);
+		//AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
 
 	}
 }
@@ -414,13 +449,23 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 	if (CurControlMode->isControlMode(BodyControlMode)) {
 		//if (CurrentStatus == CharacterStatus::PossibleMove)
 			Super::AddControllerPitchInput(Val);
+			if (nullptr != GetPlayerState()) {
+				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
+				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
+
+				PS->ControllerRot = GetController()->GetControlRotation();
+				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ControllerRot : %f, %f, %f"), PS->ControllerRot.Pitch, PS->ControllerRot.Yaw, PS->ControllerRot.Roll));
+			}
 	}
 	//위 아래 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ Val, 0.f, 0.f });
+
+		RightHandPos.X += Val;
+		AnimInstance->SetHand_RightPos(RightHandPos);
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ Val, 0.f, 0.f });
+		LeftHandPos.X += Val;
+		AnimInstance->SetHand_LeftPos(LeftHandPos);
 	}
 }
 
@@ -430,10 +475,12 @@ void AShieldManCharacter::AddControllerRolInput(float Val)
 	Val *= 2;
 	//앞 뒤 이동
 	if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ 0.f, 0.f, Val });
+		RightHandPos.Z += Val;
+		AnimInstance->SetHand_RightPos(RightHandPos);
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
+		LeftHandPos.Z -= Val;
+		AnimInstance->SetHand_LeftPos(LeftHandPos);
 	}
 }
 
@@ -484,7 +531,6 @@ void AShieldManCharacter::MoveRight(float Value)
 		else if (CurControlMode->isControlMode(LHandControlMode)) {
 			AnimInstance->AddHand_LeftRot({ 0.f, Value, 0.f });
 		}
-		
 	}
 }
 

@@ -10,6 +10,8 @@ UCLASS(minimalapi)
 class AShieldManGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+private:
+	int32 PlayerNum;
 
 public:
 	AShieldManGameMode();
@@ -22,7 +24,8 @@ public:
 
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
-
+	void PostLogin(APlayerController* NewPlayer);
+	void Logout(AController* Exiting);
 };
 
 

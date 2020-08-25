@@ -11,6 +11,7 @@ UNetworkManager::UNetworkManager()
 	// ...
 }
 // Called when the game starts
+
 void UNetworkManager::BeginPlay()
 {
 
@@ -30,7 +31,8 @@ void UNetworkManager::BeginPlay()
 bool UNetworkManager::ConnectServer(FString IP)
 {
 	//GetIp(TCHAR_TO_ANSI(*IP));
-	GetIp("127.0.0.1");
+	//UE_LOG(LogTemp, Error, TEXT("IP : %s", IP));
+	GetIp(TCHAR_TO_ANSI(*IP));
 	//UE_LOG(LogTemp, Warning, TEXT("UNetworkManager ConnectServer"));
 
 	WSADATA wsa;

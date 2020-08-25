@@ -5,11 +5,15 @@
 #include "ShieldManCharacter.h"
 #include "SMAnimInstance.h"
 #include "SM_GameState.h"
+#include "SM_PlayerState.h"
+#include "BodyControl.h"
+#include "RHandControl.h"
+#include "LHandControl.h"
 
 // Sets default values
 ASM_ArmPlayerPawn::ASM_ArmPlayerPawn()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	Init_Camera();
@@ -26,26 +30,28 @@ void ASM_ArmPlayerPawn::BeginPlay()
 	{
 		MainCharacter = Cast<AShieldManCharacter>(FA);
 	}
+	bStateExist = false;
+	GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 1.0f);
 }
 
 // Called every frame
 void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!bStateExist) return;
+	if (nullptr == MainCharacter) {
+		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("MainCharacter Nullptr")));
+		return;
+	}
 
-	//UGameplayStatics::GetGameMode(GetWorld())->GetGameState<ASM_GameState>();
-
-	//게임모드의 로그인후 함수에서 게임스테이트에 플레이어 컨트롤러를 변수로 하나씩 저장해놓고 바꾸면 되지않을까
-
-	/*auto p = GetWorld()->GetPlayerControllerIterator();
-	p++;
-	auto PC = Cast<APlayerController>(*p);
-	if (PC == nullptr) { 
-		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Red, FString::Printf(TEXT("APlayerController nullptr")));
-		return; 
-	}*/
-	SetActorLocationAndRotation(MainCharacter->GetActorLocation(), MainCharacter->GetActorRotation()/*PC->GetControlRotation()*/);
-	
+	Controller->SetControlRotation(PS->GetControllerRot());
+	SetActorLocation(MainCharacter->GetActorLocation());
+	//if (ControlMode->isControlMode(RHandControlMode)) {
+	//	GS->RightHandPos = RightHandPos;
+	//}
+	//else if (ControlMode->isControlMode(LHandControlMode)) {
+	//	GS->LeftHandPos = LeftHandPos;
+	//}
 }
 
 // Called to bind functionality to input
@@ -53,7 +59,52 @@ void ASM_ArmPlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis("Turn", this, &ASM_ArmPlayerPawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &ASM_ArmPlayerPawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("MouseWheel", this, &ASM_ArmPlayerPawn::AddControllerRolInput);
 }
+void ASM_ArmPlayerPawn::AddControllerYawInput(float Val)
+{
+	if (bStateExist) {
+		//좌 우 이동
+		if (ControlMode->isControlMode(RHandControlMode)) {
+			RightHandPos.Y += Val;
+
+		}
+		else if (ControlMode->isControlMode(LHandControlMode)) {
+			LeftHandPos.Y -= Val;
+
+		}
+	}
+}
+
+void ASM_ArmPlayerPawn::AddControllerPitchInput(float Val)
+{
+	if (bStateExist) {
+		//위 아래 이동
+		if (ControlMode->isControlMode(RHandControlMode)) {
+			RightHandPos.X += Val;
+		}
+		else if (ControlMode->isControlMode(LHandControlMode)) {
+			LeftHandPos.X += Val;
+		}
+	}
+}
+
+void ASM_ArmPlayerPawn::AddControllerRolInput(float Val)
+{
+	if (bStateExist) {
+		Val *= 2;
+		//앞 뒤 이동
+		if (ControlMode->isControlMode(RHandControlMode)) {
+			RightHandPos.Z += Val;
+		}
+		else if (ControlMode->isControlMode(LHandControlMode)) {
+			LeftHandPos.Z -= Val;
+		}
+	}
+}
+
 
 void ASM_ArmPlayerPawn::Init_Camera()
 {
@@ -82,4 +133,30 @@ void ASM_ArmPlayerPawn::Init_Camera()
 		FVector(0.0f, 0.0f, 80.0f),
 		FRotator(-5.f, 0.f, 0.f)
 	);
+}
+
+void ASM_ArmPlayerPawn::SetPlayerState()
+{
+	if (nullptr != GetPlayerState()) {
+		PS = Cast<ASM_PlayerState>(GetPlayerState());
+
+		if ("RightArm" == PS->GetPlayerName())
+			SetControlMode(RHandControlMode);
+		else if ("LeftArm" == PS->GetPlayerName())
+			SetControlMode(LHandControlMode);
+
+		bStateExist = true;
+	}
+	else
+		GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 0.5f);
+}
+
+
+void ASM_ArmPlayerPawn::SetControlMode(EControlMode ControlType)
+{
+	if (LHandControlMode == ControlType)
+		ControlMode = new LHandControl();
+
+	if (RHandControlMode == ControlType)
+		ControlMode = new RHandControl();
 }

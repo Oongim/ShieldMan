@@ -20,7 +20,24 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* Camera;
 
+	class ASM_GameState* GameState;
+
 	class AShieldManCharacter* MainCharacter;
+
+	FTimerHandle PlayerStateTimer;
+
+	bool bStateExist;
+
+	class ASM_PlayerState* PS;
+
+	class ASM_GameState* GS;
+
+	class AGameModeBase* GM;
+
+	class ControlMode* ControlMode;
+
+	FVector RightHandPos;
+	FVector LeftHandPos;
 
 public:
 	// Sets default values for this pawn's properties
@@ -30,6 +47,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/*ÆÈ ¾ÕµÚ Á¶Á¾*/
+	void AddControllerRolInput(float Val);
+	virtual void AddControllerYawInput(float Val) override;
+	virtual void AddControllerPitchInput(float Val) override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -38,4 +60,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void Init_Camera();
+
+	void SetPlayerState();
+
+	void SetControlMode(EControlMode ControlType);
 };
