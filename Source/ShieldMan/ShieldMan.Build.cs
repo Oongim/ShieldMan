@@ -8,7 +8,7 @@ public class ShieldMan : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay","UMG", "AIModule", "GameplayTasks","NavigationSystem","Niagara"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay","UMG", "AIModule", "GameplayTasks","NavigationSystem","Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate","SlateCore"});
     }

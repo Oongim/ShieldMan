@@ -78,9 +78,12 @@ void AMetaBall_Ghost::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto p = GetWorld()->GetPawnIterator();
-
-	Player = Cast<AShieldManCharacter>(*p);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+	for (auto FA : FoundActors)
+	{
+		Player = Cast<AShieldManCharacter>(FA);
+	}
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		MaterialParamName[i] = "";

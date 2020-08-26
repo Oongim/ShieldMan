@@ -1,12 +1,12 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
-
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include "Engine.h"
-
+//#include "Online.h"
+#include "UnrealNetwork.h"
 #include "EngineMinimal.h"
 
 using namespace std;

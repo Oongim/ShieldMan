@@ -56,9 +56,14 @@ void AMetaBall_Boss::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto p = GetWorld()->GetPawnIterator();
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+	for (auto FA : FoundActors)
+	{
+		Player = Cast<AShieldManCharacter>(FA);
+	}
 
-	Player = Cast<AShieldManCharacter>(*p);
+
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {

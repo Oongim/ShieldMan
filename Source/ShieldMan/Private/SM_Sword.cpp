@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Engine/GameInstance.h"
 
 #include "SM_SwordAnimInstance.h"
 #include "SM_Shield.h"
@@ -86,8 +87,15 @@ void ASM_Sword::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto p = GetWorld()->GetPawnIterator();
-	Player = Cast<AShieldManCharacter>(*p);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+	for (auto FA : FoundActors)
+	{
+		Player = Cast<AShieldManCharacter>(FA);
+	}
+	
+	//auto p = GetWorld()->GetPawnIterator();
+	//Player = Cast<AShieldManCharacter>(*p);
 	PrimaryActorTick.SetTickFunctionEnable(false);
 	
 
@@ -137,6 +145,7 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 
 void ASM_Sword::Animate(float DeltaTime)
 {
+
 	FRotator ToPlayerInterpRot =
 		FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player->GetActorLocation()).Rotation(), DeltaTime, 0.60f);
 	FVector loc{ UKismetMathLibrary::DegCos(Rotatetime) * RadiusX, UKismetMathLibrary::DegSin(Rotatetime) * RadiusY, 0.f };
@@ -210,6 +219,8 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 	{
 		FString OtherCompName = OtherComp->GetName();
 		//UE_LOG(LogTemp, Log, TEXT("OverlappedComp : %s"), *OtherComp->GetName());			//COLLISIONSylinder
+
+
 		if (FString("RIGHT_SHIELD_GUARD_COLLISION") == OtherCompName || FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
 		{
 			++GuardCount;
@@ -241,12 +252,9 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			FVector dir = Player->GetActorLocation() - GetActorLocation();
 			dir.Normalize();
 			float BodyReflectPower = -1000.f;
-			if (FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
+			if (rand()% 2 == 1)
 			{
 				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * BodyReflectPower * 100, TEXT("Bip001-L-UpperArm"));
-
-				//auto t = dir * ArmReflectPower * 1000;
-				//UE_LOG(LogTemp, Log, TEXT("LEFT t : %s"), *t.ToString());
 			}
 			else
 			{

@@ -221,17 +221,17 @@ void AMetaBall_Slime::Attacked()
 
 	}
 }
-	void AMetaBall_Slime::MoveStart()
-	{
-		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
-	}
+void AMetaBall_Slime::MoveStart()
+{
+	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
+}
 
-	bool AMetaBall_Slime::GetAlive()
-	{
-		return bAlive;
-	}
+bool AMetaBall_Slime::GetAlive()
+{
+	return bAlive;
+}
 
-	void AMetaBall_Slime::setSpeedPower(float power)
-	{
-		speedPower = power;
-	}
+void AMetaBall_Slime::setSpeedPower(float power)
+{
+	speedPower = power;
+}
