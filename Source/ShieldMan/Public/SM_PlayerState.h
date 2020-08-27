@@ -32,4 +32,6 @@ public:
 	void InitPlayerData(ASM_GameState* game_state,FString name);
 
 	FRotator GetControllerRot();
+
+
 };

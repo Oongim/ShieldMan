@@ -38,6 +38,7 @@ struct OtherPlayerInfo {
 public:
 	APlayerController* m_otherController;
 	float m_x, m_y, m_z;
+	float m_camerax, m_cameray, m_cameraz;
 	float m_pitch, m_yaw, m_roll;
 	float m_speed, m_direction;
 	char m_id[MAX_ID_LEN];
@@ -47,6 +48,12 @@ public:
 	PLAYER_POSITION_TYPE m_type;
 	UE_Player_EVENT_TYPE m_player_event;
 	bool m_connecting;
+
+
+	float rp = 0, ry = 0, rr = 0;
+	float lp = 0, ly = 0, lr = 0;
+	float cx = 0, cy = 0;
+
 	OtherPlayerInfo(float x, float y, float z, char m_id[MAX_ID_LEN], APlayerController*, int cid);
 	OtherPlayerInfo();
 };
@@ -94,9 +101,11 @@ public:
 	int nTotalSockets = 0;
 	WSANETWORKEVENTS m_netWorkEvents;
 	const char* m_ip = nullptr;
+	int m_cid = 0;
 	int m_recvcid = 0;
 	PlayerInfo m_playerInfo;
-	OtherPlayerInfo m_OtherPlayer[2];
+	OtherPlayerInfo m_OtherPlayer[3];
+	FRotator temp = { 0.f,0.f,0.f };
 public:
 	// Sets default values for this component's properties
 	UNetworkManager();

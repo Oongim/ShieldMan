@@ -15,7 +15,7 @@ ASM_ArmPlayerPawn::ASM_ArmPlayerPawn()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	networkManager = CreateDefaultSubobject< UNetworkManager>("networkManager");
 	Init_Camera();
 }
 
@@ -29,9 +29,19 @@ void ASM_ArmPlayerPawn::BeginPlay()
 	for (auto FA : FoundActors)
 	{
 		MainCharacter = Cast<AShieldManCharacter>(FA);
+		//SetControlMode(RHandControlMode);
 	}
 	bStateExist = false;
-	GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 1.0f);
+	if (true == networkManager->ConnectServer("127.0.0.1"))
+	{
+		networkManager->RecvPacket();
+	}
+	else
+	{
+
+	}
+	SetPlayerState();
+	GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 0.5f);;
 }
 
 // Called every frame
@@ -44,14 +54,43 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 		return;
 	}
 
-	Controller->SetControlRotation(PS->GetControllerRot());
-	SetActorLocation(MainCharacter->GetActorLocation());
-	//if (ControlMode->isControlMode(RHandControlMode)) {
-	//	GS->RightHandPos = RightHandPos;
-	//}
-	//else if (ControlMode->isControlMode(LHandControlMode)) {
-	//	GS->LeftHandPos = LeftHandPos;
-	//}
+	//SetPlayerState();
+	networkManager->Send_InGame(0, 0, 0, pit, yaw, rol, 0, 0, 0);
+	networkManager->RecvPacket();
+	pit = yaw = rol = 0.f;
+
+
+	/*if (nullptr == AnimInstance) {
+		if (GetMesh()->GetAnimInstance() != nullptr)
+			AnimInstance = Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
+		return;
+	}*/
+
+	if (nullptr == Controller)
+	{
+
+	}
+	else
+	{
+		FRotator c{ networkManager->m_OtherPlayer[0].cx,
+			networkManager->m_OtherPlayer[0].cy,0 };
+		Controller->SetControlRotation(FRotator{ c });
+
+		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ASM_ArmPlayerPawn ControllerRot : %f, %f, %f"),
+			c.Pitch, c.Yaw, c.Roll));
+		//GEngine->Message
+
+		//Controller->SetControlRotation(FRotator{ c.Pitch, c.Yaw, 0 });
+		SetActorLocation(MainCharacter->GetActorLocation());
+		//Camera->SetWorldLocation();
+		//GetWorldTransform();
+		//Camera->SetWorldTransform(GetWorldTransform());
+		//Camera->SetRelativeRotation(FRotator{ c.Yaw, c.Pitch, c.Roll });
+	}
+	
+	//Camera->SetRelativeRotation(FRotator{ c.Yaw, c.Pitch, c.Roll });
+	//Camera->SetWorldRotation(FRotator{ c.Yaw, c.Pitch, 0 });
+
 }
 
 // Called to bind functionality to input
@@ -68,11 +107,13 @@ void ASM_ArmPlayerPawn::AddControllerYawInput(float Val)
 	if (bStateExist) {
 		//좌 우 이동
 		if (ControlMode->isControlMode(RHandControlMode)) {
-			RightHandPos.Y += Val;
+			//RightHandPos.Y += Val;
+			yaw += Val;
 
 		}
 		else if (ControlMode->isControlMode(LHandControlMode)) {
-			LeftHandPos.Y -= Val;
+			//LeftHandPos.Y -= Val;
+			yaw -= Val;
 
 		}
 	}
@@ -83,10 +124,12 @@ void ASM_ArmPlayerPawn::AddControllerPitchInput(float Val)
 	if (bStateExist) {
 		//위 아래 이동
 		if (ControlMode->isControlMode(RHandControlMode)) {
-			RightHandPos.X += Val;
+			//RightHandPos.X += Val;
+			pit += Val;
 		}
 		else if (ControlMode->isControlMode(LHandControlMode)) {
-			LeftHandPos.X += Val;
+			//LeftHandPos.X += Val;
+			pit += Val;
 		}
 	}
 }
@@ -97,10 +140,12 @@ void ASM_ArmPlayerPawn::AddControllerRolInput(float Val)
 		Val *= 2;
 		//앞 뒤 이동
 		if (ControlMode->isControlMode(RHandControlMode)) {
-			RightHandPos.Z += Val;
+			//RightHandPos.Z += Val;
+			rol += Val;
 		}
 		else if (ControlMode->isControlMode(LHandControlMode)) {
-			LeftHandPos.Z -= Val;
+			//LeftHandPos.Z -= Val;
+			rol -= Val;
 		}
 	}
 }
@@ -139,20 +184,24 @@ void ASM_ArmPlayerPawn::SetPlayerState()
 {
 	if (nullptr != GetPlayerState()) {
 		PS = Cast<ASM_PlayerState>(GetPlayerState());
-
 		if ("RightArm" == PS->GetPlayerName())
 			SetControlMode(RHandControlMode);
 		else if ("LeftArm" == PS->GetPlayerName())
 			SetControlMode(LHandControlMode);
 
 		bStateExist = true;
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("SetPlayerState")));
+
 	}
 	else
+	{
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetWorldTimerManager")));
 		GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 0.5f);
+	}
 }
 
 
-void ASM_ArmPlayerPawn::SetControlMode(EControlMode ControlType)
+void ASM_ArmPlayerPawn::SetControlMode(int ControlType)
 {
 	if (LHandControlMode == ControlType)
 		ControlMode = new LHandControl();

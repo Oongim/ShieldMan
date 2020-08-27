@@ -8,6 +8,14 @@ SOCKET l_socket;
 int g_user_id = 0;
 int g_user_cnt = 0;
 bool g_isEvent = false;
+float chax = 0.f;
+float chay = 0.f;
+float Lpit = 0.f;
+float Lyaw = 0.f;
+float Lrol = 0.f;
+float Rpit = 0.f;
+float Ryaw = 0.f;
+float Rrol = 0.f;
 
 void send_packet(int user_id, void* p)
 {
@@ -237,6 +245,23 @@ void send_connect(int user_id)
 	send_packet(user_id, &p);
 }
 
+void send_characterinfo(int user_id, int o_id)
+{
+	sc_packet_character_info p;
+	p.id = o_id;
+	p.size = sizeof(p);
+	p.type = S2C_CHARACTERINFO;
+	p.rp = Rpit;
+	p.ry = Ryaw;
+	p.rr = Rrol;
+	p.lp = Lpit;
+	p.ly = Lyaw;
+	p.lr = Lrol;
+	p.cx = chax;
+	p.cy = chay;
+	send_packet(user_id, &p);
+}
+
 void send_ingame(int user_id, int o_id, float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
 {
 	sc_packet_in_game p;
@@ -246,11 +271,11 @@ void send_ingame(int user_id, int o_id, float x, float y, float z, float pitch, 
 	p.x = x;
 	p.y = y;
 	p.z = z;
-	p.yaw = yaw;
-	p.pitch = pitch;
-	p.roll = roll;
-	p.cx = cx;
-	p.cy = cy;
+	p.yaw = Ryaw;
+	p.pitch = Rpit;
+	p.roll = Rrol;
+	p.cx = chax;
+	p.cy = chay;
 	p.cz = cz;
 	send_packet(user_id, &p);
 }
@@ -258,33 +283,51 @@ void send_ingame(int user_id, int o_id, float x, float y, float z, float pitch, 
 void do_rotator_and_move(int user_id, float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
 {
 	CLIENT& g_c = g_clients[user_id];
-
-
-	send_ingame(user_id, user_id, x, y, z, pitch , yaw, roll, cx, cy, cz);
+	if (user_id == 0)
+	{
+		chax = cx;
+		chay = cy;
+	}
+	else if (user_id == 2)
+	{
+		Rpit = pitch;
+		Ryaw = yaw;
+		Rrol = roll;
+	}
+	else if (user_id == 6)
+	{
+		Lpit = pitch;
+		Lyaw = yaw;
+		Lrol = roll;
+	}
+	send_characterinfo(user_id, user_id);
+	//send_ingame(user_id, user_id, x, y, z, pitch, yaw, roll, cx, cy, cz);
 	/*cout << user_id << "번 클라이언트 " <<" x : " << x << ", y : " << y << ", roll : " << z << endl;
 	cout << user_id << "번 클라이언트 " <<" yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
 	cout << user_id << "번 클라이언트 " <<" cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;*/
 	//cout << "yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
 	for (int i = 0; i < MAX_USER; i++)
 	{
-		//if (user_id == i) continue;
+		if (user_id == i) continue;
 		if (ST_ACTIVE == g_clients[i].m_status)
 		{
-			if (i == 0 || i == 2)
-			{
-				send_ingame(user_id, i, x, y, z, pitch, yaw, roll, cx, cy, cz);
-				if (user_id == 0 || user_id == 2)
-				{
-					//cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
-					//cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
-					cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", roll : " << cz << endl;
-				}
-			}
+			send_characterinfo(user_id, i);
+
+			//send_ingame(user_id, i, x, y, z, pitch, yaw, roll, cx, cy, cz);
+			//if(user_id == 0)
+			//if(user_id == 6 && i == 0)
+			//	cout << user_id << "번 클라이언트가 " << i << "번 에게 Lyaw : " << Lyaw << ", Lpit : " << Lpit << ", Lrol : " << Lrol << endl;
+			//else if (user_id == 6 && i == 2)
+			//	cout << user_id << "번 클라이언트가 " << i << "번 에게 Lyaw : " << Lyaw << ", Lpit : " << Lpit << ", Lrol : " << Lrol << endl;
+			//cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
+			//if(user_id == 2 && i == 0)
+				//cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
+			//cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", cy : " << cz << endl;
 		}
 	}
 }
 
-
+int cnt = 0;
 void process_packet(int user_id, char* buf)
 {
 	switch (buf[1]) {
@@ -299,7 +342,10 @@ void process_packet(int user_id, char* buf)
 		cs_packet_enter* packet = reinterpret_cast<cs_packet_enter*>(buf);
 		//cout << user_id << "g_clients[user_id].m_id : " << packet->name << endl;
 		cout << g_clients[user_id].m_id << "번 클라이언트의 msg : C2S_ENTER" << endl;
-		enter_game(user_id, packet->name);
+		++cnt;
+			enter_game(user_id, packet->name);
+
+
 	}
 	break;
 	case C2S_MATCHING:

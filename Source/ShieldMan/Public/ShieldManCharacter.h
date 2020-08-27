@@ -7,6 +7,7 @@
 #include "LHandControl.h"
 #include "ShieldMan.h"
 #include "GameFramework/Character.h"
+#include "NetworkManager.h"
 #include "ShieldManCharacter.generated.h"
 
 
@@ -194,5 +195,20 @@ public:		//public ÇÔ¼ö
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 	virtual void Tick(float DeltaTime) override;
+
+
+
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite)
+	class UNetworkManager* networkManager;
+
+	float mx = 0;
+	float my = 0;
+	float mz = 0;
+	float cx = 0;
+	float cy = 0;
+	float cz = 0;
 };
 

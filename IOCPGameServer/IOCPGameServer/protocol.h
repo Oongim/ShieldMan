@@ -26,6 +26,7 @@ constexpr auto MAX_USER = 1000;
 #define S2C_ENTER					7
 #define S2C_ENTER_OK				8
 #define S2C_CONNECT				9
+#define S2C_CHARACTERINFO		10
 enum PLAYER_POSITION_TYPE
 {
 	PPT_NONE = 0, PPT_ARMR, PPT_BODY, PPT_ARML
@@ -95,6 +96,16 @@ struct sc_packet_in_game		//우리 게임에서의 카메라, 팔 움직임
 	float x, y, z;
 	float yaw, pitch, roll;
 	float cx, cy, cz;
+};
+
+struct sc_packet_character_info		//우리 게임에서의 카메라, 팔 움직임
+{
+	char size;
+	char type;
+	int id;
+	float rp, ry, rr;
+	float lp, ly, lr;
+	float cx, cy;
 };
 
 struct sc_packet_enter	

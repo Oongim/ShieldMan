@@ -1,2 +1,5 @@
 C:\UE_project\ShieldMan\ShieldMan\IOCPGameServer\IOCPGameServer\Debug\IOCPGameServer.exe
 C:\UE_project\ShieldMan\ShieldMan\IOCPGameServer\IOCPGameServer\Debug\IOCPGameServer.pdb
+C:\Unreal Engine\ShieldMan\IOCPGameServer\Debug\IOCPGameServer.pdb
+C:\Unreal Engine\ShieldMan\IOCPGameServer\IOCPGameServer\Debug\IOCPGameServer.exe
+C:\Unreal Engine\ShieldMan\IOCPGameServer\IOCPGameServer\Debug\IOCPGameServer.pdb

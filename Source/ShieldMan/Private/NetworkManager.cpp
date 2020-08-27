@@ -6,7 +6,7 @@ UNetworkManager::UNetworkManager()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -182,22 +182,6 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		{
 			const sc_packet_enter* my_packet = reinterpret_cast<const sc_packet_enter*>(packet);
 
-			if (!m_OtherPlayer[0].m_connecting)
-			{
-				m_OtherPlayer[0].m_connecting = true;
-				m_OtherPlayer[0].m_cid = my_packet->id;
-				strcpy_s(m_OtherPlayer[0].m_name, my_packet->name);
-
-				UE_LOG(LogTemp, Warning, TEXT("id[%d]: m_OtherPlayer[0] id : %d"), m_playerInfo.m_cid, m_OtherPlayer[0].m_cid);
-			}
-			else if (!m_OtherPlayer[1].m_connecting)
-			{
-				m_OtherPlayer[1].m_connecting = true;
-				m_OtherPlayer[1].m_cid = my_packet->id;
-				strcpy_s(m_OtherPlayer[1].m_name, my_packet->name);
-				UE_LOG(LogTemp, Warning, TEXT("id[%d]: m_OtherPlayer[1] id : %d"), m_playerInfo.m_cid, m_OtherPlayer[1].m_cid);
-			}
-			//UE_LOG(LogTemp, Warning, TEXT("UNetworkManager PacketProcess S2C_ENTER"));
 			break;
 		}
 
@@ -261,69 +245,68 @@ bool UNetworkManager::PacketProcess(const char* packet)
 			break;
 		}
 
+		case S2C_CHARACTERINFO:
+		{
+			const sc_packet_character_info* packet_S2C_character_info = reinterpret_cast<const sc_packet_character_info*>(packet);
+
+			m_OtherPlayer[0].rp = packet_S2C_character_info->rp;
+			m_OtherPlayer[0].ry = packet_S2C_character_info->ry;
+			m_OtherPlayer[0].rr = packet_S2C_character_info->rr;
+			m_OtherPlayer[0].lp = packet_S2C_character_info->lp;
+			m_OtherPlayer[0].ly = packet_S2C_character_info->ly;
+			m_OtherPlayer[0].lr = packet_S2C_character_info->lr;
+			m_OtherPlayer[0].cx = packet_S2C_character_info->cx;
+			m_OtherPlayer[0].cy = packet_S2C_character_info->cy;
+		}
+
 		case S2C_INGAME:
 		{
 			const sc_packet_in_game* packet_S2C_INGAME = reinterpret_cast<const sc_packet_in_game*>(packet);
-			m_recvcid = packet_S2C_INGAME->id;
-
-			m_playerInfo.m_x = packet_S2C_INGAME->x;
-			m_playerInfo.m_y = packet_S2C_INGAME->y;
-			m_playerInfo.m_z = packet_S2C_INGAME->z;
-			m_playerInfo.m_roll = packet_S2C_INGAME->roll;
-			m_playerInfo.m_pitch = packet_S2C_INGAME->pitch;
-			m_playerInfo.m_yaw = packet_S2C_INGAME->yaw;
-			m_playerInfo.m_camerax = packet_S2C_INGAME->cx;
-			m_playerInfo.m_cameray = packet_S2C_INGAME->cy;
-			m_playerInfo.m_cameraz = packet_S2C_INGAME->cz;
-
+			if (packet_S2C_INGAME->id == 0)
+			{
+				m_recvcid = 0;
+				m_OtherPlayer[0].m_x = packet_S2C_INGAME->x;
+				m_OtherPlayer[0].m_y = packet_S2C_INGAME->y;
+				m_OtherPlayer[0].m_z = packet_S2C_INGAME->z;
+				m_OtherPlayer[0].m_roll = packet_S2C_INGAME->roll;
+				m_OtherPlayer[0].m_pitch = packet_S2C_INGAME->pitch;
+				m_OtherPlayer[0].m_yaw = packet_S2C_INGAME->yaw;
+				m_OtherPlayer[0].m_camerax = packet_S2C_INGAME->cx;
+				m_OtherPlayer[0].m_cameray = packet_S2C_INGAME->cy;
+				m_OtherPlayer[0].m_cameraz = packet_S2C_INGAME->cz;
+			}
+			else if (packet_S2C_INGAME->id == 2)
+			{
+				m_recvcid = 1;
+				m_OtherPlayer[1].m_x = packet_S2C_INGAME->x;
+				m_OtherPlayer[1].m_y = packet_S2C_INGAME->y;
+				m_OtherPlayer[1].m_z = packet_S2C_INGAME->z;
+				m_OtherPlayer[1].m_roll = packet_S2C_INGAME->roll;
+				m_OtherPlayer[1].m_pitch = packet_S2C_INGAME->pitch;
+				m_OtherPlayer[1].m_yaw = packet_S2C_INGAME->yaw;
+				m_OtherPlayer[1].m_camerax = packet_S2C_INGAME->cx;
+				m_OtherPlayer[1].m_cameray = packet_S2C_INGAME->cy;
+				m_OtherPlayer[1].m_cameraz = packet_S2C_INGAME->cz;
+			}
+			else if (packet_S2C_INGAME->id == 6)
+			{
+				m_recvcid = 2;
+				m_OtherPlayer[2].m_x = packet_S2C_INGAME->x;
+				m_OtherPlayer[2].m_y = packet_S2C_INGAME->y;
+				m_OtherPlayer[2].m_z = packet_S2C_INGAME->z;
+				m_OtherPlayer[2].m_roll = packet_S2C_INGAME->roll;
+				m_OtherPlayer[2].m_pitch = packet_S2C_INGAME->pitch;
+				m_OtherPlayer[2].m_yaw = packet_S2C_INGAME->yaw;
+				m_OtherPlayer[2].m_camerax = packet_S2C_INGAME->cx;
+				m_OtherPlayer[2].m_cameray = packet_S2C_INGAME->cy;
+				m_OtherPlayer[2].m_cameraz = packet_S2C_INGAME->cz;
+			}
+			else
+			{
+				m_recvcid = -1;
+			}
 			break;
 		}
-
-		//case S2C_MOVE:
-		//{
-		//	const sc_packet_move* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move*>(packet);
-		//	m_recvcid = packet_S2C_ROTATOR->id;
-		//	//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
-		//	//{
-		//	m_playerInfo.m_x = packet_S2C_ROTATOR->x;
-		//	m_playerInfo.m_y = packet_S2C_ROTATOR->y;
-		//	m_playerInfo.m_z = packet_S2C_ROTATOR->z;
-		//	//m_playerInfo.m_changed = true;
-		//	UE_LOG(LogTemp, Warning, TEXT("x : %f      y : %f"), m_playerInfo.m_x, m_playerInfo.m_y);
-		////}
-		////else
-		////{
-		////	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
-		////	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
-		////	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
-		////	m_OtherPlayer[0].m_changed = true;
-		////}
-		////UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
-		//	break;
-		//}
-
-		//case S2C_CAMERA:
-		//{
-		//	const sc_packet_move* packet_S2C_ROTATOR = reinterpret_cast<const sc_packet_move*>(packet);
-		//	m_recvcid = packet_S2C_ROTATOR->id;
-		//	//if (m_playerInfo.m_cid == packet_S2C_ROTATOR->id)
-		//	//{
-		//	m_playerInfo.m_x = packet_S2C_ROTATOR->x;
-		//	m_playerInfo.m_y = packet_S2C_ROTATOR->y;
-		//	m_playerInfo.m_z = packet_S2C_ROTATOR->z;
-		//	//m_playerInfo.m_changed = true;
-		//	UE_LOG(LogTemp, Warning, TEXT("x : %f      y : %f"), m_playerInfo.m_x, m_playerInfo.m_y);
-		//	//}
-		//	//else
-		//	//{
-		//	//	m_OtherPlayer[0].m_roll = packet_S2C_ROTATOR->roll;
-		//	//	m_OtherPlayer[0].m_pitch = packet_S2C_ROTATOR->pitch;
-		//	//	m_OtherPlayer[0].m_yaw = packet_S2C_ROTATOR->yaw;
-		//	//	m_OtherPlayer[0].m_changed = true;
-		//	//}
-		//	//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ROTATOR"), m_playerInfo.m_cid);
-		//	break;
-		//}
 
 		default:
 			UE_LOG(LogTemp, Error, TEXT(" %d PacketProcess:: An undefined packet received"), (int)packet[1]);

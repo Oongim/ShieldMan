@@ -4,6 +4,7 @@
 
 #include "ShieldMan.h"
 #include "GameFramework/Pawn.h"
+#include "NetworkManager.h"
 #include "SM_ArmPlayerPawn.generated.h"
 
 UCLASS()
@@ -63,5 +64,14 @@ public:
 
 	void SetPlayerState();
 
-	void SetControlMode(EControlMode ControlType);
+	UFUNCTION(BlueprintCallable)
+	void SetControlMode(int ControlType);
+
+	class UNetworkManager* networkManager;
+
+	FRotator ControlRot;
+	FVector ControlLoc;
+	float pit = 0;
+	float yaw = 0;
+	float rol = 0;
 };

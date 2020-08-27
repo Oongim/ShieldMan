@@ -30,6 +30,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Network)
 	class UNetworkManager* networkManager;
 
+	FTimerHandle HostTimer;
+
+	int playercnt;
 	
 	UFUNCTION(BlueprintCallable)
 	void SetTimeStage1(float time);

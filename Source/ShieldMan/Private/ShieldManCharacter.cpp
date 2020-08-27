@@ -31,7 +31,6 @@ AShieldManCharacter::AShieldManCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
-
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = false; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 100.0f, 0.0f); // ...at this rotation rate
@@ -92,6 +91,8 @@ AShieldManCharacter::AShieldManCharacter()
 
 	HPlock = false;
 
+	networkManager = CreateDefaultSubobject<UNetworkManager>("networkManager");
+
 	SetReplicates(true);
 	bReplicates = true;
 	GetMesh()->SetIsReplicated(true);
@@ -108,11 +109,25 @@ void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 void AShieldManCharacter::Tick(float DeltaTime)
 {
+
+	networkManager->Send_InGame(0, 0, 0, 0, 0, 0, cx, cy, 0);
+
+	networkManager->RecvPacket();
+	
 	if (nullptr == AnimInstance) {
 		if(GetMesh()->GetAnimInstance() != nullptr)
 			AnimInstance=Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 		return; 
 	}
+	
+	RightHandPos += FVector{ networkManager->m_OtherPlayer[0].rp,
+											networkManager->m_OtherPlayer[0].ry,
+											networkManager->m_OtherPlayer[0].rr};
+
+	LeftHandPos += FVector{ networkManager->m_OtherPlayer[0].lp,
+										networkManager->m_OtherPlayer[0].ly,
+										networkManager->m_OtherPlayer[0].lr };
+
 	AnimInstance->SetHand_RightPos(RightHandPos);
 	AnimInstance->SetHand_LeftPos(LeftHandPos);
 }
@@ -427,6 +442,7 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
 
 				PS->ControllerRot = GetController()->GetControlRotation();
+				cx = PS->ControllerRot.Pitch;
 			}
 	}
 	//좌 우 이동
@@ -454,7 +470,9 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
 
 				PS->ControllerRot = GetController()->GetControlRotation();
-				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ControllerRot : %f, %f, %f"), PS->ControllerRot.Pitch, PS->ControllerRot.Yaw, PS->ControllerRot.Roll));
+
+				cy = PS->ControllerRot.Yaw;
+				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("AShieldManCharacter ControllerRot : %f, %f, %f"), PS->ControllerRot.Pitch, PS->ControllerRot.Yaw, PS->ControllerRot.Roll));
 			}
 	}
 	//위 아래 이동
@@ -533,4 +551,3 @@ void AShieldManCharacter::MoveRight(float Value)
 		}
 	}
 }
-
