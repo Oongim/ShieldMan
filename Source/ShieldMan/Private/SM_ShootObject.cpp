@@ -39,6 +39,8 @@ ASM_ShootObject::ASM_ShootObject()
 
 	ShootPower = 200000;
 
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -48,7 +50,10 @@ void ASM_ShootObject::BeginPlay()
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
 
-	Player = Cast<AShieldManCharacter>(FoundActors[0]);
+	for (auto FA : FoundActors)
+	{
+		Player = Cast<AShieldManCharacter>(FA);
+	}
 	
 	PrimaryActorTick.SetTickFunctionEnable(false);
 }
@@ -56,45 +61,51 @@ void ASM_ShootObject::BeginPlay()
 // Called every frame
 void ASM_ShootObject::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	if (HasAuthority()) {
+		Super::Tick(DeltaTime);
 
-	if (!bFire) {
-		FVector Player_Location = Player->GetActorLocation();
-		Player_Location.Z += 30.f;
-		FRotator ToPlayerInterpRot = 
-			FMath::RInterpTo(GetActorRotation() , (GetActorLocation() - Player_Location).Rotation(), DeltaTime, 3.f);
-		SetActorRotation(ToPlayerInterpRot );
-	}
-	else
-	{ 
-		sleepTime += DeltaTime;
-
-		if (sleepTime >= maxSleepTime)
-		{
-			bFire = false;
-			sleepTime = 0;
-			
+		if (!bFire) {
+			FVector Player_Location = Player->GetActorLocation();
+			Player_Location.Z += 30.f;
+			FRotator ToPlayerInterpRot =
+				FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player_Location).Rotation(), DeltaTime, 3.f);
+			SetActorRotation(ToPlayerInterpRot);
 		}
-		
+		else
+		{
+			sleepTime += DeltaTime;
+
+			if (sleepTime >= maxSleepTime)
+			{
+				bFire = false;
+				sleepTime = 0;
+
+			}
+
+		}
+		reloadTime += DeltaTime;
+
+		if (reloadTime >= reloadMaxTime)
+		{
+			ServerSetOpacity(1.0f);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1.0f);
+			reloadTime = 0.f;
+			SpawnBullet(GetActorLocation(), GetActorRotation());
+			bFire = true;
+		}
+		else if (reloadTime <= 0.5f) {
+			ServerSetOpacity(1 - reloadTime * 2);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1 - reloadTime * 2);
+		}
+		else if (reloadTime <= 0.8f) {
+			ServerSetOpacity(0.f);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 0.f);
+		}
+		else if (reloadTime >= reloadMaxTime - 1.0f) {
+			ServerSetOpacity(reloadTime - (int)reloadTime);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), reloadTime - (int)reloadTime);
+		}
 	}
-	reloadTime += DeltaTime;
-	if (reloadTime >= reloadMaxTime)
-	{
-		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1.0f);
-		reloadTime = 0.f;
-		SpawnBullet(GetActorLocation(), GetActorRotation());
-		bFire = true;
-	}
-	else if (reloadTime <= 0.5f) {
-		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1-reloadTime*2);
-	}
-	else if (reloadTime <= 0.8f) {
-		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 0.f);
-	}
-	else if (reloadTime >= reloadMaxTime - 1.0f) {
-		AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), reloadTime-(int)reloadTime);
-	}
-	
 }
 
 void ASM_ShootObject::SpawnBullet(FVector Loc, FRotator Rot)
@@ -113,5 +124,10 @@ void ASM_ShootObject::StartAttack()
 void ASM_ShootObject::StopAttack()
 {
 	PrimaryActorTick.SetTickFunctionEnable(false);
+}
+
+void ASM_ShootObject::ServerSetOpacity_Implementation(float val)
+{
+	AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), val);
 }
 
