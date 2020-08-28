@@ -9,13 +9,13 @@
 #include "BodyControl.h"
 #include "RHandControl.h"
 #include "LHandControl.h"
+#include "SM_GameInstance.h"
 
 // Sets default values
 ASM_ArmPlayerPawn::ASM_ArmPlayerPawn()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	networkManager = CreateDefaultSubobject< UNetworkManager>("networkManager");
 	Init_Camera();
 }
 
@@ -32,16 +32,9 @@ void ASM_ArmPlayerPawn::BeginPlay()
 		//SetControlMode(RHandControlMode);
 	}
 	bStateExist = false;
-	if (true == networkManager->ConnectServer("127.0.0.1"))
-	{
-		networkManager->RecvPacket();
-	}
-	else
-	{
 
-	}
 	SetPlayerState();
-	GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 0.5f);;
+	//GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &ASM_ArmPlayerPawn::SetPlayerState, 0.5f);;
 }
 
 // Called every frame
@@ -51,12 +44,39 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 	if (!bStateExist) return;
 	if (nullptr == MainCharacter) {
 		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("MainCharacter Nullptr")));
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+
+		for (auto FA : FoundActors)
+		{
+			MainCharacter = Cast<AShieldManCharacter>(FA);
+			//SetControlMode(RHandControlMode);
+		}
 		return;
 	}
+	PS = Cast<ASM_PlayerState>(GetPlayerState());
 
-	//SetPlayerState();
-	networkManager->Send_InGame(0, 0, 0, pit, yaw, rol, 0, 0, 0);
-	networkManager->RecvPacket();
+	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
+	//	FString::Printf(TEXT("%d "), GI->networkManager->m_cid));
+	if (ControlMode->isControlMode(LHandControlMode))
+	{
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
+		//	FString::Printf(TEXT("LControl : %s"), *PS->GetPlayerName()));
+		GI->GetNetworkManager()->Send_InGame(0,0,0, pit, yaw, rol,
+			0,0, 0);
+	}
+	else if (ControlMode->isControlMode(RHandControlMode))
+	{
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
+		//	FString::Printf(TEXT("LControl : %s"), *PS->GetPlayerName()));
+		GI->GetNetworkManager()->Send_InGame(pit, yaw, rol, 0, 0, 0, 
+			0,0 ,0);
+	}
+	
+
+	GI->GetNetworkManager()->RecvPacket();
+
 	pit = yaw = rol = 0.f;
 
 
@@ -72,12 +92,12 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 	}
 	else
 	{
-		FRotator c{ networkManager->m_OtherPlayer[0].cx,
-			networkManager->m_OtherPlayer[0].cy,0 };
-		Controller->SetControlRotation(FRotator{ c });
+		FRotator c{ GI->networkManager->m_OtherPlayer[0].cx,
+			GI->networkManager->m_OtherPlayer[0].cy,0 };
+		Controller->SetControlRotation(c);
 
-		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ASM_ArmPlayerPawn ControllerRot : %f, %f, %f"),
-			c.Pitch, c.Yaw, c.Roll));
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ASM_ArmPlayerPawn ControllerRot : %f, %f, %f"),
+			//c.Pitch, c.Yaw, c.Roll));
 		//GEngine->Message
 
 		//Controller->SetControlRotation(FRotator{ c.Pitch, c.Yaw, 0 });
@@ -182,13 +202,23 @@ void ASM_ArmPlayerPawn::Init_Camera()
 
 void ASM_ArmPlayerPawn::SetPlayerState()
 {
-	if (nullptr != GetPlayerState()) {
-		PS = Cast<ASM_PlayerState>(GetPlayerState());
-		if ("RightArm" == PS->GetPlayerName())
-			SetControlMode(RHandControlMode);
-		else if ("LeftArm" == PS->GetPlayerName())
-			SetControlMode(LHandControlMode);
-
+	if (nullptr != GetPlayerState())
+	{
+		if (false == bStateExist)
+		{
+			//USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+			PS = Cast<ASM_PlayerState>(GetPlayerState());
+			//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
+			//	FString::Printf(TEXT("PS : %s"), *PS->GetPlayerName()));
+			if ("RightArm" == PS->GetPlayerName())
+				SetControlMode(RHandControlMode);
+			else if ("LeftArm" == PS->GetPlayerName())
+				SetControlMode(LHandControlMode);
+			//if (FString("RightArm") == GI->name)
+			//	SetControlMode(RHandControlMode);
+			//else if (FString("LeftArm") == GI->name)
+			//	SetControlMode(LHandControlMode);
+		}
 		bStateExist = true;
 		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("SetPlayerState")));
 
@@ -204,8 +234,11 @@ void ASM_ArmPlayerPawn::SetPlayerState()
 void ASM_ArmPlayerPawn::SetControlMode(int ControlType)
 {
 	if (LHandControlMode == ControlType)
+	{
 		ControlMode = new LHandControl();
-
+	}
 	if (RHandControlMode == ControlType)
+	{
 		ControlMode = new RHandControl();
+	}
 }

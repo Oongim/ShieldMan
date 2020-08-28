@@ -55,16 +55,23 @@ void AShieldManGameMode::PostLogin(APlayerController* NewPlayer)
 		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Red, FString::Printf(TEXT("ASM_PlayerState Nullptr")));
 		return;
 	}
-	if (0 == PlayerNum) {
+	if (0 == PlayerNum)
+	{
 		PS->InitPlayerData(GetGameState<ASM_GameState>() ,{ "Body" });
+		PlayerNum = 1;
+		return;
 	}
-	else if (1 == PlayerNum) {
+	else if (1 == PlayerNum)
+	{
 		PS->InitPlayerData(GetGameState<ASM_GameState>(),{ "RightArm" });
+		PlayerNum = 2;
+		return;
 	}
 	else if (2 == PlayerNum) {
 		PS->InitPlayerData(GetGameState<ASM_GameState>(),{ "LeftArm" });
+		PlayerNum = 3;
+		return;
 	}
-	PlayerNum++;
 	//GetGameState();
 }
 
