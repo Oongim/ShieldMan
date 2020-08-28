@@ -64,4 +64,6 @@ public:
 	UFUNCTION()
 	void StopAttack();
 
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerSetOpacity(float val);
 };
