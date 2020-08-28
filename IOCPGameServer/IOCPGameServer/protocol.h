@@ -113,6 +113,7 @@ struct sc_packet_enter
 	char size;
 	char type;
 	int id;
+	int playercnt;
 	char name[MAX_ID_LEN];	
 };
 
@@ -121,6 +122,7 @@ struct sc_packet_enter_ok
 	char size;
 	char type;
 	int id;
+	int playercnt;
 	char name[MAX_ID_LEN];
 };
 
@@ -167,7 +169,7 @@ struct sc_packet_connect
 {
 	char size;
 	char type;
-	bool isEvent;
+	int playercnt;
 };
 
 struct cs_packet_connect

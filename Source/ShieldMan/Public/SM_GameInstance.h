@@ -56,7 +56,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Exec)
-		void Host();
+		void Host(const FString& Address);
 
 	UFUNCTION(BlueprintCallable, Exec)
 		void Join(const  FString& Address);
@@ -66,4 +66,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FString name;
+
+	void MakeRoom();
 };

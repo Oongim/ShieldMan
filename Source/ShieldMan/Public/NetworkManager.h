@@ -103,6 +103,7 @@ public:
 	const char* m_ip = nullptr;
 	int m_cid = 0;
 	int m_recvcid = 0;
+	int m_playercnt = 0;
 	PlayerInfo m_playerInfo;
 	OtherPlayerInfo m_OtherPlayer[3];
 	FRotator temp = { 0.f,0.f,0.f };

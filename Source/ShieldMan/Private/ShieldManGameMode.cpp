@@ -72,7 +72,6 @@ void AShieldManGameMode::PostLogin(APlayerController* NewPlayer)
 		PlayerNum = 3;
 		return;
 	}
-	//GetGameState();
 }
 
 void AShieldManGameMode::Logout(AController* Exiting)

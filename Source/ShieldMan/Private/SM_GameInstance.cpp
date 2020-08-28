@@ -43,7 +43,7 @@ float USM_GameInstance::GetTimeStage3()
 	return Stage3;
 }
 
-void USM_GameInstance::Host()
+void USM_GameInstance::Host(const FString& Address)
 {
     UEngine* Engine = GetEngine();
     if (!ensure(Engine != nullptr)) return;
@@ -55,11 +55,13 @@ void USM_GameInstance::Host()
 
 
        //Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("make")));
-    if (true == networkManager->ConnectServer("127.0.0.1"))
+    if (true == networkManager->ConnectServer(Address))
     {
         networkManager->RecvPacket();
     }
-    World->ServerTravel("/Game/1Stage/Stage1?listen");
+
+    MakeRoom();
+    
 
       // GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("%d"),playercnt));
 
@@ -73,11 +75,28 @@ void USM_GameInstance::Join(const FString& Address)
 {
     APlayerController* PlayerController = GetFirstLocalPlayerController();
 
-    if (true == networkManager->ConnectServer("127.0.0.1"))
+    if (true == networkManager->ConnectServer(Address))
     {
         networkManager->RecvPacket();
     }
     PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+}
+
+void USM_GameInstance::MakeRoom()
+{
+    networkManager->Send_Connect();
+    networkManager->RecvPacket();
+    if (networkManager->m_playercnt == 3)
+    {
+        UWorld* World = GetWorld();
+        if (!ensure(World != nullptr)) return;
+        World->ServerTravel("/Game/1Stage/Stage1?listen");
+        networkManager->m_playercnt = 0;
+    }
+    else
+    {
+        TimerManager->SetTimer(HostTimer, this, &USM_GameInstance::MakeRoom, 1.f);
+    }
 }
 
 UNetworkManager* USM_GameInstance::GetNetworkManager()

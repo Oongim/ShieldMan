@@ -33,5 +33,5 @@ public:
 
 	FRotator GetControllerRot();
 
-
+	int PlayerCnt = 0;
 };

@@ -181,14 +181,14 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		case S2C_ENTER:
 		{
 			const sc_packet_enter* my_packet = reinterpret_cast<const sc_packet_enter*>(packet);
-
+			m_playercnt = my_packet->playercnt;
 			break;
 		}
 
 		case S2C_ENTER_OK:
 		{
 			const sc_packet_enter_ok* my_packet = reinterpret_cast<const sc_packet_enter_ok*>(packet);
-
+			m_playercnt = my_packet->playercnt;
 
 
 			//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ENTER_OK"), m_playerInfo.m_cid);
@@ -241,12 +241,9 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		case S2C_CONNECT:
 		{
 			const sc_packet_connect* packet_S2C_CONNECT = reinterpret_cast<const sc_packet_connect*>(packet);
-			if (packet_S2C_CONNECT->isEvent)
-			{
-				RecvPacket();
-			}
-			UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_CONNECT"), m_playerInfo.m_cid);
 
+			m_playercnt = packet_S2C_CONNECT->playercnt;
+			
 			break;
 		}
 

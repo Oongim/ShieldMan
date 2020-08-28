@@ -9,7 +9,7 @@ int g_user_id = 0;
 int g_user_cnt = 0;
 bool g_isEvent = false;
 float chax = 0.f;
-float chay = 0.f;
+float chay = 270.f;
 float Lpit = 0.f;
 float Lyaw = 0.f;
 float Lrol = 0.f;
@@ -87,6 +87,7 @@ void send_enter_ok_packet(int user_id, int o_id)
 	p.id = user_id;
 	//cout << user_id << endl;
 	p.size = sizeof(p);
+	p.playercnt = g_user_cnt;
 	p.type = S2C_ENTER_OK;
 	strcpy_s(p.name, g_clients[user_id].m_name);
 	send_packet(user_id, &p);
@@ -97,6 +98,7 @@ void send_enter_packet(int user_id, int o_id)
 	sc_packet_enter p;
 	p.id = o_id;
 	p.size = sizeof(p);
+	p.playercnt = g_user_cnt;
 	p.type = S2C_ENTER;
 	strcpy_s(p.name, g_clients[o_id].m_name);
 	send_packet(user_id, &p);
@@ -241,8 +243,7 @@ void send_connect(int user_id)
 	sc_packet_connect p;
 	p.size = sizeof(p);
 	p.type = S2C_CONNECT;
-	p.isEvent = g_clients[user_id].m_isevent;
-	g_clients[user_id].m_isevent = false;
+	p.playercnt = g_user_cnt;
 	send_packet(user_id, &p);
 }
 
