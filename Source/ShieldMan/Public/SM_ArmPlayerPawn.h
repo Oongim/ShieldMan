@@ -36,6 +36,7 @@ private:
 	class AGameModeBase* GM;
 
 	class ControlMode* ControlMode;
+	int CType = 0;
 
 	FVector RightHandPos;
 	FVector LeftHandPos;
@@ -62,12 +63,11 @@ public:
 
 	void Init_Camera();
 
+	UFUNCTION()
 	void SetPlayerState();
 
 	UFUNCTION(BlueprintCallable)
 	void SetControlMode(int ControlType);
-
-	class UNetworkManager* networkManager;
 
 	FRotator ControlRot;
 	FVector ControlLoc;

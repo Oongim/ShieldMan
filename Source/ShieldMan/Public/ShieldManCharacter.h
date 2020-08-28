@@ -198,12 +198,6 @@ public:		//public ÇÔ¼ö
 
 
 
-
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadwrite)
-	class UNetworkManager* networkManager;
-
 	float mx = 0;
 	float my = 0;
 	float mz = 0;

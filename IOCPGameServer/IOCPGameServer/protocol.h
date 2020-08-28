@@ -93,8 +93,8 @@ struct sc_packet_in_game		//우리 게임에서의 카메라, 팔 움직임
 	char size;
 	char type;
 	int id;
-	float x, y, z;
-	float yaw, pitch, roll;
+	float rp, ry, rz;
+	float lp, ly, lr;
 	float cx, cy, cz;
 };
 
@@ -181,8 +181,8 @@ struct cs_packet_in_game	//in game	//우리 게임에서의 카메라, 팔 움직임
 	char size;
 	char type;
 	int id;
-	float x, y, z;
-	float yaw, pitch, roll;
+	float rp, ry,rr;
+	float lp, ly, lr;
 	float cx, cy, cz;
 };
 

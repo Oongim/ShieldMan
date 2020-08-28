@@ -189,10 +189,15 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		{
 			const sc_packet_enter_ok* my_packet = reinterpret_cast<const sc_packet_enter_ok*>(packet);
 
-			UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ENTER_OK"), m_playerInfo.m_cid);
+
+
+			//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ENTER_OK"), m_playerInfo.m_cid);
 			if (false == isConnect)
 			{
+
 				m_playerInfo.m_cid = my_packet->id;
+				//GEngine->AddOnScreenDebugMessage(0, 10, FColor::Green,
+				//	FString::Printf(TEXT("%d "), m_cid));
 				isConnect = true;
 			}
 			break;
@@ -262,7 +267,7 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		case S2C_INGAME:
 		{
 			const sc_packet_in_game* packet_S2C_INGAME = reinterpret_cast<const sc_packet_in_game*>(packet);
-			if (packet_S2C_INGAME->id == 0)
+			/*if (packet_S2C_INGAME->id == 0)
 			{
 				m_recvcid = 0;
 				m_OtherPlayer[0].m_x = packet_S2C_INGAME->x;
@@ -300,11 +305,11 @@ bool UNetworkManager::PacketProcess(const char* packet)
 				m_OtherPlayer[2].m_camerax = packet_S2C_INGAME->cx;
 				m_OtherPlayer[2].m_cameray = packet_S2C_INGAME->cy;
 				m_OtherPlayer[2].m_cameraz = packet_S2C_INGAME->cz;
-			}
-			else
-			{
-				m_recvcid = -1;
-			}
+			}*/
+			//else
+			//{
+			//	m_recvcid = -1;
+			//}
 			break;
 		}
 
@@ -361,22 +366,22 @@ void UNetworkManager::Send_Connect()
 
 }
 
-void UNetworkManager::Send_InGame(float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
+void UNetworkManager::Send_InGame(float rp, float ry, float rr, float lp, float ly, float lr, float cx, float cy, float cz)
 {
 	cs_packet_in_game packet;
 
 	packet.type = C2S_INGAME;
 	packet.size = sizeof(packet);
 
-	packet.x = x;
-	packet.y = y;
-	packet.z = z;
-	packet.pitch = pitch;
-	packet.yaw = yaw;
-	packet.roll = roll;
+	packet.rp = rp;
+	packet.ry = ry;
+	packet.rr = rr;
+	packet.lp = lp;
+	packet.ly = ly;
+	packet.lr = lr;
 	packet.cx = cx;
 	packet.cy = cy;
-	packet.cz = cz;
+	packet.cz = 0;
 
 	packet.id = m_playerInfo.m_cid;
 	Send_Packet(&packet);

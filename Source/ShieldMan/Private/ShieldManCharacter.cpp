@@ -14,7 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "SM_PlayerState.h"
 #include "SM_GameState.h"
-
+#include "SM_GameInstance.h"
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
 #include "MetaBall_Slime.h"
@@ -91,8 +91,6 @@ AShieldManCharacter::AShieldManCharacter()
 
 	HPlock = false;
 
-	networkManager = CreateDefaultSubobject<UNetworkManager>("networkManager");
-
 	SetReplicates(true);
 	bReplicates = true;
 	GetMesh()->SetIsReplicated(true);
@@ -109,24 +107,22 @@ void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 void AShieldManCharacter::Tick(float DeltaTime)
 {
-
-	networkManager->Send_InGame(0, 0, 0, 0, 0, 0, cx, cy, 0);
-
-	networkManager->RecvPacket();
+	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	GI->GetNetworkManager()->Send_InGame(0, 0, 0, 0, 0, 0, cx, cy, 0);
+	GI->GetNetworkManager()->RecvPacket();
 	
 	if (nullptr == AnimInstance) {
 		if(GetMesh()->GetAnimInstance() != nullptr)
 			AnimInstance=Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 		return; 
 	}
-	
-	RightHandPos += FVector{ networkManager->m_OtherPlayer[0].rp,
-											networkManager->m_OtherPlayer[0].ry,
-											networkManager->m_OtherPlayer[0].rr};
+	RightHandPos = FVector{ GI->networkManager->m_OtherPlayer[0].rp,
+											GI->networkManager->m_OtherPlayer[0].ry,
+											GI->networkManager->m_OtherPlayer[0].rr};
 
-	LeftHandPos += FVector{ networkManager->m_OtherPlayer[0].lp,
-										networkManager->m_OtherPlayer[0].ly,
-										networkManager->m_OtherPlayer[0].lr };
+	LeftHandPos = FVector{ GI->networkManager->m_OtherPlayer[0].lp,
+										GI->networkManager->m_OtherPlayer[0].ly,
+										GI->networkManager->m_OtherPlayer[0].lr };
 
 	AnimInstance->SetHand_RightPos(RightHandPos);
 	AnimInstance->SetHand_LeftPos(LeftHandPos);
@@ -438,9 +434,8 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 		//if(CurrentStatus== CharacterStatus::PossibleMove)
 			Super::AddControllerYawInput(Val);
 			if (nullptr != GetPlayerState()) {
-				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
 				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
-
 				PS->ControllerRot = GetController()->GetControlRotation();
 				cx = PS->ControllerRot.Pitch;
 			}
@@ -466,7 +461,7 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 		//if (CurrentStatus == CharacterStatus::PossibleMove)
 			Super::AddControllerPitchInput(Val);
 			if (nullptr != GetPlayerState()) {
-				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
 				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
 
 				PS->ControllerRot = GetController()->GetControlRotation();

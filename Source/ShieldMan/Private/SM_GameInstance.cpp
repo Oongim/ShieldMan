@@ -12,7 +12,6 @@ USM_GameInstance::USM_GameInstance()
 	Stage3 = 0;
 
     networkManager= CreateDefaultSubobject<UNetworkManager>(TEXT("NETWORKMANAGER"));
-
     playercnt = 0;
 }
 
@@ -49,13 +48,24 @@ void USM_GameInstance::Host()
     UEngine* Engine = GetEngine();
     if (!ensure(Engine != nullptr)) return;
     
-    Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Hosting")));
+   
 
     UWorld* World = GetWorld();
     if (!ensure(World != nullptr)) return;
 
 
-     World->ServerTravel("/Game/1Stage/Stage1?listen");
+       //Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("make")));
+    if (true == networkManager->ConnectServer("127.0.0.1"))
+    {
+        networkManager->RecvPacket();
+    }
+    World->ServerTravel("/Game/1Stage/Stage1?listen");
+
+      // GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("%d"),playercnt));
+
+       //TimerManager->SetTimer(HostTimer, this, &USM_GameInstance::Host, 1.f);
+    
+     
 
 }
 
@@ -63,8 +73,10 @@ void USM_GameInstance::Join(const FString& Address)
 {
     APlayerController* PlayerController = GetFirstLocalPlayerController();
 
-   // playercnt += 1;
-    
+    if (true == networkManager->ConnectServer("127.0.0.1"))
+    {
+        networkManager->RecvPacket();
+    }
     PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 }
 

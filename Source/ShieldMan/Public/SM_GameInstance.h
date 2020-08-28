@@ -63,4 +63,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		UNetworkManager* GetNetworkManager();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString name;
 };

@@ -4,6 +4,7 @@
 #include "SM_PlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "SM_GameState.h"
+#include "SM_GameInstance.h"
 
 void ASM_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -20,7 +21,8 @@ void ASM_PlayerState::InitPlayerData(ASM_GameState* game_state, FString name)
 	GameState = game_state;
 
 	SetPlayerName(name);
-
+	//USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	//GI->name = name;
 	if (FString{ "Body" } != name) {
 		for (auto PS : GameState->PlayerArray) {
 			if (PS->GetPlayerName() == FString{ "Body" }) {
