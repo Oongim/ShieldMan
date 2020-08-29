@@ -75,6 +75,8 @@ ASM_Sword::ASM_Sword()
 	GuardCount = 0;
 	MaxGuardCount = 4;
 
+	attacktype = 0;
+
 	GetCharacterMovement()->GravityScale = 0.f;
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetEnableGravity(false);
@@ -120,7 +122,8 @@ void ASM_Sword::AnimateVariable(float DeltaTime)
 		isWaiting = false;
 		SwordAnimInstance->SetHiding(false);
 		Waitingtime = 0.f;
-		SwordAnimInstance->SetAttackType(rand() % 3);
+		attacktype = (attacktype + 1) % 3;
+		SwordAnimInstance->SetAttackType(attacktype);
 		if (GuardCount >= MaxGuardCount)
 		{
 			EventTrigger = false;
@@ -212,14 +215,13 @@ void ASM_Sword::DynamicCollision()
 	On_Collision->OnComponentEndOverlap.AddDynamic(this, &ASM_Sword::OnOverlapEnd);
 }
 
-
-void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ASM_Sword::ServerOverlapBegin_Implementation(UPrimitiveComponent* OtherComp)
 {
 	if (!isHit)
 	{
 		FString OtherCompName = OtherComp->GetName();
 		//UE_LOG(LogTemp, Log, TEXT("OverlappedComp : %s"), *OtherComp->GetName());			//COLLISIONSylinder
-
+		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("OverlappedComp : %s"), *OtherComp->GetName()));
 
 		if (FString("RIGHT_SHIELD_GUARD_COLLISION") == OtherCompName || FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
 		{
@@ -231,6 +233,12 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			dir.Normalize();
 			if (FString("LEFT_SHIELD_GUARD_COLLISION") == OtherCompName)
 			{
+				TArray<AActor*> FoundActors;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+				for (auto FA : FoundActors)
+				{
+					Player = Cast<AShieldManCharacter>(FA);
+				}
 				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * ArmReflectPower * 100, TEXT("Bip001-L-Forearm"));
 
 				//auto t = dir * ArmReflectPower * 1000;
@@ -238,12 +246,18 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			}
 			else
 			{
+				TArray<AActor*> FoundActors;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+				for (auto FA : FoundActors)
+				{
+					Player = Cast<AShieldManCharacter>(FA);
+				}
 				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * ArmReflectPower * 100, TEXT("Bip001-R-Forearm"));
 				auto t = dir * ArmReflectPower * 1000;
 				//UE_LOG(LogTemp, Log, TEXT("Right t : %s"), *t.ToString());
 			}
 
-			StartNiagaraEffect();
+			ServerStartNiagaraEffect();
 		}
 		else if (FString("CollisionCylinder") == OtherCompName)
 		{
@@ -252,15 +266,27 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			FVector dir = Player->GetActorLocation() - GetActorLocation();
 			dir.Normalize();
 			float BodyReflectPower = -1000.f;
-			if (rand()% 2 == 1)
+			if (rand() % 2 == 1)
 			{
+				TArray<AActor*> FoundActors;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+				for (auto FA : FoundActors)
+				{
+					Player = Cast<AShieldManCharacter>(FA);
+				}
 				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * BodyReflectPower * 100, TEXT("Bip001-L-UpperArm"));
 			}
 			else
 			{
+				TArray<AActor*> FoundActors;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
+				for (auto FA : FoundActors)
+				{
+					Player = Cast<AShieldManCharacter>(FA);
+				}
 				Player->GetMesh()->AddImpulseToAllBodiesBelow(dir * BodyReflectPower * 100, TEXT("Bip001-R-UpperArm"));
 			}
-			StartNiagaraEffect();
+			ServerStartNiagaraEffect();
 
 			if (true == Player->isDeath())
 			{
@@ -274,6 +300,15 @@ void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 	{
 
 	}
+}
+void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	if (Role == ROLE_Authority)
+	{
+		ServerOverlapBegin(OtherComp);
+	}
+
 }
 
 void ASM_Sword::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -318,3 +353,7 @@ void ASM_Sword::SetCollisionFromBP(UBoxComponent* Col)
 	Begin_Stage->OnComponentEndOverlap.AddDynamic(this, &ASM_Sword::Begin_StageOverlapEnd);
 }
 
+void ASM_Sword::ServerStartNiagaraEffect_Implementation()
+{
+	StartNiagaraEffect();
+}

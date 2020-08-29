@@ -22,18 +22,18 @@ class SHIELDMAN_API USM_SwordAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = state, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = state, Meta = (AllowPrivateAccess = true), Replicated)
 		int AttackType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = state, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = state, Meta = (AllowPrivateAccess = true), Replicated)
 		bool isHiding;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = state, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = state, Meta = (AllowPrivateAccess = true), Replicated)
 		bool isGuard;
 
 
 public:
-
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 	void SetAttackType(int type);
 	void SetHiding(bool hiding);
 	void SetGuard(bool guard);
