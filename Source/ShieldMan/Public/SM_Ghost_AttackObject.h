@@ -62,4 +62,12 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void StartNiagaraEffect();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerSpawnEndEffect();
+	/*UFUNCTION(Server, Reliable, WithValidation)
+		virtual void ServerOpenDoor();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		virtual void ServerOpenDoor();*/
 };

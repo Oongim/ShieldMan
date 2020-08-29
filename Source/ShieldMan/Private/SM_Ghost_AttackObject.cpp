@@ -55,7 +55,8 @@ ASM_Ghost_AttackObject::ASM_Ghost_AttackObject()
 	{
 		MoveEffect->SetTemplate(ParticleAsset.Object);
 	}
-
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -63,14 +64,14 @@ void ASM_Ghost_AttackObject::BeginPlay()
 {
 	Super::BeginPlay();
 	bDefended = false;
+	if (Role == ROLE_Authority) {
+		Collision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Ghost_AttackObject::OnOverlapBegin);
+		Bullet->OnComponentHit.AddDynamic(this, &ASM_Ghost_AttackObject::OnHit);
 
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Ghost_AttackObject::OnOverlapBegin);
-	Bullet->OnComponentHit.AddDynamic(this, &ASM_Ghost_AttackObject::OnHit);
+		Bullet->SetSimulatePhysics(true);
 
-	Bullet->SetSimulatePhysics(true);
-
-	Bullet->AddForce(GetActorRotation().Vector() * 20000);
-
+		Bullet->AddForce(GetActorRotation().Vector() * 20000);
+	}
 	GetWorldTimerManager().SetTimer(LifeTimerHandle, this, &ASM_Ghost_AttackObject::Death, LifeTime);
 }
 
@@ -82,43 +83,50 @@ void ASM_Ghost_AttackObject::SetTarget(AActor* actor)
 
 void ASM_Ghost_AttackObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bDead) return;
-	bool bCollisioned = false;
+	if (Role == ROLE_Authority) {
+		if (bDead) return;
+		bool bCollisioned = false;
 
-	if (bDefended)
-	{
-		if (OtherActor->GetClass()->GetName() == "BP_MetaBall_Boss_C") {
-			return;
-		}
-		if (OtherActor->GetClass()->GetName() == Target->GetClass()->GetName())
+		if (bDefended)
 		{
-			auto ghost = Cast<AMetaBall_Ghost>(OtherActor);
-			if (ghost->GetAlive()) {
-				ghost->Attacked();
+			if (OtherActor->GetClass()->GetName() == "BP_MetaBall_Boss_C") {
+				return;
+			}
+			if (OtherActor->GetClass()->GetName() == Target->GetClass()->GetName())
+			{
+				auto ghost = Cast<AMetaBall_Ghost>(OtherActor);
+				if (ghost->GetAlive()) {
+					ghost->Attacked();
+					bCollisioned = true;
+				}
+			}
+		}
+		else if (OtherActor->GetClass()->GetName() == characterClass->GetName())
+		{
+			ServerSpawnEndEffect();
+			//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndEffect, GetActorLocation(), GetActorRotation(), true);
+			auto character = Cast<AShieldManCharacter>(OtherActor);
+			if (false == character->isDeath())
+			{
+				character->AddForceToCharacter(GetActorRotation().Vector() * -1, 20.f);
+				character->DecreaseHP(20.f);
 				bCollisioned = true;
 			}
 		}
-	}
-	else if (OtherActor->GetClass()->GetName() == characterClass->GetName())
-	{
-		MoveEffect->SetVisibility(false);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndEffect, GetActorLocation(), GetActorRotation(), true);
-		auto character = Cast<AShieldManCharacter>(OtherActor);
-		if (false == character->isDeath())
-		{
-			character->AddForceToCharacter(GetActorRotation().Vector() * -1, 20.f);
-			character->DecreaseHP(20.f);
-			bCollisioned = true;
-		}
-	}
 
-	if (bCollisioned) {
-		GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_Ghost_AttackObject::Death, DeathMaxCount);
-		bDead = true;
-		Bullet->SetSimulatePhysics(false);
+		if (bCollisioned) {
+			GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &ASM_Ghost_AttackObject::Death, DeathMaxCount);
+			bDead = true;
+			Bullet->SetSimulatePhysics(false);
+		}
 	}
 }
 
+void ASM_Ghost_AttackObject::ServerSpawnEndEffect_Implementation()
+{
+	MoveEffect->SetVisibility(false);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EndEffect, GetActorLocation(), GetActorRotation(), true);
+}
 void ASM_Ghost_AttackObject::Death()
 {
 	//ULog::Invalid("Death", "", LO_Viewport);
@@ -127,26 +135,28 @@ void ASM_Ghost_AttackObject::Death()
 
 void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (bDead) return;
-	
-	if (OtherActor == nullptr)return;
-	//ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
-	
-	if (OtherActor->GetClass()->GetName() == FString("SM_Shield")||
-		(OtherComp->GetClass()->GetName() == FString("BoxComponent")&& OtherActor->GetClass()->GetName()== FString("BP_SMCharacter_C")))
-	{
-		//ULog::Invalid("OnHit", "", LO_Viewport);
-		MoveEffect->SetVisibility(false);
-		FVector target_velocity = Target->GetActorLocation() - GetActorLocation();
-		target_velocity.Normalize();
+	if (Role == ROLE_Authority) {
+		if (bDead) return;
 
-		Bullet->AddForce(target_velocity * 100000);
-		bDefended = true;
-	}
-	else
-	{
-		//ULog::Invalid(OtherComp->GetName(), "", LO_Viewport);
-		Death();
+		if (OtherActor == nullptr)return;
+		//ULog::Invalid(OtherActor->GetClass()->GetName(), "", LO_Viewport);
+
+		if (OtherActor->GetClass()->GetName() == FString("SM_Shield") ||
+			(OtherComp->GetClass()->GetName() == FString("BoxComponent") && OtherActor->GetClass()->GetName() == FString("BP_SMCharacter_C")))
+		{
+			//ULog::Invalid("OnHit", "", LO_Viewport);
+			MoveEffect->SetVisibility(false);
+			FVector target_velocity = Target->GetActorLocation() - GetActorLocation();
+			target_velocity.Normalize();
+
+			Bullet->AddForce(target_velocity * 100000);
+			bDefended = true;
+		}
+		else
+		{
+			//ULog::Invalid(OtherComp->GetName(), "", LO_Viewport);
+			Death();
+		}
 	}
 }
 

@@ -71,6 +71,9 @@ AMetaBall_Ghost::AMetaBall_Ghost()
 	CurrentHP = 100.f;
 
 	Opacity = 0;
+
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -109,47 +112,52 @@ void AMetaBall_Ghost::BeginPlay()
 // Called every frame
 void AMetaBall_Ghost::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	if (HasAuthority()) {
+		Super::Tick(DeltaTime);
 
+		SetRotation(DeltaTime);
+		Update(DeltaTime);
+		BoundCheck(m_status);
+		Update_EyeScale(DeltaTime);
 
+		if (!bAlive) {
+			Opacity -= 0.05;
+			Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("Opacity"), Opacity);
+			Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeL_Scale"), 0);
+			Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeR_Scale"), 0);
+			return;
+		}
 
-	SetRotation(DeltaTime);
-	Update(DeltaTime);
-	BoundCheck(m_status);
-	Update_EyeScale(DeltaTime);
-
-	if (!bAlive) {
-		Opacity -= 0.05;
-		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("Opacity"), Opacity);
-		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeL_Scale"), 0);
-		Dynamic_Mesh->SetScalarParameterValueOnMaterials(FName("EyeR_Scale"), 0);
-		return;
-	}
-
-	if (false == Player->isDeath())
-	{
-		switch (m_status)
+		if (false == Player->isDeath())
 		{
-		case WAITING:
+			switch (m_status)
+			{
+			case WAITING:
 
-			break;
-		case MOVING: {
-			FVector dest_direct = m_destination - GetActorLocation();
+				break;
+			case MOVING: {
+				FVector dest_direct = m_destination - GetActorLocation();
 
-			SetActorLocation(GetActorLocation() + dest_direct * DeltaTime / 3);
-			if ((m_destination - GetActorLocation()).Size() < 50) {
-				AddForceToVelocity(0.f);
-				m_status = ATTACKING;
+				SetActorLocation(GetActorLocation() + dest_direct * DeltaTime / 3);
+				if ((m_destination - GetActorLocation()).Size() < 50) {
+					AddForceToVelocity(0.f);
+					m_status = ATTACKING;
+				}
+			}
+					   break;
+			case ATTACKING:
+				GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::Attack, 1.f, false);
+
+				m_status = WAITING;
+				break;
 			}
 		}
-				   break;
-		case ATTACKING:
-			GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::Attack, 1.f, false);
-
-			m_status = WAITING;
-			break;
-		}
 	}
+}
+
+void AMetaBall_Ghost::ServerSetEyePos_Implementation(FName name, FVector pos)
+{
+	Dynamic_Mesh->SetVectorParameterValueOnMaterials(name, pos);
 }
 
 void AMetaBall_Ghost::Update(float DeltaTime)
@@ -158,7 +166,6 @@ void AMetaBall_Ghost::Update(float DeltaTime)
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i], Balls_Position[i]);
-
 	}
 }
 void AMetaBall_Ghost::SetRotation(float DeltaTime)
@@ -173,6 +180,8 @@ void AMetaBall_Ghost::SetRotation(float DeltaTime)
 
 	FVector R_Pos = UKismetMathLibrary::GreaterGreater_VectorRotator(EyeR_Default_Pos, ToPlayerInterpRot);
 	FVector L_Pos = UKismetMathLibrary::GreaterGreater_VectorRotator(EyeL_Default_Pos, ToPlayerInterpRot);
+	//ServerSetEyePos(FName("EyeL_Pos"), L_Pos);
+	//ServerSetEyePos(FName("EyeR_Pos"), R_Pos);
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName("EyeL_Pos"), L_Pos);
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName("EyeR_Pos"), R_Pos);
 }
@@ -250,6 +259,7 @@ void AMetaBall_Ghost::Update_EyeScale(float DeltaTime)
 		}
 	}
 }
+
 void AMetaBall_Ghost::Muitiple_SpringMass_System(float timeStep)
 {
 	int numLeg = 3;

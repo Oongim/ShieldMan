@@ -16,7 +16,8 @@ ASM_Stage2_GhostPhase::ASM_Stage2_GhostPhase()
 
 	StartCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("START_COLLISION"));
 
-	
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -26,11 +27,12 @@ void ASM_Stage2_GhostPhase::BeginPlay()
 	PrimaryActorTick.SetTickFunctionEnable(false);
 	StartCollision->SetWorldLocation(FVector(-2520.f, 260.f, 76.f));
 
-	Entrance = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-2420.f, 260.f, -61.f), FRotator::ZeroRotator);
-	Exit = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-4000.f, 260.f, -61.f), FRotator::ZeroRotator);
+	if (HasAuthority()) {
+		ServerSpawnActor();
 
-	OpenCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnOpenOverlapBegin);
-	StartCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnStartOverlapBegin);
+		OpenCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnOpenOverlapBegin);
+		StartCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnStartOverlapBegin);
+	}
 
 	bOpened = false;
 }
@@ -38,24 +40,27 @@ void ASM_Stage2_GhostPhase::BeginPlay()
 // Called every frame
 void ASM_Stage2_GhostPhase::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
-	bool ended = false;
-	for (auto ghost : m_GhostArr)
+	if (Role == ROLE_Authority)
 	{
-		if (ghost->GetAlive()) {
-			ended = true;
-			break;
+		Super::Tick(DeltaTime);
+
+		bool ended = false;
+		for (auto ghost : m_GhostArr)
+		{
+			if (ghost->GetAlive()) {
+				ended = true;
+				break;
+			}
 		}
-	}
-	if (!ended) {
-		//ULog::Invalid("End Ghost Phase", "", LO_Viewport);
-		Exit->OpenDoor();
-		PrimaryActorTick.SetTickFunctionEnable(false);
-		if (m_GhostArr[0] != nullptr) {
-			for (auto ghost : m_GhostArr)
-			{
-				ghost->Destroy();
+		if (!ended) {
+			//ULog::Invalid("End Ghost Phase", "", LO_Viewport);
+			Exit->OpenDoor();
+			PrimaryActorTick.SetTickFunctionEnable(false);
+			if (m_GhostArr[0] != nullptr) {
+				for (auto ghost : m_GhostArr)
+				{
+					ghost->Destroy();
+				}
 			}
 		}
 	}
@@ -63,24 +68,56 @@ void ASM_Stage2_GhostPhase::Tick(float DeltaTime)
 
 void ASM_Stage2_GhostPhase::OnOpenOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (Role == ROLE_Authority)
+	{
+		ServerOpenDoor();
+	}
+}
+
+void ASM_Stage2_GhostPhase::OnStartOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Role == ROLE_Authority)
+	{
+		ServerCloseDoor();
+	}
+}
+
+bool ASM_Stage2_GhostPhase::ServerOpenDoor_Validate()
+{
+	return true;
+}
+
+void ASM_Stage2_GhostPhase::ServerOpenDoor_Implementation()
+{
 	if (bOpened)return;
-	Entrance->OpenDoor();
+	if (nullptr != Entrance)
+		Entrance->OpenDoor();
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3600.f, 1000.f, 250.f), FRotator::ZeroRotator));
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-2600.f, 1000.f, 250.f), FRotator::ZeroRotator));
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3100.f, 260.f, 250.f), FRotator::ZeroRotator));
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3600.f, -600.f, 250.f), FRotator::ZeroRotator));
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-2600.f, -600.f, 250.f), FRotator::ZeroRotator));
-
 	for (auto ghost : m_GhostArr)
 	{
 		ghost->MoveStart();
 	}
+
 	bOpened = true;
 }
 
-void ASM_Stage2_GhostPhase::OnStartOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ASM_Stage2_GhostPhase::ServerCloseDoor_Implementation()
 {
-	Entrance->CloseDoor();
+	if (nullptr != Entrance)
+		Entrance->CloseDoor();
 	PrimaryActorTick.SetTickFunctionEnable(true);
 }
 
+void ASM_Stage2_GhostPhase::ServerSpawnActor_Implementation()
+{
+
+
+
+	Entrance = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-2420.f, 260.f, -61.f), FRotator::ZeroRotator);
+	Exit = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-4000.f, 260.f, -61.f), FRotator::ZeroRotator);
+
+}

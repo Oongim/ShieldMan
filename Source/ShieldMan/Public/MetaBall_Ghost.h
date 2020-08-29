@@ -147,4 +147,7 @@ public:
 		void Scream();
 
 
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerSetEyePos(FName name, FVector pos);
+
 };

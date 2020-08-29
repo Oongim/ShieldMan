@@ -38,4 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
 	void CloseDoor();
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerOpenDoor(float val);
+
+	
 };

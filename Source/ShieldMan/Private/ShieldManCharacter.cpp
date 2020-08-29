@@ -308,58 +308,71 @@ void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
 	CurrentStatus = status;
 }
 
+void AShieldManCharacter::ServerShieldImpulse_Implementation(FVector Lpower, FVector Rpower, FVector pos)
+{
+	GetMesh()->AddImpulseToAllBodiesBelow(Lpower, TEXT("Bip001-L-Forearm"));
+	GetMesh()->AddImpulseToAllBodiesBelow(Rpower, TEXT("Bip001-R-Forearm"));
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, pos, FRotator::ZeroRotator, true);
+}
 void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bAttackPossible) {
-		FVector LeftArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-L-Forearm"));
-		FVector RightArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-R-Forearm"));
-		float power = LeftArmVelocity.Size() + RightArmVelocity.Size();
-		LeftArmVelocity.Normalize();
-		RightArmVelocity.Normalize();
+	if (Role == ROLE_Authority)
+	{
+		if (bAttackPossible) {
+			FVector LeftArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-L-Forearm"));
+			FVector RightArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-R-Forearm"));
+			float power = LeftArmVelocity.Size() + RightArmVelocity.Size();
+			LeftArmVelocity.Normalize();
+			RightArmVelocity.Normalize();
 
-		GetMesh()->AddImpulseToAllBodiesBelow(LeftArmVelocity * ArmReflectPower * power, TEXT("Bip001-L-Forearm"));
-		GetMesh()->AddImpulseToAllBodiesBelow(RightArmVelocity * ArmReflectPower * power, TEXT("Bip001-R-Forearm"));
+			FVector ImpulsePosition = (Right_Shield_Collision->GetComponentLocation() + Right_Shield_Collision->GetComponentLocation()) / 2;
 
-		FVector ImpulsePosition = (Right_Shield_Collision->GetComponentLocation() + Right_Shield_Collision->GetComponentLocation()) / 2;
+			ServerShieldImpulse(LeftArmVelocity * ArmReflectPower * power, RightArmVelocity * ArmReflectPower * power, ImpulsePosition);
+			/*GetMesh()->AddImpulseToAllBodiesBelow(LeftArmVelocity * ArmReflectPower * power, TEXT("Bip001-L-Forearm"));
+			GetMesh()->AddImpulseToAllBodiesBelow(RightArmVelocity * ArmReflectPower * power, TEXT("Bip001-R-Forearm"));
 
-		TArray<FOverlapResult> OutHits;
-		FCollisionShape MyColSphere = FCollisionShape::MakeSphere(power / 10);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition, FRotator::ZeroRotator, true);*/
 
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition,FRotator::ZeroRotator,true);
-		bool isHit = GetWorld()->OverlapMultiByChannel(OutHits, ImpulsePosition,
-			FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
+			TArray<FOverlapResult> OutHits;
+			FCollisionShape MyColSphere = FCollisionShape::MakeSphere(power / 10);
 
-		FColor color;
-		if (isHit)
-		{
-			color = FColor::Green;
-		}
-		else
-		{
-			color = FColor::Red;
-		}
+			
+			bool isHit = GetWorld()->OverlapMultiByChannel(OutHits, ImpulsePosition,
+				FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
 
-		//DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
-
-		if (isHit)
-		{
-			for (auto& Hit : OutHits)
+			FColor color;
+			if (isHit)
 			{
-				UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
-				//UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
-				if (MeshComp)
+				color = FColor::Green;
+			}
+			else
+			{
+				color = FColor::Red;
+			}
+
+			//DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
+
+			if (isHit)
+			{
+				for (auto& Hit : OutHits)
 				{
-					MeshComp->AddRadialImpulse(ImpulsePosition,
-						power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
-					AMetaBall_Slime* slime = Cast<AMetaBall_Slime>(Hit.GetActor());
-					if(slime)slime->Attacked();
+					UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
+					//UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
+					if (MeshComp)
+					{
+						MeshComp->AddRadialImpulse(ImpulsePosition,
+							power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
+						AMetaBall_Slime* slime = Cast<AMetaBall_Slime>(Hit.GetActor());
+						if (slime)slime->Attacked();
+					}
 				}
 			}
-		}
 
-		//ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
-		bAttackPossible = false;
-		GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
+			//ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
+			bAttackPossible = false;
+			GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
+		}
 	}
 }
 
@@ -375,19 +388,27 @@ void AShieldManCharacter::DecreaseHP(float val)
 		CurrentHP -= val;
 		if (CurrentHP <= 0)
 		{
-			ChangeDeath();
+			if (Role == ROLE_Authority)
+			{
+				ChangeDeath();
+			}
 		}
 	}
 }
 
 void AShieldManCharacter::ChangeDeath()
 {
-	GetMesh()->PlayAnimation(Anim, false);
+	ServerDeath();
 	//ULog::Number(Anim->GetMaxCurrentTime(), "Time: ", "", LO_Viewport);
 	Set_DeathCamera();
 	bDeath = true;
 	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
 }
+void AShieldManCharacter::ServerDeath_Implementation()
+{
+	GetMesh()->PlayAnimation(Anim, false);
+}
+
 
 void AShieldManCharacter::ChangeMagmaDeath()
 {

@@ -24,6 +24,8 @@ private:
 	class ASM_Stage2_Door* Entrance;
 	class ASM_Stage2_Door* Exit;
 
+	bool bOpened;
+
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
 		TSubclassOf< class ASM_Stage2_Door> DoorClass;
@@ -49,4 +51,16 @@ public:
 	UFUNCTION()
 		void OnStartOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerAddCeilingOffset(float val);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerOpenDoor();
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerCloseDoor();
+
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerSpawnActor();
 };

@@ -16,7 +16,8 @@ ASM_Stage2_Door::ASM_Stage2_Door()
 	Door->SetupAttachment(RootComponent);
 
 	bClosing = false;
-
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -29,23 +30,28 @@ void ASM_Stage2_Door::BeginPlay()
 // Called every frame
 void ASM_Stage2_Door::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-	fDoorDeltaTime += DeltaTime;
-	float fDoorHeight = 220 * DeltaTime;
+	if (Role == ROLE_Authority) {
+		Super::Tick(DeltaTime);
+		fDoorDeltaTime += DeltaTime;
+		float fDoorHeight = 220 * DeltaTime;
 
-	if (bClosing) {
-		Door->AddLocalOffset(FVector(0.f, 0.f, -fDoorHeight));
-		if (fDoorDeltaTime >= 0.99f) {
-			PrimaryActorTick.SetTickFunctionEnable(false);
-			fDoorDeltaTime = 0.f;
+
+		if (bClosing) {
+			ServerOpenDoor(-fDoorHeight);
+			//Door->AddLocalOffset(FVector(0.f, 0.f, -fDoorHeight));
+			if (fDoorDeltaTime >= 0.99f) {
+				PrimaryActorTick.SetTickFunctionEnable(false);
+				fDoorDeltaTime = 0.f;
+			}
 		}
-	}
-	else
-	{
-		Door->AddLocalOffset(FVector(0.f, 0.f, fDoorHeight));
-		if (fDoorDeltaTime >= 0.99f) {
-			PrimaryActorTick.SetTickFunctionEnable(false);
-			fDoorDeltaTime = 0.f;
+		else
+		{
+			ServerOpenDoor(fDoorHeight);
+			//Door->AddLocalOffset(FVector(0.f, 0.f, fDoorHeight));
+			if (fDoorDeltaTime >= 0.99f) {
+				PrimaryActorTick.SetTickFunctionEnable(false);
+				fDoorDeltaTime = 0.f;
+			}
 		}
 	}
 }
@@ -64,4 +70,10 @@ void ASM_Stage2_Door::CloseDoor()
 		PrimaryActorTick.SetTickFunctionEnable(true);
 		bClosing = false;
 	}
+}
+
+
+void ASM_Stage2_Door::ServerOpenDoor_Implementation(float val)
+{
+	Door->AddLocalOffset(FVector(0.f, 0.f, val));
 }

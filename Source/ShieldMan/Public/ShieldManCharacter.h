@@ -90,10 +90,6 @@ private:
 
 	class ASM_PlayerState* PS;
 
-	class ASM_GameState* GS;
-
-	class AGameModeBase* GM;
-
 	bool bStateExist;
 
 public:		//생성자 , public 변수
@@ -127,6 +123,13 @@ public:		//생성자 , public 변수
 
 	UPROPERTY(BlueprintReadOnly, Category = UI)
 		FString stage;
+
+	float mx = 0;
+	float my = 0;
+	float mz = 0;
+	float cx = 0;
+	float cy = 0;
+	float cz = 0;
 
 protected: //조작
 	/** Called for forwards/backward input */
@@ -197,12 +200,10 @@ public:		//public 함수
 	virtual void Tick(float DeltaTime) override;
 
 
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerShieldImpulse(FVector Lpower, FVector Rpower, FVector pos);
 
-	float mx = 0;
-	float my = 0;
-	float mz = 0;
-	float cx = 0;
-	float cy = 0;
-	float cz = 0;
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerDeath();
 };
 

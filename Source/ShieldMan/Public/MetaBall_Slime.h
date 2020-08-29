@@ -95,4 +95,10 @@ public:
 	bool GetAlive();
 
 	void setSpeedPower(float power);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ServerAddForceToVelocity(FVector vec, float power);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerUpdateMetaBall(float timeStep);
 };

@@ -49,5 +49,14 @@ public:
 	UFUNCTION()
 		void OnStartOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+		virtual void ServerOpenDoor();
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerCloseDoor();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerSpawnActor();
+
 
 };

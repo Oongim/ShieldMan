@@ -54,6 +54,9 @@ AMetaBall_Slime::AMetaBall_Slime()
 	bAlive = true;
 
 	ShakeClamp = 500.f;
+
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -61,9 +64,13 @@ void AMetaBall_Slime::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto p = GetWorld()->GetPawnIterator();
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
 
-	Player = Cast<AShieldManCharacter>(*p);
+	for (auto FA : FoundActors)
+	{
+		Player = Cast<AShieldManCharacter>(FA);
+	}
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		MaterialParamName[i] = "";
@@ -82,18 +89,18 @@ void AMetaBall_Slime::BeginPlay()
 // Called every frame
 void AMetaBall_Slime::Tick(float DeltaTime)
 {
-	if (!bAlive) return;
+	if (HasAuthority()) {
+		if (!bAlive) return;
 
-	Super::Tick(DeltaTime);
+		Super::Tick(DeltaTime);
 
-	SetRotation();
-
-	Update(DeltaTime);
-
+		ServerUpdateMetaBall(DeltaTime);
+	}
 }
 
 void AMetaBall_Slime::Update(float DeltaTime)
 {
+	SetRotation();
 	Muitiple_SpringMass_System(DeltaTime);
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i], Balls_Position[i]);
@@ -153,6 +160,11 @@ void AMetaBall_Slime::Muitiple_SpringMass_System(float timeStep)
 	}
 }
 
+void AMetaBall_Slime::ServerUpdateMetaBall_Implementation(float timeStep)
+{
+	Update(timeStep);
+}
+
 void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)
 {
 
@@ -185,13 +197,15 @@ void AMetaBall_Slime::OnRepeatTimer()
 	if (bAttacked)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 1500);
+		ServerAddForceToVelocity(RunAwayVec, speedPower * 1500);
+		//AddForceToVelocity(RunAwayVec, speedPower * 1500);
 		//ULog::Invalid("bAttacked", "", LO_Viewport);
 	}
 	else if ((RunAwayVec).Size() < 300.f)
 	{
 		RunAwayVec.Normalize();
-		AddForceToVelocity(RunAwayVec, speedPower * 1500);
+		ServerAddForceToVelocity(RunAwayVec, speedPower * 1500);
+		//AddForceToVelocity(RunAwayVec, speedPower * 1500);
 		//ULog::Invalid("RunAway", "", LO_Viewport);
 	}
 	else {
@@ -200,7 +214,8 @@ void AMetaBall_Slime::OnRepeatTimer()
 		FNavLocation NextLocation;
 		if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.f, NextLocation))
 		{
-			AddForceToVelocity(NextLocation.Location, speedPower * 30);
+			ServerAddForceToVelocity(NextLocation.Location, speedPower * 30);
+			//AddForceToVelocity(NextLocation.Location, speedPower * 30);
 		}
 	}
 }
@@ -223,7 +238,9 @@ void AMetaBall_Slime::Attacked()
 }
 void AMetaBall_Slime::MoveStart()
 {
-	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
+	if (HasAuthority()) {
+		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, RepeatInterval, true);
+	}
 }
 
 bool AMetaBall_Slime::GetAlive()
@@ -234,4 +251,9 @@ bool AMetaBall_Slime::GetAlive()
 void AMetaBall_Slime::setSpeedPower(float power)
 {
 	speedPower = power;
+}
+
+void AMetaBall_Slime::ServerAddForceToVelocity_Implementation(FVector vec, float power)
+{
+	AddForceToVelocity(vec, power);
 }
