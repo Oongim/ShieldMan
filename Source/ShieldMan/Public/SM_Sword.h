@@ -28,6 +28,7 @@ private:
 
 	bool isHit;
 
+	int attacktype;
 public:
 
 	UPROPERTY(EditAnywhere, Category = "Value")
@@ -109,5 +110,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void StartNiagaraEffect();
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerOverlapBegin(UPrimitiveComponent* OtherComp);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerStartNiagaraEffect();
 
 };

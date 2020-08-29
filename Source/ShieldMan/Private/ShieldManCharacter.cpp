@@ -384,7 +384,7 @@ void AShieldManCharacter::ChangeDeath()
 {
 	GetMesh()->PlayAnimation(Anim, false);
 	//ULog::Number(Anim->GetMaxCurrentTime(), "Time: ", "", LO_Viewport);
-	Set_DeathCamera();
+	//Set_DeathCamera();
 	bDeath = true;
 	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
 }
@@ -467,7 +467,7 @@ void AShieldManCharacter::AddControllerPitchInput(float Val)
 				PS->ControllerRot = GetController()->GetControlRotation();
 
 				cy = PS->ControllerRot.Yaw;
-				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("AShieldManCharacter ControllerRot : %f, %f, %f"), PS->ControllerRot.Pitch, PS->ControllerRot.Yaw, PS->ControllerRot.Roll));
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("AShieldManCharacter ControllerRot : %f, %f, %f"), PS->ControllerRot.Pitch, PS->ControllerRot.Yaw, PS->ControllerRot.Roll));
 			}
 	}
 	//위 아래 이동

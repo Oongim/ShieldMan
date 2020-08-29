@@ -11,6 +11,15 @@ USM_SwordAnimInstance::USM_SwordAnimInstance()
 	AttackType = 0;
 }
 
+void USM_SwordAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USM_SwordAnimInstance, AttackType);
+	DOREPLIFETIME(USM_SwordAnimInstance, isHiding);
+	DOREPLIFETIME(USM_SwordAnimInstance, isGuard);
+}
+
 void USM_SwordAnimInstance::SetAttackType(int type)
 {
 	AttackType = type;
