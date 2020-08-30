@@ -82,6 +82,10 @@ ASM_Sword::ASM_Sword()
 	GetMesh()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetEnableGravity(false);
 	On_Collision->SetEnableGravity(false);
+	bReplicates = true;
+	bReplicateMovement = true;
+
+
 }
 
 // Called when the game starts or when spawned
@@ -106,14 +110,28 @@ void ASM_Sword::BeginPlay()
 // Called every frame
 void ASM_Sword::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
-	if (EventTrigger)
+	
+	if (HasAuthority())
 	{
-		AnimateVariable(DeltaTime);
-		Animate(DeltaTime);
+		Super::Tick(DeltaTime);
+		if (EventTrigger)
+		{
+			ServerAnimateVariable(DeltaTime);
+			ServerAnimate(DeltaTime);
+		}
 	}
 }
+
+void ASM_Sword::ServerAnimate_Implementation(float DeltaTime)
+{
+	Animate(DeltaTime);
+}
+
+void ASM_Sword::ServerAnimateVariable_Implementation(float DeltaTime)
+{
+	AnimateVariable(DeltaTime);
+}
+
 
 void ASM_Sword::AnimateVariable(float DeltaTime)
 {
@@ -303,12 +321,10 @@ void ASM_Sword::ServerOverlapBegin_Implementation(UPrimitiveComponent* OtherComp
 }
 void ASM_Sword::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
 	if (Role == ROLE_Authority)
 	{
 		ServerOverlapBegin(OtherComp);
 	}
-
 }
 
 void ASM_Sword::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

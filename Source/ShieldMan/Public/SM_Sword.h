@@ -117,4 +117,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void ServerStartNiagaraEffect();
 
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerAnimateVariable(float DeltaTime);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerAnimate(float DeltaTime);
 };
