@@ -144,8 +144,8 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 		if (OtherActor->GetClass()->GetName() == FString("SM_Shield") ||
 			(OtherComp->GetClass()->GetName() == FString("BoxComponent") && OtherActor->GetClass()->GetName() == FString("BP_SMCharacter_C")))
 		{
-			//ULog::Invalid("OnHit", "", LO_Viewport);
-			MoveEffect->SetVisibility(false);
+			ServerMoveEffectOff();
+			//MoveEffect->SetVisibility(false);
 			FVector target_velocity = Target->GetActorLocation() - GetActorLocation();
 			target_velocity.Normalize();
 
@@ -160,4 +160,7 @@ void ASM_Ghost_AttackObject::OnHit(UPrimitiveComponent* OnHittedComp, AActor* Ot
 	}
 }
 
-
+void ASM_Ghost_AttackObject::ServerMoveEffectOff_Implementation()
+{
+	MoveEffect->SetVisibility(false);
+}

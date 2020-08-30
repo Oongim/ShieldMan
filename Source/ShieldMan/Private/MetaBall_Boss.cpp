@@ -21,8 +21,6 @@ AMetaBall_Boss::AMetaBall_Boss()
 
 	RootComponent = Dynamic_Mesh;
 
-	
-
 	v_Octahedron.emplace_back("Ball1");
 	v_Octahedron.emplace_back("Ball3");
 	v_Octahedron.emplace_back("Ball5");
@@ -48,7 +46,8 @@ AMetaBall_Boss::AMetaBall_Boss()
 	BoombPower = 20.f;
 
 	HP = 27;
-
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -63,7 +62,6 @@ void AMetaBall_Boss::BeginPlay()
 		Player = Cast<AShieldManCharacter>(FA);
 	}
 
-
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
@@ -75,10 +73,11 @@ void AMetaBall_Boss::BeginPlay()
 		}
 	}
 
-
 	float ball_size = 150.f;
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
+		//Balls_Position.Emplace(TArray<TArray<FVector>>{});
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
+			//Balls_Position[i].Emplace(TArray<FVector>{});
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
 				Balls_Position[i][j][k] = FVector(
 					-ball_size + i * ball_size,
@@ -107,25 +106,57 @@ void AMetaBall_Boss::BeginPlay()
 // Called every frame
 void AMetaBall_Boss::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	
+	if (Role == ROLE_Authority){
+		Super::Tick(DeltaTime);
 
-	Muitiple_SpringMass_System(DeltaTime);
+		Muitiple_SpringMass_System(DeltaTime);
 
-	Update(DeltaTime);
+		Update(DeltaTime);
 
-	switch (m_status)
+		switch (m_status)
+		{
+		case WAITING:
+
+			break;
+		case ROTATING: {
+			//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Tick")));
+			if (Role == ROLE_Authority) {
+				RotateRow(rand_target, rand_row, rand_rigt, DeltaTime);
+			}
+		}
+					 break;
+		case DEAD:
+			BoundCheck();
+			break;
+		}
+
+		//ServerUpdateBallPos(Balls_Position);
+	}
+	/*else
 	{
-	case WAITING:
+		for (int i = 0; i < MAX_NUM_ROW; ++i) {
+			for (int j = 0; j < MAX_NUM_ROW; ++j) {
+				for (int k = 0; k < MAX_NUM_ROW; ++k) {
+					Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i][j][k], Balls_Position[i][j][k]);
+				}
+			}
+		}
+	}*/
+}
 
-		break;
-	case ROTATING: {
-		RotateRow(rand_target, rand_row, rand_rigt, DeltaTime);
-	}
-		break;
-	case DEAD:
-		BoundCheck();
-		break;
-	}
+//void AMetaBall_Boss::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//
+//	DOREPLIFETIME(AMetaBall_Boss, Balls_Position);
+//
+//}
+
+
+void AMetaBall_Boss::ServerRotateRow_Implementation(int Target_Row, int row, bool bRight_Rotate, float DeltaTime)
+{
+	RotateRow(static_cast<ROTATE_TARGET>(Target_Row), row, bRight_Rotate, DeltaTime);
 }
 
 void AMetaBall_Boss::Update(float DeltaTime)
@@ -289,7 +320,6 @@ void AMetaBall_Boss::spawn_Effect()
 
 void AMetaBall_Boss::RotateReset()
 {
-
 	rotate_cnt = 0.f;
 }
 
@@ -388,6 +418,13 @@ void AMetaBall_Boss::BoundCheck()
 }
 
 void AMetaBall_Boss::SetStatus(int status)
+{
+	if (Role == ROLE_Authority) {
+		ServerSetStatus(status);
+	}
+}
+
+void AMetaBall_Boss::ServerSetStatus_Implementation(int status)
 {
 	m_status = static_cast<STATUS>(status);
 }

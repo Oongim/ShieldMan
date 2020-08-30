@@ -17,8 +17,4 @@ class SHIELDMAN_API AMetaBall_BossStageSlime : public AMetaBall_Slime
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };

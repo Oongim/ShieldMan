@@ -29,11 +29,9 @@ void ASM_Stage2_GhostPhase::BeginPlay()
 
 	if (HasAuthority()) {
 		ServerSpawnActor();
-
-		OpenCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnOpenOverlapBegin);
-		StartCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnStartOverlapBegin);
 	}
-
+	OpenCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnOpenOverlapBegin);
+	StartCollision->OnComponentBeginOverlap.AddDynamic(this, &ASM_Stage2_GhostPhase::OnStartOverlapBegin);
 	bOpened = false;
 }
 
@@ -115,9 +113,6 @@ void ASM_Stage2_GhostPhase::ServerCloseDoor_Implementation()
 void ASM_Stage2_GhostPhase::ServerSpawnActor_Implementation()
 {
 
-
-
 	Entrance = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-2420.f, 260.f, -61.f), FRotator::ZeroRotator);
 	Exit = GetWorld()->SpawnActor<ASM_Stage2_Door>(DoorClass, FVector(-4000.f, 260.f, -61.f), FRotator::ZeroRotator);
-
 }

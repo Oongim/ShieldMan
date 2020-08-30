@@ -13,8 +13,3 @@ void AMetaBall_BossStageSlime::BeginPlay()
 	RunAwayPower = 30.f;
 }
 
-void AMetaBall_BossStageSlime::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}

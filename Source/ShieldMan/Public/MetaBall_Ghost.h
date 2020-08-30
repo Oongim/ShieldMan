@@ -31,8 +31,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float max_Clamp;
 
-	FVector Balls_Velocity[MAX_NUM_BLOB];
-	FVector Balls_Position[MAX_NUM_BLOB];
+	//FVector Balls_Velocity[MAX_NUM_BLOB];
+	TArray<FVector> Balls_Velocity;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = MetaBall, meta = (AllowPrivateAccess = "true"))
+	TArray<FVector> Balls_Position;
+
+	FVector Basic_BallsPosition[MAX_NUM_BLOB];
 	FName MaterialParamName[MAX_NUM_BLOB];
 
 	// INITIAL SETTINGS
@@ -148,6 +153,11 @@ public:
 
 
 	UFUNCTION(NetMulticast, Reliable)
-		void ServerSetEyePos(FName name, FVector pos);
+		void ServerAttacked();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerReturnColor();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 };

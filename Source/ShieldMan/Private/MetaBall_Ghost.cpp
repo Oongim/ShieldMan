@@ -88,6 +88,8 @@ void AMetaBall_Ghost::BeginPlay()
 		Player = Cast<AShieldManCharacter>(FA);
 	}
 
+	Balls_Position.Reserve(MAX_NUM_BLOB);
+
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		MaterialParamName[i] = "";
 		FString Name = "Ball";
@@ -97,28 +99,35 @@ void AMetaBall_Ghost::BeginPlay()
 	}
 
 	for (int i = 0; i < MAX_NUM_BLOB - 4; ++i) {
-		Balls_Velocity[i] = FVector(0.f, 0.f, 0.f);
+		Basic_BallsPosition[i] = Anchor_Default_Position[i];
 
-		Balls_Position[i] = Anchor_Default_Position[i];
-
-		Balls_Position[i + 3] = FVector(Anchor_Default_Position[i].X, Anchor_Default_Position[i].Y, 75.f);
+		Basic_BallsPosition[i + 3] = FVector(Anchor_Default_Position[i].X, Anchor_Default_Position[i].Y, 75.f);
 	}
-	Balls_Position[MAX_NUM_BLOB - 1] = FVector(0, 0, 70.f);
+	Basic_BallsPosition[MAX_NUM_BLOB - 1] = FVector(0, 0, 70.f);
 
+	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
+		Balls_Velocity.Emplace(FVector(0.f, 0.f, 0.f));
+		Balls_Position.Emplace(Basic_BallsPosition[i]);
+	}
 	bRightMove = FMath::RandBool();
 	MoveStart();
+}
+void AMetaBall_Ghost::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMetaBall_Ghost, Balls_Position);
 }
 
 // Called every frame
 void AMetaBall_Ghost::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+	SetRotation(DeltaTime);
+	Update_EyeScale(DeltaTime);
 	if (HasAuthority()) {
-		Super::Tick(DeltaTime);
-
-		SetRotation(DeltaTime);
 		Update(DeltaTime);
 		BoundCheck(m_status);
-		Update_EyeScale(DeltaTime);
 
 		if (!bAlive) {
 			Opacity -= 0.05;
@@ -153,12 +162,21 @@ void AMetaBall_Ghost::Tick(float DeltaTime)
 			}
 		}
 	}
+	else
+	{
+		//Muitiple_SpringMass_System(DeltaTime);
+		for (int i = 0; i < MAX_NUM_BLOB; ++i) {
+			Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i], Balls_Position[i]);
+		}
+	}
 }
 
-void AMetaBall_Ghost::ServerSetEyePos_Implementation(FName name, FVector pos)
+void AMetaBall_Ghost::ServerAttacked_Implementation()
 {
-	Dynamic_Mesh->SetVectorParameterValueOnMaterials(name, pos);
+	CurrentHP -= 20.f;
+	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 1.f, 0.f, 0.f });
 }
+
 
 void AMetaBall_Ghost::Update(float DeltaTime)
 {
@@ -170,7 +188,6 @@ void AMetaBall_Ghost::Update(float DeltaTime)
 }
 void AMetaBall_Ghost::SetRotation(float DeltaTime)
 {
-	//Anchor_Position[0].RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 1, 0));
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
 		Anchor_Position[i] = UKismetMathLibrary::GreaterGreater_VectorRotator(Anchor_Default_Position[i], GetActorRotation() * -1);
 	}
@@ -180,8 +197,6 @@ void AMetaBall_Ghost::SetRotation(float DeltaTime)
 
 	FVector R_Pos = UKismetMathLibrary::GreaterGreater_VectorRotator(EyeR_Default_Pos, ToPlayerInterpRot);
 	FVector L_Pos = UKismetMathLibrary::GreaterGreater_VectorRotator(EyeL_Default_Pos, ToPlayerInterpRot);
-	//ServerSetEyePos(FName("EyeL_Pos"), L_Pos);
-	//ServerSetEyePos(FName("EyeR_Pos"), R_Pos);
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName("EyeL_Pos"), L_Pos);
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName("EyeR_Pos"), R_Pos);
 }
@@ -202,10 +217,8 @@ void AMetaBall_Ghost::AddForceToVelocity(float power, bool bRandomShake)
 	}
 	else
 	{
-		//ULog::Invalid("bRandomShake", "", LO_Viewport);
 		FVector rand_Velocity;
 		for (int i = 1; i < MAX_NUM_BLOB; ++i) {
-			//rand_Velocity = FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f));
 			if (i == 1)
 				rand_Velocity = FVector{ 1,0,0 };
 			if (i == 2)
@@ -213,7 +226,6 @@ void AMetaBall_Ghost::AddForceToVelocity(float power, bool bRandomShake)
 			if (i == 3)
 				rand_Velocity = FVector{ 0,0,1 };
 			rand_Velocity.Normalize();
-			//ULog::Vector(rand_Velocity, LO_Viewport);
 			rand_Velocity *= power * ShakePower * 10;
 			Balls_Velocity[i] = rand_Velocity;
 		}
@@ -301,21 +313,18 @@ void AMetaBall_Ghost::Muitiple_SpringMass_System(float timeStep)
 		Balls_Velocity[i + numLeg] += mass2Acceleration * timeStep;
 
 		// Mass 1 position
-		float Balls_PositionZ = FMath::Clamp(Balls_Position[i].Z + Balls_Velocity[i].Z * timeStep, 0.f, 25.f);
-		Balls_Position[i].X += Balls_Velocity[i].X * timeStep;
-		Balls_Position[i].Y += Balls_Velocity[i].Y * timeStep;
-		Balls_Position[i].Z += Balls_Velocity[i].Z * timeStep;
-		//Balls_Position[i].Z = Balls_PositionZ;
-
-
+		Balls_Position[i] += Balls_Velocity[i] * timeStep;
+		//ServerUpdateBallPos(i, Balls_Position[i]);
 		// Mass 2 position
 		Balls_Position[i + numLeg] += Balls_Velocity[i + numLeg] * timeStep;
-
+		//ServerUpdateBallPos(i + numLeg, Balls_Position[i + numLeg]);
 	}
 	Balls_Position[MAX_NUM_BLOB - 1] = (Balls_Position[4] + Balls_Position[5] + Balls_Position[6]) / 3;
-	Balls_Position[MAX_NUM_BLOB - 1].Z -= 5;
-	//ULog::Vector(Balls_Position[MAX_NUM_BLOB - 1], "Balls_Position: ", "", LO_Viewport);
+	Balls_Position[MAX_NUM_BLOB - 1].Z -= 5  ;
+	//ServerUpdateBallPos(MAX_NUM_BLOB - 1, Balls_Position[MAX_NUM_BLOB - 1]);
 }
+
+
 
 void AMetaBall_Ghost::BoundCheck(STATUS status)
 {
@@ -388,6 +397,7 @@ void AMetaBall_Ghost::OnRepeatTimer()
 	}
 
 	m_destination = NextLocation;
+	//ServerAddForceToVelocity(speedPower * 10);
 	AddForceToVelocity(speedPower * 10);
 
 	m_status = MOVING;
@@ -396,20 +406,26 @@ void AMetaBall_Ghost::OnRepeatTimer()
 // 공격을 받았을 때
 void AMetaBall_Ghost::Attacked()
 {
-	if (!bAlive) return;
-	bAttacked = true;
-	CurrentHP -= 20.f;
-	AddForceToVelocity(15, true);
+	if (HasAuthority()) {
+		if (!bAlive) return;
+		bAttacked = true;
 
-	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 1.f, 0.f, 0.f });
-	GetWorld()->GetTimerManager().SetTimer(AttackedTimerHandle, this, &AMetaBall_Ghost::ChangeAttackedBaseColor, 0.5f, false);
-	if (CurrentHP <= 0)
-		bAlive = false;
+		AddForceToVelocity(15, true);
+
+		ServerAttacked();
+		/*CurrentHP -= 20.f;
+		Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 1.f, 0.f, 0.f });*/
+		GetWorld()->GetTimerManager().SetTimer(AttackedTimerHandle, this, &AMetaBall_Ghost::ChangeAttackedBaseColor, 0.5f, false);
+		if (CurrentHP <= 0)
+			bAlive = false;
+	}
 }
 
 void AMetaBall_Ghost::MoveStart()
 { 
-	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::OnRepeatTimer, RepeatInterval, false);
+	if (HasAuthority()) {
+		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::OnRepeatTimer, RepeatInterval, false);
+	}
 }
 
 void AMetaBall_Ghost::SetAlive(bool alive)
@@ -443,9 +459,14 @@ void AMetaBall_Ghost::Attack()
 
 void AMetaBall_Ghost::ChangeAttackedBaseColor()
 {
+	if (HasAuthority()) {
+		ServerReturnColor();
+	}
+}
+void AMetaBall_Ghost::ServerReturnColor_Implementation()
+{
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.194, 0.227, 0.675 });
 }
-
 void AMetaBall_Ghost::SetStatus(STATUS status)
 {
 	m_status = status;

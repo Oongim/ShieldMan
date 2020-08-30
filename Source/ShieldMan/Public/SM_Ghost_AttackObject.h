@@ -65,9 +65,10 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 		void ServerSpawnEndEffect();
-	/*UFUNCTION(Server, Reliable, WithValidation)
-		virtual void ServerOpenDoor();
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerMoveEffectOff();
+
+	/*UFUNCTION(Server, Reliable, WithValidation)
 		virtual void ServerOpenDoor();*/
 };

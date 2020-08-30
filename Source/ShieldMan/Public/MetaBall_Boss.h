@@ -28,7 +28,9 @@ private:
 	class AShieldManCharacter* Player;
 
 	FVector Balls_Velocity[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
+
 	FVector Balls_Position[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
+
 	FName MaterialParamName[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
 
 	FVector Anchor_Position[MAX_NUM_ROW][MAX_NUM_ROW][MAX_NUM_ROW];
@@ -132,4 +134,14 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void StageClear();
+
+	UFUNCTION(NetMulticast, UnReliable)
+		void ServerRotateRow(int Target_Row, int row, bool bRight_Rotate, float DeltaTime);
+
+	UFUNCTION(NetMulticast, UnReliable)
+		void ServerSetStatus(int status);
+
+
+	//void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
 };
