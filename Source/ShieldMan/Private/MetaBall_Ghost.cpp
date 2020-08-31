@@ -325,7 +325,7 @@ void AMetaBall_Ghost::Muitiple_SpringMass_System(float timeStep)
 
 	}
 	Balls_Position[MAX_NUM_BLOB - 1] = (Balls_Position[4] + Balls_Position[5] + Balls_Position[6]) / 3;
-	Balls_Position[MAX_NUM_BLOB - 1].Z -= 5  ;
+	Balls_Position[MAX_NUM_BLOB - 1].Z -= 5;
 }
 
 void AMetaBall_Ghost::BoundCheck(STATUS status)
@@ -424,7 +424,7 @@ void AMetaBall_Ghost::Attacked()
 }
 
 void AMetaBall_Ghost::MoveStart()
-{ 
+{
 	if (HasAuthority()) {
 		GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Ghost::OnRepeatTimer, RepeatInterval, false);
 	}

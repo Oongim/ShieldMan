@@ -187,8 +187,6 @@ void AMetaBall_Slime::AddForceToVelocity(FVector vec, float power)
 	}
 }
 
-
-
 void AMetaBall_Slime::OnRepeatTimer()
 {
 	if (!bAlive) return;
@@ -228,13 +226,19 @@ void AMetaBall_Slime::Attacked()
 	GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AMetaBall_Slime::OnRepeatTimer, 2.f, true);
 	Health -= 20.f;
 	Ball_Size -= 10;		//구의 크기를 줄인다.
-	//ULog::Number((float)Ball_Size, "The Number is: ", "", LO_Viewport);
+	if (HasAuthority()) {
+		ServerUpdateBallSize(Ball_Size);
+	}
+	//Dynamic_Mesh->SetScalarParameterValueOnMaterials(TEXT("BallSize"), Ball_Size);
+	
 	if (Ball_Size < 20.f) {
 		Ball_Size = 1.f;
 		bAlive = false;
-		Dynamic_Mesh->SetScalarParameterValueOnMaterials(TEXT("BallSize"), Ball_Size);
-
 	}
+}
+void AMetaBall_Slime::ServerUpdateBallSize_Implementation(float size)
+{
+	Dynamic_Mesh->SetScalarParameterValueOnMaterials(TEXT("BallSize"), size);
 }
 void AMetaBall_Slime::MoveStart()
 {

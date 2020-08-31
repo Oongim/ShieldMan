@@ -431,6 +431,15 @@ void AMetaBall_Boss::SetStatus(int status)
 	if (Role == ROLE_Authority) {
 		ServerSetStatus(status);
 		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
 	}
 }
 

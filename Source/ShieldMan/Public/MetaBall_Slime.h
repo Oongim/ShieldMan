@@ -101,4 +101,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 		virtual void ServerUpdateMetaBall(float timeStep);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerUpdateBallSize(float size);
 };
