@@ -106,10 +106,10 @@ public:		//생성자 , public 변수
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Status")
 		float MaxHP;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Player Status")
 		float CurrentHP;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Player Status")
 		bool HPlock;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Status")
@@ -205,5 +205,8 @@ public:		//public 함수
 
 	UFUNCTION(NetMulticast, Reliable)
 		void ServerDeath();
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	float playtime;
 };
 

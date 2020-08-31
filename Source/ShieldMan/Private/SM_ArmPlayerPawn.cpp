@@ -195,7 +195,7 @@ void ASM_ArmPlayerPawn::Init_Camera()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 	Camera->SetRelativeLocationAndRotation(  //카메라 초기 위치와 각도 조정
-		FVector(0.0f, 0.0f, 80.0f),
+		FVector(0.0f, 0.0f, 100.0f),
 		FRotator(-5.f, 0.f, 0.f)
 	);
 }

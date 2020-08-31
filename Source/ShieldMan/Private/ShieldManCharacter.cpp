@@ -94,6 +94,8 @@ AShieldManCharacter::AShieldManCharacter()
 	SetReplicates(true);
 	bReplicates = true;
 	GetMesh()->SetIsReplicated(true);
+
+	playtime = 0;
 }
 
 void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -103,10 +105,17 @@ void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AShieldManCharacter, RightHandPos);
 	DOREPLIFETIME(AShieldManCharacter, LeftHandPos);
 	DOREPLIFETIME(AShieldManCharacter, AnimInstance);
+	DOREPLIFETIME(AShieldManCharacter, CurrentHP);
+	DOREPLIFETIME(AShieldManCharacter, HPlock);
+	DOREPLIFETIME(AShieldManCharacter, playtime);
 }
 
 void AShieldManCharacter::Tick(float DeltaTime)
 {
+	if (HasAuthority())
+	{		
+		playtime += DeltaTime;
+	}
 	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
 	GI->GetNetworkManager()->Send_InGame(0, 0, 0, 0, 0, 0, cx, cy, 0);
 	GI->GetNetworkManager()->RecvPacket();

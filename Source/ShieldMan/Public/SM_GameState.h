@@ -23,5 +23,39 @@ public:
 	UPROPERTY(Replicated)
 		FVector LeftHandPos;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		float Stage1;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		float Stage2;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		float Stage3;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		float EntireTime;
+
+	UFUNCTION(BlueprintCallable)
+		void SetTimeStage1(float time);
+
+	UFUNCTION(BlueprintCallable)
+		void SetTimeStage2(float time);
+
+	UFUNCTION(BlueprintCallable)
+		void SetTimeStage3(float time);
+
+	UFUNCTION(BlueprintCallable)
+		float GetTimeStage1();
+
+	UFUNCTION(BlueprintCallable)
+		float GetTimeStage2();
+
+	UFUNCTION(BlueprintCallable)
+		float GetTimeStage3();
+
+	UFUNCTION(BlueprintCallable)
+		void AddEntireTime(float time);
+
+	UFUNCTION(BlueprintCallable)
+		float GetEntireTime();
+
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 };
