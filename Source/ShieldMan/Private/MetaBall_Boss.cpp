@@ -36,7 +36,7 @@ AMetaBall_Boss::AMetaBall_Boss()
 	attack_term = 3.0f;
 	avoid_term = 2.f;
 	Max_Rotate = 10;
-	rotate_speed = 480.f;
+	rotate_speed = 350.f;
 
 	k = 5;
 	damping = 5;
@@ -75,9 +75,7 @@ void AMetaBall_Boss::BeginPlay()
 
 	float ball_size = 150.f;
 	for (int i = 0; i < MAX_NUM_ROW; ++i) {
-		//Balls_Position.Emplace(TArray<TArray<FVector>>{});
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
-			//Balls_Position[i].Emplace(TArray<FVector>{});
 			for (int k = 0; k < MAX_NUM_ROW; ++k) {
 				Balls_Position[i][j][k] = FVector(
 					-ball_size + i * ball_size,
@@ -95,68 +93,53 @@ void AMetaBall_Boss::BeginPlay()
 	rotate_cnt = 0;
 
 	num_rotate = 0;
-
-	rand_target = (ROTATE_TARGET)(rand() % 3);
-	rand_row = rand() % 3;
-	rand_rigt = false;//static_cast<bool>(rand() % 2);
-
+	
+	rand_target = 0;
+	rand_row = 0;
+	rand_rigt = false;
 	m_status = WAITING;
 }
 
+void AMetaBall_Boss::ServerStartSetRotate_Implementation()
+{
+	if (ServerRow.Num()) {
+		RandVal val = ServerRow[0];
+		ServerRow.RemoveAt(0);
+		rand_target = val.rand_target;
+		rand_row = val.rand_row;
+		rand_rigt = val.rand_rigt;
+	}
+}
+void AMetaBall_Boss::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
 // Called every frame
 void AMetaBall_Boss::Tick(float DeltaTime)
 {
-	
-	if (Role == ROLE_Authority){
-		Super::Tick(DeltaTime);
 
-		Muitiple_SpringMass_System(DeltaTime);
+	//if (Role == ROLE_Authority){
+	Super::Tick(DeltaTime);
 
-		Update(DeltaTime);
+	Muitiple_SpringMass_System(DeltaTime);
 
-		switch (m_status)
-		{
-		case WAITING:
+	Update(DeltaTime);
 
-			break;
-		case ROTATING: {
-			//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Tick")));
-			if (Role == ROLE_Authority) {
-				RotateRow(rand_target, rand_row, rand_rigt, DeltaTime);
-			}
-		}
-					 break;
-		case DEAD:
-			BoundCheck();
-			break;
-		}
-
-		//ServerUpdateBallPos(Balls_Position);
-	}
-	/*else
+	switch (m_status)
 	{
-		for (int i = 0; i < MAX_NUM_ROW; ++i) {
-			for (int j = 0; j < MAX_NUM_ROW; ++j) {
-				for (int k = 0; k < MAX_NUM_ROW; ++k) {
-					Dynamic_Mesh->SetVectorParameterValueOnMaterials(MaterialParamName[i][j][k], Balls_Position[i][j][k]);
-				}
-			}
-		}
-	}*/
-}
+	case WAITING:
 
-//void AMetaBall_Boss::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//
-//	DOREPLIFETIME(AMetaBall_Boss, Balls_Position);
-//
-//}
+		break;
+	case ROTATING: {
+		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("%d %d %d"), rand_target, rand_row, rand_rigt));
+		RotateRow(static_cast<ROTATE_TARGET>(rand_target), rand_row, rand_rigt, DeltaTime);
+	}
+				 break;
+	case DEAD:
+		BoundCheck();
+		break;
+	}
 
-
-void AMetaBall_Boss::ServerRotateRow_Implementation(int Target_Row, int row, bool bRight_Rotate, float DeltaTime)
-{
-	RotateRow(static_cast<ROTATE_TARGET>(Target_Row), row, bRight_Rotate, DeltaTime);
 }
 
 void AMetaBall_Boss::Update(float DeltaTime)
@@ -171,19 +154,19 @@ void AMetaBall_Boss::Update(float DeltaTime)
 }
 void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Rotate, float DeltaTime)
 {
-	if (rotate_cnt >= 90.f) return;
+
 	bool bResetCnt = false;
 
 	float turn_rate = rotate_speed * DeltaTime;
-
+	if (rotate_cnt >= 90.f) return;
 	rotate_cnt += turn_rate;
+
 	if (rotate_cnt >= 90.f) {
 		float sulplus = rotate_cnt - 90.f;
 		turn_rate -= sulplus;
 
 		bResetCnt = true;
 	}
-
 	switch (Target_Row) {
 	case ROTATE_X:
 		for (int j = 0; j < MAX_NUM_ROW; ++j) {
@@ -265,14 +248,25 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 			//ULog::Invalid("Target_Row", "", LO_Viewport);
 			break;
 		}
+		if (Role == ROLE_Authority) {
+			ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
+		}
+		if (ServerRow.Num()) {
+			
+			RandVal val = ServerRow[0];
+			UE_LOG(LogTemp, Warning, TEXT("======%d======"), ServerRow.Num());
+			UE_LOG(LogTemp, Warning, TEXT("%d %d %d"), val.rand_target, val.rand_row, val.rand_rigt);
+			UE_LOG(LogTemp, Warning, TEXT("=============="));
+			ServerRow.RemoveAt(0);
 
-		rand_target = (ROTATE_TARGET)(rand() % 3);
-		rand_row = rand() % 3;
-		rand_rigt = false;
-
+			rand_target = val.rand_target;
+			rand_row = val.rand_row;
+			rand_rigt = val.rand_rigt;
+		}
 		num_rotate++;
 		if (num_rotate == Max_Rotate)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Attack"));
 			GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::spawn_Effect, avoid_term);
 		}
 		else
@@ -280,42 +274,57 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 			rotate_cnt = 0.f;
 		}
 	}
+}
 
+void AMetaBall_Boss::ServerSetRotateRowVal_Implementation(int target, int row, bool bright)
+{
+	ServerRow.Emplace(RandVal{ target,row,bright });
+
+	//DOREPLIFETIME(AShieldManCharacter, RightHandPos);
 }
 
 void AMetaBall_Boss::spawn_Effect()
 {
-	bool bAttackSuccess = false;
-	FVector Pos = GetActorLocation();
-	float gab = 560.f;
-	float between_dis = 70.f;
-	Pos.X += gab;
-	Pos.Y += between_dis;
-	FVector taget_Pos = Player->GetActorLocation();
+	if (Role == ROLE_Authority) {
+		FVector Pos = GetActorLocation();
+		float gab = 560.f;
+		float between_dis = 70.f;
+		Pos.X += gab;
+		Pos.Y += between_dis;
+		FVector taget_Pos = Player->GetActorLocation();
+		bool bAttackSuccess = false;
+		for (int i = 0; i < MAX_NUM_ROW; ++i) {
+			for (int j = 0; j < MAX_NUM_ROW; ++j) {
+				if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][0][j]) != v_Octahedron.end()) {
 
-	for (int i = 0; i < MAX_NUM_ROW; ++i) {
-		for (int j = 0; j < MAX_NUM_ROW; ++j) {
-			if (find(v_Octahedron.begin(), v_Octahedron.end(), MaterialParamName[i][0][j]) != v_Octahedron.end()) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600), FRotator::ZeroRotator, true);
-				if (!bAttackSuccess) {
-					if (Pos.X - (i * gab) + (gab / 2) >= taget_Pos.X && Pos.X - (i * gab) - (gab / 2) < taget_Pos.X) {
-						if (Pos.Y + ((MAX_NUM_ROW - j) * gab) + (gab / 2) >= taget_Pos.Y && Pos.Y + ((MAX_NUM_ROW - j) * gab) - (gab / 2) < taget_Pos.Y) {
-							bAttackSuccess = true;
-							AMetaBall_Slime* slime = GetWorld()->SpawnActor<AMetaBall_Slime>(SlimeClass, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600.f), FRotator::ZeroRotator);
-							Player->AddForceToCharacter(FVector{ 0.f,0.f,-1.f }, BoombPower);
-							Player->DecreaseHP(20.f);
+					ServerSpawn_Effect(FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600));
+
+					//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600), FRotator::ZeroRotator, true);
+					if (!bAttackSuccess) {
+						if (Pos.X - (i * gab) + (gab / 2) >= taget_Pos.X && Pos.X - (i * gab) - (gab / 2) < taget_Pos.X) {
+							if (Pos.Y + ((MAX_NUM_ROW - j) * gab) + (gab / 2) >= taget_Pos.Y && Pos.Y + ((MAX_NUM_ROW - j) * gab) - (gab / 2) < taget_Pos.Y) {
+								bAttackSuccess = true;
+								AMetaBall_Slime* slime = GetWorld()->SpawnActor<AMetaBall_Slime>(SlimeClass, FVector(Pos.X - (i * gab), Pos.Y + ((MAX_NUM_ROW - j) * gab), 600.f), FRotator::ZeroRotator);
+								Player->AddForceToCharacter(FVector{ 0.f,0.f,-1.f }, BoombPower);
+								Player->DecreaseHP(20.f);
+							}
 						}
 					}
 				}
 			}
+
+		}
+		if (!bAttackSuccess) {
+			GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(0.f, 40.f, 1000.f), FRotator::ZeroRotator);
 		}
 	}
-	if (!bAttackSuccess) {
-		GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(0.f, 40.f, 1000.f), FRotator::ZeroRotator);
-	}
-
 	num_rotate = 0;
 	GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::RotateReset, attack_term);
+}
+
+void AMetaBall_Boss::ServerSpawn_Effect_Implementation(FVector pos)
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, pos, FRotator::ZeroRotator, true);
 }
 
 void AMetaBall_Boss::RotateReset()
@@ -330,7 +339,7 @@ void AMetaBall_Boss::Attacked()
 	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(AttackedCameraShake, 1.0f);
 
 	RandShakeBall(ShakePower);
-	
+
 	HP--;
 	if (HP == 0)
 		Dead();
@@ -421,6 +430,7 @@ void AMetaBall_Boss::SetStatus(int status)
 {
 	if (Role == ROLE_Authority) {
 		ServerSetStatus(status);
+		ServerSetRotateRowVal(rand() % 3, rand() % 3, false);
 	}
 }
 

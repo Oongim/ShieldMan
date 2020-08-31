@@ -22,6 +22,14 @@ private:
 		ROTATE_Y,
 		ROTATE_Z
 	};
+
+	struct RandVal {
+		int rand_target;
+
+		int rand_row;
+
+		bool rand_rigt;
+	};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Dynamic_Mesh;
 
@@ -49,11 +57,17 @@ private:
 
 	STATUS m_status;
 
+
 	float rotate_cnt;
 
-	ROTATE_TARGET rand_target;
+
+	int rand_target;
+
 	int rand_row;
+
 	bool rand_rigt;
+
+	TArray< RandVal> ServerRow;
 
 	int num_rotate;
 
@@ -135,13 +149,18 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void StageClear();
 
-	UFUNCTION(NetMulticast, UnReliable)
-		void ServerRotateRow(int Target_Row, int row, bool bRight_Rotate, float DeltaTime);
-
-	UFUNCTION(NetMulticast, UnReliable)
+	UFUNCTION(NetMulticast, Reliable)
 		void ServerSetStatus(int status);
 
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerSpawn_Effect(FVector pos);
 
-	//void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerSetRotateRowVal(int target,int row,bool bright);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerStartSetRotate();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 };

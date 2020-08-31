@@ -112,6 +112,7 @@ void AMetaBall_Ghost::BeginPlay()
 	bRightMove = FMath::RandBool();
 	MoveStart();
 }
+
 void AMetaBall_Ghost::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -314,17 +315,18 @@ void AMetaBall_Ghost::Muitiple_SpringMass_System(float timeStep)
 
 		// Mass 1 position
 		Balls_Position[i] += Balls_Velocity[i] * timeStep;
-		//ServerUpdateBallPos(i, Balls_Position[i]);
+
 		// Mass 2 position
-		Balls_Position[i + numLeg] += Balls_Velocity[i + numLeg] * timeStep;
-		//ServerUpdateBallPos(i + numLeg, Balls_Position[i + numLeg]);
+		FVector velocity = Balls_Velocity[i + numLeg] * timeStep;
+
+
+
+		Balls_Position[i + numLeg] += velocity;
+
 	}
 	Balls_Position[MAX_NUM_BLOB - 1] = (Balls_Position[4] + Balls_Position[5] + Balls_Position[6]) / 3;
 	Balls_Position[MAX_NUM_BLOB - 1].Z -= 5  ;
-	//ServerUpdateBallPos(MAX_NUM_BLOB - 1, Balls_Position[MAX_NUM_BLOB - 1]);
 }
-
-
 
 void AMetaBall_Ghost::BoundCheck(STATUS status)
 {
