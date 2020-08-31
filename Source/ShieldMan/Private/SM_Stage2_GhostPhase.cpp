@@ -93,8 +93,8 @@ void ASM_Stage2_GhostPhase::ServerOpenDoor_Implementation()
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3600.f, 1000.f, 250.f), FRotator::ZeroRotator));
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-2600.f, 1000.f, 250.f), FRotator::ZeroRotator));
 	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3100.f, 260.f, 250.f), FRotator::ZeroRotator));
-	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3600.f, -600.f, 250.f), FRotator::ZeroRotator));
-	m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-2600.f, -600.f, 250.f), FRotator::ZeroRotator));
+	//m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-3600.f, -600.f, 250.f), FRotator::ZeroRotator));
+	//m_GhostArr.Emplace(GetWorld()->SpawnActor<AMetaBall_Ghost>(GhostClass, FVector(-2600.f, -600.f, 250.f), FRotator::ZeroRotator));
 	for (auto ghost : m_GhostArr)
 	{
 		ghost->MoveStart();

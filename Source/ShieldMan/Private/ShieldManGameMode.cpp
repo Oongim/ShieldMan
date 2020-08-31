@@ -24,6 +24,8 @@ AShieldManGameMode::AShieldManGameMode()
 	PlayerStateClass = ASM_PlayerState::StaticClass();
 
 	PlayerNum = 0;
+
+
 }
 
 void AShieldManGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -76,5 +78,8 @@ void AShieldManGameMode::PostLogin(APlayerController* NewPlayer)
 
 void AShieldManGameMode::Logout(AController* Exiting)
 {
+
 	Super::Logout(Exiting);
 }
+
+
