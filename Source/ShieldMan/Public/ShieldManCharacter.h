@@ -208,5 +208,8 @@ public:		//public ÇÔ¼ö
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float playtime;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		bool ServerTraveling;
 };
 
