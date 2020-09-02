@@ -178,59 +178,19 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		//UE_LOG(LogTemp, Warning, TEXT("packet %d"), t);
 		switch (packet[1])
 		{
-		case S2C_ENTER:
-		{
-			const sc_packet_enter* my_packet = reinterpret_cast<const sc_packet_enter*>(packet);
-			m_playercnt = my_packet->playercnt;
-			break;
-		}
-
 		case S2C_ENTER_OK:
 		{
 			const sc_packet_enter_ok* my_packet = reinterpret_cast<const sc_packet_enter_ok*>(packet);
-			m_playercnt = my_packet->playercnt;
-
-
-			//UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_ENTER_OK"), m_playerInfo.m_cid);
+			m_room = my_packet->room;
+			m_type = my_packet->ctype;
 			if (false == isConnect)
 			{
-
 				m_playerInfo.m_cid = my_packet->id;
-				//GEngine->AddOnScreenDebugMessage(0, 10, FColor::Green,
-				//	FString::Printf(TEXT("%d "), m_cid));
 				isConnect = true;
 			}
 			break;
 		}
 
-		case S2C_PICK:
-		{
-			const sc_packet_pick_position* packet_S2C_PICK = reinterpret_cast<const sc_packet_pick_position*>(packet);
-			UE_LOG(LogTemp, Warning, TEXT("id[%d]: UNetworkManager PacketProcess S2C_PICK"), m_playerInfo.m_cid);
-
-			if (packet_S2C_PICK->id == PPT_NONE)
-			{
-				break;
-			}
-			else if (m_playerInfo.m_cid == packet_S2C_PICK->id)
-			{
-				m_playerInfo.m_type = (PLAYER_POSITION_TYPE)packet_S2C_PICK->type;
-			}
-			else if (m_OtherPlayer[0].m_cid == packet_S2C_PICK->id)
-			{
-				m_OtherPlayer[0].m_type = (PLAYER_POSITION_TYPE)packet_S2C_PICK->type;
-			}
-			else if (m_OtherPlayer[1].m_cid == packet_S2C_PICK->id)
-			{
-				m_OtherPlayer[1].m_type = (PLAYER_POSITION_TYPE)packet_S2C_PICK->type;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("id[%d]: ERROR ID S2C_PICK"), m_playerInfo.m_cid);
-			}
-
-			break;
-		}
 		case S2C_READY:
 		{
 			const sc_packet_ready_postion* pickPlayer = reinterpret_cast<const sc_packet_ready_postion*>(packet);
@@ -242,7 +202,7 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		{
 			const sc_packet_connect* packet_S2C_CONNECT = reinterpret_cast<const sc_packet_connect*>(packet);
 
-			m_playercnt = packet_S2C_CONNECT->playercnt;
+			m_isfull = packet_S2C_CONNECT->isfull;
 			
 			break;
 		}
@@ -251,63 +211,21 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		{
 			const sc_packet_character_info* packet_S2C_character_info = reinterpret_cast<const sc_packet_character_info*>(packet);
 
-			m_OtherPlayer[0].rp = packet_S2C_character_info->rp;
-			m_OtherPlayer[0].ry = packet_S2C_character_info->ry;
-			m_OtherPlayer[0].rr = packet_S2C_character_info->rr;
-			m_OtherPlayer[0].lp = packet_S2C_character_info->lp;
-			m_OtherPlayer[0].ly = packet_S2C_character_info->ly;
-			m_OtherPlayer[0].lr = packet_S2C_character_info->lr;
-			m_OtherPlayer[0].cx = packet_S2C_character_info->cx;
-			m_OtherPlayer[0].cy = packet_S2C_character_info->cy;
-		}
-
-		case S2C_INGAME:
-		{
-			const sc_packet_in_game* packet_S2C_INGAME = reinterpret_cast<const sc_packet_in_game*>(packet);
-			/*if (packet_S2C_INGAME->id == 0)
-			{
-				m_recvcid = 0;
-				m_OtherPlayer[0].m_x = packet_S2C_INGAME->x;
-				m_OtherPlayer[0].m_y = packet_S2C_INGAME->y;
-				m_OtherPlayer[0].m_z = packet_S2C_INGAME->z;
-				m_OtherPlayer[0].m_roll = packet_S2C_INGAME->roll;
-				m_OtherPlayer[0].m_pitch = packet_S2C_INGAME->pitch;
-				m_OtherPlayer[0].m_yaw = packet_S2C_INGAME->yaw;
-				m_OtherPlayer[0].m_camerax = packet_S2C_INGAME->cx;
-				m_OtherPlayer[0].m_cameray = packet_S2C_INGAME->cy;
-				m_OtherPlayer[0].m_cameraz = packet_S2C_INGAME->cz;
-			}
-			else if (packet_S2C_INGAME->id == 2)
-			{
-				m_recvcid = 1;
-				m_OtherPlayer[1].m_x = packet_S2C_INGAME->x;
-				m_OtherPlayer[1].m_y = packet_S2C_INGAME->y;
-				m_OtherPlayer[1].m_z = packet_S2C_INGAME->z;
-				m_OtherPlayer[1].m_roll = packet_S2C_INGAME->roll;
-				m_OtherPlayer[1].m_pitch = packet_S2C_INGAME->pitch;
-				m_OtherPlayer[1].m_yaw = packet_S2C_INGAME->yaw;
-				m_OtherPlayer[1].m_camerax = packet_S2C_INGAME->cx;
-				m_OtherPlayer[1].m_cameray = packet_S2C_INGAME->cy;
-				m_OtherPlayer[1].m_cameraz = packet_S2C_INGAME->cz;
-			}
-			else if (packet_S2C_INGAME->id == 6)
-			{
-				m_recvcid = 2;
-				m_OtherPlayer[2].m_x = packet_S2C_INGAME->x;
-				m_OtherPlayer[2].m_y = packet_S2C_INGAME->y;
-				m_OtherPlayer[2].m_z = packet_S2C_INGAME->z;
-				m_OtherPlayer[2].m_roll = packet_S2C_INGAME->roll;
-				m_OtherPlayer[2].m_pitch = packet_S2C_INGAME->pitch;
-				m_OtherPlayer[2].m_yaw = packet_S2C_INGAME->yaw;
-				m_OtherPlayer[2].m_camerax = packet_S2C_INGAME->cx;
-				m_OtherPlayer[2].m_cameray = packet_S2C_INGAME->cy;
-				m_OtherPlayer[2].m_cameraz = packet_S2C_INGAME->cz;
-			}*/
-			//else
-			//{
-			//	m_recvcid = -1;
-			//}
+			m_playerInfo.rp = packet_S2C_character_info->rp;
+			m_playerInfo.ry = packet_S2C_character_info->ry;
+			m_playerInfo.rr = packet_S2C_character_info->rr;
+			m_playerInfo.lp = packet_S2C_character_info->lp;
+			m_playerInfo.ly = packet_S2C_character_info->ly;
+			m_playerInfo.lr = packet_S2C_character_info->lr;
+			m_playerInfo.cx = packet_S2C_character_info->cx;
+			m_playerInfo.cy = packet_S2C_character_info->cy;
 			break;
+		}
+			
+		case S2C_LEAVE:
+		{
+			const sc_packet_leave* packet_S2C_leave = reinterpret_cast<const sc_packet_leave*>(packet);
+			DisConnect();
 		}
 
 		default:
@@ -324,31 +242,9 @@ void UNetworkManager::Send_Enter_Packet()
 
 	packet.type = C2S_ENTER;
 	packet.size = sizeof(packet);
+	packet.host = m_host;
 	strcpy_s(packet.name, m_playerInfo.m_id);
 
-	Send_Packet(&packet);
-
-}
-
-void UNetworkManager::Send_Pick_Position()
-{
-	cs_packet_pick_position packet;
-
-	packet.type = C2S_PICK;
-	packet.size = sizeof(packet);
-	strcpy_s(packet.name, m_playerInfo.m_id);
-	packet.ppt = m_playerInfo.m_type;
-	Send_Packet(&packet);
-
-}
-
-void UNetworkManager::Send_Ready_Position()
-{
-	cs_packet_ready_postion packet;
-
-	packet.type = C2S_READY;
-	packet.size = sizeof(packet);
-	strcpy_s(packet.name, m_playerInfo.m_id);
 	Send_Packet(&packet);
 
 }
@@ -359,6 +255,7 @@ void UNetworkManager::Send_Connect()
 
 	packet.type = C2S_CONNECT;
 	packet.size = sizeof(packet);
+	packet.room = m_room;
 	Send_Packet(&packet);
 
 }
@@ -379,62 +276,23 @@ void UNetworkManager::Send_InGame(float rp, float ry, float rr, float lp, float 
 	packet.cx = cx;
 	packet.cy = cy;
 	packet.cz = 0;
-
+	packet.ctype = m_type;
+	packet.room = m_room;
 	packet.id = m_playerInfo.m_cid;
 	Send_Packet(&packet);
 }
 
-void UNetworkManager::Send_MoveForward_Packet(float axisValue, FVector Position, float Speed, float Direction)
+void UNetworkManager::Send_Leave_Packet()
 {
-	if (axisValue != 0)
-	{
-		SetPlayerPosition(Position);
-		SetPlayerVelocity(Speed, Direction);
-		Send_PlayerMove_packet();
-	}
+	cs_packet_leave packet;
+	packet.size = sizeof(packet);
+	packet.type = C2S_LEAVE;
+	packet.room = m_room;
+	Send_Packet(&packet);
 }
-
-void UNetworkManager::Send_MoveRight_Packet(float axisValue, FVector Position, float Speed, float Direction)
-{
-
-	if (axisValue != 0) {
-		SetPlayerPosition(Position);
-		SetPlayerVelocity(Speed, Direction);
-		Send_PlayerMove_packet();
-	}
-}
-
-void UNetworkManager::Send_MoveStop_Packet(FVector Position, float Speed, float Direction)
-{
-	SetPlayerPosition(Position);
-	SetPlayerVelocity(0.0f, Direction);
-	Send_PlayerMove_packet();
-}
-
 void UNetworkManager::DisConnect()
 {
-
-}
-
-void UNetworkManager::Send_EventPlayer_Packet(UE_Player_EVENT_TYPE type)
-{
-
-	//Cs_packet_event_player packet;
-	//packet.size = sizeof(packet);
-	//packet.type = CS_EVENT_PLAYER;
-
-	//switch (type) {
-	//case SM_MOVE:
-	//	packet.pt = PET_MOVE;
-	//	break;
-	//case SM_JUMP:
-	//	packet.pt = PET_JUMP;
-	//	break;
-	//default:
-	//	UE_LOG(LogTemp, Error, TEXT(" An undefined Event Player packet send"));
-	//	break;
-	//}
-	//Send_Packet(&packet);
+	closesocket(m_playerInfo.m_socket);
 }
 
 void UNetworkManager::Send_Packet(const void* data) {
@@ -446,57 +304,6 @@ void UNetworkManager::Send_Packet(const void* data) {
 	}
 
 }
-
-void UNetworkManager::Send_PlayerMove_packet()
-{
-	//Cs_packet_move_player packet;
-
-	//packet.type = CS_MOVE_PLAYER;
-	//packet.size = sizeof(packet);
-
-	////Location
-	//packet.x = m_playerInfo.m_x;
-	//packet.y = m_playerInfo.m_y;
-	//packet.z = m_playerInfo.m_z;
-
-	////speed and direction
-	//packet.speed = m_playerInfo.m_speed;
-	//packet.direction = m_playerInfo.m_direction;
-
-	//Send_Packet(&packet);
-}
-
-void UNetworkManager::Send_Rotator_Packet(float axisValue, FRotator rotator)
-{
-	//Cs_packet_rotator_player packet;
-	//SetPlayerRotation(rotator);
-	//packet.type = CS_ROTATER_PLAYER;
-	//packet.size = sizeof(packet);
-	////Rotation
-	//packet.pitch = m_playerInfo.m_pitch;
-	//packet.yaw = m_playerInfo.m_yaw;
-	//packet.roll = m_playerInfo.m_roll;
-
-
-	//Send_Packet(&packet);
-}
-
-//void UNetworkManager::EventPlayerProcess(APlayerController* player, PLAYER_EVENT_TYPE type)
-//{
-//	UE_Player_EVENT_TYPE ue_type;
-//	switch (type) {
-//	case PET_MOVE:
-//		ue_type = SM_MOVE;
-//		break;
-//	case PET_JUMP:
-//		ue_type = SM_JUMP;
-//		break;
-//	default:
-//		UE_LOG(LogTemp, Error, TEXT(" An undefined Event Player packet received"));
-//		break;
-//	}
-//	EventPlayerEvent.Broadcast(player, ue_type);
-//}
 
 void UNetworkManager::SetPlayerID(FString id)
 {
@@ -535,7 +342,6 @@ int UNetworkManager::GetCID()
 	return m_playerInfo.m_cid;
 }
 
-
 void UNetworkManager::SetPlayerVelocity(float speed, float direction) {
 	m_playerInfo.m_speed = speed;
 	m_playerInfo.m_direction = direction;
@@ -552,7 +358,7 @@ void PlayerInfo::clearoverlapped()
 PlayerInfo::PlayerInfo()
 	:m_x(0.0f), m_y(0.0f), m_z(0.0f), m_pitch(0.0f), m_yaw(0.0f), m_roll(0.0f),
 	m_speed(0.0f), m_direction(0.0f), m_index(0),
-	m_action(-1), m_packet_size(0), m_saved_packet_size(0), m_type(PPT_NONE), m_cid(-1) {
+	m_action(-1), m_packet_size(0), m_saved_packet_size(0), m_type(BODY), m_cid(-1) {
 	m_myController = nullptr;
 	ZeroMemory(&m_wsabuf, sizeof(m_wsabuf));
 	clearoverlapped();
@@ -562,7 +368,7 @@ PlayerInfo::PlayerInfo(float x, float y, float z, char id[MAX_ID_LEN], int cid)
 	: m_x(x), m_y(y), m_z(z), m_cid(cid) {
 	m_myController = nullptr;
 	strcpy_s(m_id, id);
-	m_type = PPT_NONE;
+	m_type = BODY;
 	clearoverlapped();
 }
 
@@ -570,33 +376,8 @@ PlayerInfo::PlayerInfo(float x, float y, float z, char id[MAX_ID_LEN], float yaw
 	: m_x(x), m_y(y), m_z(z), m_pitch(pitch), m_yaw(yaw), m_roll(roll), m_cid(cid)
 {
 	strcpy_s(m_id, id);
-	m_type = PPT_NONE;
+	m_type = BODY;
 	m_myController = nullptr;
 	clearoverlapped();
 }
-
-OtherPlayerInfo::OtherPlayerInfo() : m_x(0.0f), m_y(0.0f), m_z(0.0f), m_pitch(0.0f), m_yaw(0.0f), m_roll(0.0f),
-m_speed(0.0f), m_direction(0.0f), m_type(PPT_NONE), m_cid(-1)
-{
-	m_otherController = nullptr;
-	m_connecting = false;
-}
-
-OtherPlayerInfo::OtherPlayerInfo(float x, float y, float z, char id[MAX_ID_LEN], APlayerController* controller, int cid)
-{
-	m_otherController = controller;
-	m_x = x;
-	m_y = y;
-	m_z = z;
-	m_roll = 0;
-	m_yaw = 0;
-	m_pitch = 0;
-	m_speed = 0;
-	m_direction = 0;
-	strcpy_s(m_id, id);
-	m_cid = cid;
-	m_type = PPT_NONE;
-	m_connecting = false;
-}
-
 

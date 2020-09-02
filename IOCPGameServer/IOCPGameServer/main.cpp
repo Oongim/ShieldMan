@@ -7,15 +7,17 @@ HANDLE g_iocp;
 SOCKET l_socket;
 int g_user_id = 0;
 int g_user_cnt = 0;
-bool g_isEvent = false;
-float chax = 0.f;
-float chay = 270.f;
-float Lpit = 0.f;
-float Lyaw = 0.f;
-float Lrol = 0.f;
-float Rpit = 0.f;
-float Ryaw = 0.f;
-float Rrol = 0.f;
+//float chax = 0.f;
+//float chay = 270.f;
+//float Lpit = 0.f;
+//float Lyaw = 0.f;
+//float Lrol = 0.f;
+//float Rpit = 0.f;
+//float Ryaw = 0.f;
+//float Rrol = 0.f;
+
+ROOM g_room[MAX_ROOM];
+int g_now_room = 0;
 
 void send_packet(int user_id, void* p)
 {
@@ -32,62 +34,13 @@ void send_packet(int user_id, void* p)
 	WSASend(u.m_s, &exover->wsabuf, 1, NULL, 0, &exover->over, NULL);
 }
 
-void send_leave_packet(int user_id, int o_id)
-{
-	/*sc_packet_leave p;
-	p.id = o_id;
-	p.size = sizeof(p);
-	p.type = S2C_LEAVE;
-
-	g_clients[user_id].m_cl.lock();
-	g_clients[user_id].m_viewlist.erase(o_id);
-	g_clients[user_id].m_cl.unlock();
-
-	send_packet(user_id, &p);*/
-}
-
-void send_move_packet(int user_id, int mover)
-{
-	//sc_packet_move p;
-	//p.id = mover;
-	//p.size = sizeof(p);
-	//p.type = S2C_MOVE;
-	//p.x = g_clients[mover].x;
-	//p.y = g_clients[mover].y;
-	//p.move_time = g_clients[mover].m_movetime;
-	//send_packet(user_id, &p);
-}
-
-void matching_game(int user_id, char id[])
-{
-	//g_clients[user_id].m_cl.lock();
-	//strcpy_s(g_clients[user_id].m_name, name);
-	//g_clients[user_id].m_name[MAX_ID_LEN] = NULL;
-	//send_login_ok_packet(user_id);
-	//g_clients[user_id].m_status = ST_ACTIVE;
-	//g_clients[user_id].m_cl.unlock();
-
-	//for (int i = 0; i < MAX_USER; i++)
-	//{
-	//	if (user_id == i) continue;
-	//	if (user_id != i)
-	//	{
-
-	//		send_enter_packet(user_id, i);
-	//		send_enter_packet(i, user_id);
-	//	}
-	//}
-
-
-}
-
-void send_enter_ok_packet(int user_id, int o_id)
+void send_enter_ok_packet(int user_id, int o_id, int room, int ctype)
 {
 	sc_packet_enter_ok p;
 	p.id = user_id;
-	//cout << user_id << endl;
 	p.size = sizeof(p);
-	p.playercnt = g_user_cnt;
+	p.ctype = ctype;
+	p.room = room;
 	p.type = S2C_ENTER_OK;
 	strcpy_s(p.name, g_clients[user_id].m_name);
 	send_packet(user_id, &p);
@@ -98,295 +51,211 @@ void send_enter_packet(int user_id, int o_id)
 	sc_packet_enter p;
 	p.id = o_id;
 	p.size = sizeof(p);
-	p.playercnt = g_user_cnt;
+	p.room = g_now_room;
 	p.type = S2C_ENTER;
 	strcpy_s(p.name, g_clients[o_id].m_name);
 	send_packet(user_id, &p);
 }
 
-void enter_game(int user_id, char name[])
+void enter_game(int user_id, char name[], bool host)
 {
 	CLIENT& g_c = g_clients[user_id];
 
 	g_c.m_cl.lock();
+	int assign_room = NONE;
+	int assign_ctype = NONE;
+	if (true == host)
+	{
+		for (int i = 0; i < MAX_ROOM; ++i)
+		{
+			if (false == g_room[i].full && NONE == g_room[i].p1)
+			{
+				g_room[i].p1 = user_id;
+				assign_room = i;
+				assign_ctype = BODY;
+				//cout << assign_room << "방 개설" << endl;
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < MAX_ROOM; ++i)
+		{
+			if (NONE == g_room[i].p2)
+			{
+				g_room[i].p2 = user_id;
+				assign_room = i;
+				assign_ctype = ARMR;
+				break;
+			}
+			else if (NONE == g_room[i].p3)
+			{
+				g_room[i].p3 = user_id;
+				assign_room = i;
+				assign_ctype = ARML;
+				g_room[i].full = true;
+				break;
+			}
+		}
+		//cout << assign_room << "방 참여" << endl;
+	}
+	
 	strcpy_s(g_c.m_name, name);
 	g_c.m_name[MAX_ID_LEN] = NULL;
-	send_enter_ok_packet(user_id, user_id);
+	send_enter_ok_packet(user_id, user_id, assign_room, assign_ctype);
 	g_clients[user_id].m_status = ST_ACTIVE;
 	g_c.m_cl.unlock();
 
-	for (int i = 0; i < MAX_USER; i++)
-	{
-		if (user_id == i) continue;
-
-		if (ST_ACTIVE == g_clients[i].m_status)
-		{
-				send_enter_packet(user_id, i);
-				if (i != user_id)
-				{
-					send_enter_packet(i, user_id);
-				}
-				g_clients[i].m_isevent = true;
-				cout << user_id << "번 클라이언트가 " << i << "번 클라이언트에게 참여를 알림" << endl;
-		}
-	}
-	g_c.m_cl.lock();
-	g_c.m_cl.unlock();
-
-	//cout << user_id << " enter_game " << endl;
 }
 
-void send_pick_position_packet(int user_id, int o_id)
-{
-	sc_packet_pick_position p;
-	p.id = o_id;
-	p.size = sizeof(p);
-	p.type = S2C_PICK;
-	p.ppt = g_clients[o_id].m_type;
-	send_packet(user_id, &p);
-}
-
-void pick_position(int user_id, PLAYER_POSITION_TYPE ppt)
-{
-	CLIENT& g_c = g_clients[user_id];
-	bool picksuccess = true;
-	g_c.m_cl.lock();
-	for (int i = 0; i < MAX_USER; i++)
-	{
-		if (user_id == i) continue;
-		if (user_id != i)
-		{
-			if (ST_ACTIVE == g_clients[i].m_status)
-			{
-				if (g_clients[i].m_type != ppt)
-					continue;
-				else
-				{
-					picksuccess = false;
-					break;
-				}
-			}
-		}
-
-	}
-	if (!picksuccess)
-	{
-		g_c.m_type = PPT_NONE;
-		cout << user_id << "번 클라이언트는 해당 선택을 거절당함" << endl;
-		send_pick_position_packet(user_id, user_id);
-	}
-	else
-	{
-		g_c.m_type = ppt;
-
-		for (int i = 0; i < MAX_USER; i++)
-		{
-			if (user_id == i) continue;
-			if (user_id != i)
-			{
-				if (ST_ACTIVE == g_clients[i].m_status)
-				{
-					send_pick_position_packet(user_id, i);
-					send_pick_position_packet(i, user_id);
-					if (g_c.m_type == PPT_ARML)
-						cout << user_id << "번 클라이언트가 " << i << "번 에게" << " 왼팔 선택을 알림" << endl;
-					else if (g_c.m_type == PPT_BODY)
-						cout << user_id << "번 클라이언트가 " << i << "번 에게" << " 몸통 선택을 알림" << endl;
-					else if (g_c.m_type == PPT_ARMR)
-						cout << user_id << "번 클라이언트가 " << i << "번 에게" << " 오른팔 선택을 알림" << endl;
-				}
-			}
-		}
-	}
-	g_c.m_cl.unlock();
-
-}
-
-void send_ready_position_packet(int user_id, int o_id)
-{
-	sc_packet_ready_postion p;
-	p.id = o_id;
-	p.size = sizeof(p);
-	p.type = S2C_READY;
-	send_packet(user_id, &p);
-}
-
-void ready_position(int user_id)
-{
-	CLIENT& g_c = g_clients[user_id];
-
-	g_c.m_cl.lock();
-	if (g_c.m_type != PPT_NONE)
-	{
-		send_ready_position_packet(user_id, user_id);
-		for (int i = 0; i < MAX_USER; i++)
-		{
-			if (user_id == i) continue;
-			if (ST_ACTIVE == g_clients[i].m_status)
-			{
-				send_ready_position_packet(user_id, i);
-				send_ready_position_packet(i, user_id);
-				cout << user_id << "번 클라이언트가 " << i << "번 에게" << "준비됐음을 알림" << endl;
-			}
-		}
-	}
-	else
-	{
-		send_ready_position_packet(user_id, user_id);
-		cout << user_id << "번 클라이언트는 포지션을 선택하지 않아 준비가 불가능" << endl;
-	}
-	g_c.m_cl.unlock();
-}
-
-void send_connect(int user_id)
+void send_connect(int user_id, int room)
 {
 	sc_packet_connect p;
 	p.size = sizeof(p);
 	p.type = S2C_CONNECT;
-	p.playercnt = g_user_cnt;
+	p.isfull = g_room[room].full;
 	send_packet(user_id, &p);
 }
 
-void send_characterinfo(int user_id, int o_id)
+void send_characterinfo(int user_id, int o_id, int room)
 {
 	sc_packet_character_info p;
 	p.id = o_id;
 	p.size = sizeof(p);
 	p.type = S2C_CHARACTERINFO;
-	p.rp = Rpit;
-	p.ry = Ryaw;
-	p.rr = Rrol;
-	p.lp = Lpit;
-	p.ly = Lyaw;
-	p.lr = Lrol;
-	p.cx = chax;
-	p.cy = chay;
+	p.rp = g_room[room].Rpit;
+	p.ry = g_room[room].Ryaw;
+	p.rr = g_room[room].Rrol;
+	p.lp = g_room[room].Lpit;
+	p.ly = g_room[room].Lyaw;
+	p.lr = g_room[room].Lrol;
+	p.cx = g_room[room].chax;
+	p.cy = g_room[room].chay;
 	send_packet(user_id, &p);
 }
 
-void send_ingame(int user_id, int o_id, float x, float y, float z, float pitch, float yaw, float roll, float cx, float cy, float cz)
-{
-	//sc_packet_in_game p;
-	//p.id = o_id;
-	//p.size = sizeof(p);
-	//p.type = S2C_INGAME;
-	//p.x = x;
-	//p.y = y;
-	//p.z = z;
-	//p.yaw = Ryaw;
-	//p.pitch = Rpit;
-	//p.roll = Rrol;
-	//p.cx = chax;
-	//p.cy = chay;
-	//p.cz = cz;
-	//send_packet(user_id, &p);
-}
-
-void do_rotator_and_move(int user_id, float rp, float ry, float rr, float lp, float ly, float lr, float cx, float cy, float cz)
+void do_rotator_and_move(int user_id, float rp, float ry, float rr, float lp, float ly, float lr, float cx, float cy, float cz, int type, int room)
 {
 	CLIENT& g_c = g_clients[user_id];
 
-	if (cx != 0.f)
+	if (type == BODY)
 	{
-		chax = cx;
-		chay = cy;
-		//cout << chax << "      " << chay << "       " << endl;
+		g_room[room].chax = cx;
+		g_room[room].chay = cy;
 	}
-	if (rp !=0.f)
+	if (type == ARMR)
 	{
-		Rpit += rp;
-		Ryaw += ry;
-		Rrol += rr;
+		g_room[room].Rpit += rp;
+		g_room[room].Ryaw += ry;
+		g_room[room].Rrol += rr;
 	}
-	if (lp != 0.f)
+	if (type == ARML)
 	{
-		Lpit += lp;
-		Lyaw += ly;
-		Lrol += lr;
+		g_room[room].Lpit += lp;
+		g_room[room].Lyaw += ly;
+		g_room[room].Lrol += lr;
 	}
 
-	send_characterinfo(user_id, user_id);
-	//cout << user_id << "번 클라이언트 " << "  rp : " << rp << ", ry : " << ry <<",  rr : " << rr << endl;
+	send_characterinfo(user_id, user_id, room);
 
 	for (int i = 0; i < MAX_USER; i++)
 	{
 		if (user_id == i) continue;
 		if (ST_ACTIVE == g_clients[i].m_status)
 		{
-			send_characterinfo(user_id, i);
-
-			//send_ingame(user_id, i, x, y, z, pitch, yaw, roll, cx, cy, cz);
-			//if(user_id == 0)
-			//if(user_id == 6 && i == 0)
-			//cout << user_id << "번 클라이언트가 " << i << "번 에게 Lyaw : " << Lyaw << ", Lpit : " << Lpit << ", Lrol : " << Lrol << endl;
-			//else if (user_id == 6 && i == 2)
-			//	cout << user_id << "번 클라이언트가 " << i << "번 에게 Lyaw : " << Lyaw << ", Lpit : " << Lpit << ", Lrol : " << Lrol << endl;
-			//cout << user_id << "번 클라이언트가 " << i << "번 에게 x : " << x << ", y : " << y << ", roll : " << z << endl;
-			//if(user_id == 2 && i == 0)
-				//cout << user_id << "번 클라이언트가 " << i << "번 에게 yaw : " << yaw << ", pitch : " << pitch << ", roll : " << roll << endl;
-			//cout << user_id << "번 클라이언트가 " << i << "번 에게 cx : " << cx << ", cy : " << cy << ", cy : " << cz << endl;
+			send_characterinfo(user_id, i, room);
 		}
 	}
 
 }
 
-int cnt = 0;
+void send_leave_packet(int user_id)
+{
+	sc_packet_leave p;
+	p.id = user_id;
+	p.size = sizeof(p);
+	p.type = S2C_LEAVE;
+	send_packet(user_id, &p);
+}
+
+void disconnect(int user_id, int room)
+{
+	//
+	//send_leave_packet(g_room[room].p1);
+	//g_clients[g_room[room].p1].m_cl.lock();
+	//g_clients[g_room[room].p1].m_status = ST_ALLOC;
+	//closesocket(g_clients[g_room[room].p1].m_s);
+	//g_clients[g_room[room].p1].m_status = ST_FREE;
+	//g_clients[g_room[room].p1].m_cl.unlock();
+
+	//send_leave_packet(g_room[room].p2);
+	//g_clients[g_room[room].p2].m_cl.lock();
+	//g_clients[g_room[room].p2].m_status = ST_ALLOC;
+	//closesocket(g_clients[g_room[room].p2].m_s);
+	//g_clients[g_room[room].p2].m_status = ST_FREE;
+	//g_clients[g_room[room].p2].m_cl.unlock();
+
+	//send_leave_packet(g_room[room].p3);
+	//g_clients[g_room[room].p3].m_cl.lock();
+	//g_clients[g_room[room].p3].m_status = ST_ALLOC;
+	//closesocket(g_clients[g_room[room].p3].m_s);
+	//g_clients[g_room[room].p3].m_status = ST_FREE;
+	//g_clients[g_room[room].p3].m_cl.unlock();
+
+	//g_room[room].p1 = NONE;
+	//g_room[room].p2 = NONE;
+	//g_room[room].p3 = NONE;
+	//g_room[room].full = false;
+	//g_room[room].chax = 0.f;
+	//g_room[room].chay = 270.f;
+	//g_room[room].Lpit = 0.f;
+	//g_room[room].Lyaw = 0.f;
+	//g_room[room].Lrol = 0.f;
+	//g_room[room].Rpit = 0.f;
+	//g_room[room].Ryaw = 0.f;
+	//g_room[room].Rrol = 0.f;
+}
+
+
 void process_packet(int user_id, char* buf)
 {
 	switch (buf[1]) {
 	case C2S_CONNECT:
 	{
 		cs_packet_connect* packet = reinterpret_cast<cs_packet_connect*>(buf);
-		send_connect(user_id);
+		send_connect(user_id, packet->room);
 	}
 	break;
 	case C2S_ENTER:
 	{
 		cs_packet_enter* packet = reinterpret_cast<cs_packet_enter*>(buf);
 		//cout << user_id << "g_clients[user_id].m_id : " << packet->name << endl;
-		cout << g_clients[user_id].m_id << "번 클라이언트의 msg : C2S_ENTER" << endl;
-		++cnt;
-			enter_game(user_id, packet->name);
-
+		//cout << g_clients[user_id].m_id << "번 클라이언트의 msg : C2S_ENTER" << endl;
+		enter_game(user_id, packet->name, packet->host);
 
 	}
 	break;
-	case C2S_MATCHING:
-	{
-		//cs_packet_matching* packet = reinterpret_cast<cs_packet_matching*>(buf);
-		//matching_game(user_id, packet->id);
-		//enter_game(user_id, packet->name);
-	}
-	break;
-	case C2S_PICK:
-	{
-		cs_packet_pick_position* packet = reinterpret_cast<cs_packet_pick_position*>(buf);
-		cout << g_clients[user_id].m_id << "번 클라이언트의 msg : C2S_PICK" << endl;
-		pick_position(user_id, packet->ppt);
-		//do_move(user_id, packet->direction);
-	}
-	break;
 
-	case C2S_READY:
-	{
-		cs_packet_ready_postion* packet = reinterpret_cast<cs_packet_ready_postion*>(buf);
-		cout << g_clients[user_id].m_id << "번 클라이언트의 msg : C2S_READY" << endl;
-		ready_position(user_id);
-		//do_move(user_id, packet->direction);
-	}
-	break;
+	
 
 	case C2S_INGAME:
 	{
 		cs_packet_in_game* packet = reinterpret_cast<cs_packet_in_game*>(buf);
-		do_rotator_and_move(packet->id, packet->rp, packet->ry, packet->rr,
+		do_rotator_and_move(user_id, packet->rp, packet->ry, packet->rr,
 									packet->lp, packet->ly, packet->lr,
-									packet->cx, packet->cy, packet->cz);
+									packet->cx, packet->cy, packet->cz, packet->ctype, packet->room);
 
 		
 	}
 		break;
 
+
+	case C2S_LEAVE:
+	{
+		cs_packet_leave* packet = reinterpret_cast<cs_packet_leave*>(buf);
+		disconnect(user_id, packet->room);
+	}
 	default:
 		cout << "Unknown Packet Type Error!\n";
 		DebugBreak();
@@ -394,24 +263,6 @@ void process_packet(int user_id, char* buf)
 	}
 }
 
-void disconnect(int user_id)
-{
-	/*send_leave_packet(user_id, user_id);
-	g_clients[user_id].m_cl.lock();
-	g_clients[user_id].m_status = ST_ALLOC;
-	closesocket(g_clients[user_id].m_s);
-	for (auto& cl : g_clients)
-	{
-		if (user_id == cl.m_id) continue;
-
-		if (ST_ACTIVE == cl.m_status)
-		{
-			send_leave_packet(cl.m_id, user_id);
-		}
-	}
-	g_clients[user_id].m_status = ST_FREE;
-	g_clients[user_id].m_cl.unlock();*/
-}
 
 void recv_packet_construct(int user_id, int io_byte)
 {
@@ -470,7 +321,14 @@ void worker_thread()
 		{
 		case OP_RECV:
 			if (0 == io_byte)
-				disconnect(user_id);
+			{
+				for (int i = 0; i < MAX_ROOM; ++i)
+				{
+					if(g_room[i].p1 == user_id || g_room[i].p2 == user_id || g_room[i].p3 == user_id)
+						disconnect(user_id, i);
+				}
+				
+			}
 			else
 			{
 				recv_packet_construct(user_id, io_byte);
@@ -484,7 +342,13 @@ void worker_thread()
 
 		case OP_SEND:
 			if (0 == io_byte)
-				disconnect(user_id);
+			{
+				for (int i = 0; i < MAX_ROOM; ++i)
+				{
+					if (g_room[i].p1 == user_id || g_room[i].p2 == user_id || g_room[i].p3 == user_id)
+						disconnect(user_id, i);
+				}
+			}
 			delete exover;
 			break;
 

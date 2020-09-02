@@ -27,6 +27,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Stage3;
 
+	bool ismake;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Network)
 	class UNetworkManager* networkManager;
 

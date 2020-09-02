@@ -10,7 +10,7 @@ USM_GameInstance::USM_GameInstance()
 	Stage1 = 0;
 	Stage2 = 0;
 	Stage3 = 0;
-
+    ismake = false;
     networkManager= CreateDefaultSubobject<UNetworkManager>(TEXT("NETWORKMANAGER"));
     playercnt = 0;
 }
@@ -45,30 +45,12 @@ float USM_GameInstance::GetTimeStage3()
 
 void USM_GameInstance::Host(const FString& Address)
 {
-    UEngine* Engine = GetEngine();
-    if (!ensure(Engine != nullptr)) return;
-    
-   
-
-    UWorld* World = GetWorld();
-    if (!ensure(World != nullptr)) return;
-
-
-       //Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("make")));
+    networkManager->m_host = true;
     if (true == networkManager->ConnectServer(Address))
     {
         networkManager->RecvPacket();
+        MakeRoom();
     }
-
-    MakeRoom();
-    
-
-      // GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("%d"),playercnt));
-
-       //TimerManager->SetTimer(HostTimer, this, &USM_GameInstance::Host, 1.f);
-    
-     
-
 }
 
 void USM_GameInstance::Join(const FString& Address)
@@ -84,18 +66,21 @@ void USM_GameInstance::Join(const FString& Address)
 
 void USM_GameInstance::MakeRoom()
 {
-    networkManager->Send_Connect();
-    networkManager->RecvPacket();
-    if (networkManager->m_playercnt == 3)
+    if (false == ismake)
     {
-        UWorld* World = GetWorld();
-        if (!ensure(World != nullptr)) return;
-        World->ServerTravel("/Game/1Stage/Stage1?listen");
-        networkManager->m_playercnt = 0;
-    }
-    else
-    {
-        TimerManager->SetTimer(HostTimer, this, &USM_GameInstance::MakeRoom, 1.f);
+        networkManager->Send_Connect();
+        networkManager->RecvPacket();
+        if (true == networkManager->m_isfull)
+        {
+            UWorld* World = GetWorld();
+            if (!ensure(World != nullptr)) return;
+            World->ServerTravel("/Game/1Stage/Stage1?listen");
+            ismake = true;
+        }
+        else
+        {
+            TimerManager->SetTimer(HostTimer, this, &USM_GameInstance::MakeRoom, 1.f);
+        }
     }
 }
 

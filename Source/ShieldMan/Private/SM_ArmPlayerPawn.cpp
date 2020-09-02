@@ -59,23 +59,26 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
 	//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
 	//	FString::Printf(TEXT("%d "), GI->networkManager->m_cid));
-	if (ControlMode->isControlMode(LHandControlMode))
+	//if (ControlMode->isControlMode(LHandControlMode))
+	if(GI->GetNetworkManager()->m_type == LHandControlMode)
 	{
 		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
 		//	FString::Printf(TEXT("LControl : %s"), *PS->GetPlayerName()));
 		GI->GetNetworkManager()->Send_InGame(0,0,0, pit, yaw, rol,
 			0,0, 0);
+		GI->GetNetworkManager()->RecvPacket();
 	}
-	else if (ControlMode->isControlMode(RHandControlMode))
+	else if (GI->GetNetworkManager()->m_type == RHandControlMode)
 	{
 		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
 		//	FString::Printf(TEXT("LControl : %s"), *PS->GetPlayerName()));
 		GI->GetNetworkManager()->Send_InGame(pit, yaw, rol, 0, 0, 0, 
 			0,0 ,0);
+		GI->GetNetworkManager()->RecvPacket();
 	}
 	
 
-	GI->GetNetworkManager()->RecvPacket();
+	
 
 	pit = yaw = rol = 0.f;
 
@@ -92,8 +95,8 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 	}
 	else
 	{
-		FRotator c{ GI->networkManager->m_OtherPlayer[0].cx,
-			GI->networkManager->m_OtherPlayer[0].cy,0 };
+		FRotator c{ GI->networkManager->m_playerInfo.cx,
+			GI->networkManager->m_playerInfo.cy,0 };
 		Controller->SetControlRotation(c);
 
 		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ASM_ArmPlayerPawn ControllerRot : %f, %f, %f"),
@@ -208,11 +211,12 @@ void ASM_ArmPlayerPawn::SetPlayerState()
 		{
 			//USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
 			PS = Cast<ASM_PlayerState>(GetPlayerState());
+			USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
 			//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green,
 			//	FString::Printf(TEXT("PS : %s"), *PS->GetPlayerName()));
-			if ("RightArm" == PS->GetPlayerName())
+			if (GI->networkManager->m_type == ARMR)
 				SetControlMode(RHandControlMode);
-			else if ("LeftArm" == PS->GetPlayerName())
+			else if (GI->networkManager->m_type == ARML)
 				SetControlMode(LHandControlMode);
 			//if (FString("RightArm") == GI->name)
 			//	SetControlMode(RHandControlMode);

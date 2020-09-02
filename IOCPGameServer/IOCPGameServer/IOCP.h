@@ -50,3 +50,20 @@ struct CLIENT
 	PLAYER_POSITION_TYPE m_type;
 	char m_name[MAX_ID_LEN + 1];
 };
+
+
+struct ROOM
+{
+	int p1 = -1;
+	int p2 = -1;
+	int p3 = -1;
+	bool full = false;
+	float chax = 0.f;
+	float chay = 270.f;
+	float Lpit = 0.f;
+	float Lyaw = 0.f;
+	float Lrol = 0.f;
+	float Rpit = 0.f;
+	float Ryaw = 0.f;
+	float Rrol = 0.f;
+};

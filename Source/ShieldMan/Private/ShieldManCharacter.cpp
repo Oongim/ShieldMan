@@ -130,13 +130,13 @@ void AShieldManCharacter::Tick(float DeltaTime)
 			AnimInstance=Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 		return; 
 	}
-	RightHandPos = FVector{ GI->networkManager->m_OtherPlayer[0].rp,
-											GI->networkManager->m_OtherPlayer[0].ry,
-											GI->networkManager->m_OtherPlayer[0].rr};
+	RightHandPos = FVector{ GI->networkManager->m_playerInfo.rp,
+											GI->networkManager->m_playerInfo.ry,
+											GI->networkManager->m_playerInfo.rr};
 
-	LeftHandPos = FVector{ GI->networkManager->m_OtherPlayer[0].lp,
-										GI->networkManager->m_OtherPlayer[0].ly,
-										GI->networkManager->m_OtherPlayer[0].lr };
+	LeftHandPos = FVector{ GI->networkManager->m_playerInfo.lp,
+										GI->networkManager->m_playerInfo.ly,
+										GI->networkManager->m_playerInfo.lr };
 
 	AnimInstance->SetHand_RightPos(RightHandPos);
 	AnimInstance->SetHand_LeftPos(LeftHandPos);
