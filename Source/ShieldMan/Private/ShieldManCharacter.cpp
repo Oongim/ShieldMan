@@ -251,6 +251,9 @@ void AShieldManCharacter::Set_DeathCamera()
 
 void AShieldManCharacter::Death()
 {
+	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	GI->networkManager->Send_Leave_Packet();
+	GI->networkManager->m_host = false;
 	SwitchLevel(FName("Title"));
 }
 

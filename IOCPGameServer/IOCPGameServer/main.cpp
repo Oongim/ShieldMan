@@ -73,7 +73,7 @@ void enter_game(int user_id, char name[], bool host)
 				g_room[i].p1 = user_id;
 				assign_room = i;
 				assign_ctype = BODY;
-				//cout << assign_room << "방 개설" << endl;
+				//cout << user_id << "번 " << assign_room << "방 개설" << endl;
 				break;
 			}
 		}
@@ -98,7 +98,7 @@ void enter_game(int user_id, char name[], bool host)
 				break;
 			}
 		}
-		//cout << assign_room << "방 참여" << endl;
+		//cout << user_id << "번 " << assign_room << "방 참여" << endl;
 	}
 	
 	strcpy_s(g_c.m_name, name);
@@ -181,40 +181,46 @@ void send_leave_packet(int user_id)
 
 void disconnect(int user_id, int room)
 {
-	//
-	//send_leave_packet(g_room[room].p1);
-	//g_clients[g_room[room].p1].m_cl.lock();
-	//g_clients[g_room[room].p1].m_status = ST_ALLOC;
-	//closesocket(g_clients[g_room[room].p1].m_s);
-	//g_clients[g_room[room].p1].m_status = ST_FREE;
-	//g_clients[g_room[room].p1].m_cl.unlock();
+	send_leave_packet(user_id);
+	g_clients[user_id].m_cl.lock();
+	g_clients[user_id].m_status = ST_ALLOC;
+	closesocket(g_clients[user_id].m_s);
+	g_clients[user_id].m_status = ST_FREE;
+	g_clients[user_id].m_cl.unlock();
+	
+	/*send_leave_packet(g_room[room].p1);
+	g_clients[g_room[room].p1].m_cl.lock();
+	g_clients[g_room[room].p1].m_status = ST_ALLOC;
+	closesocket(g_clients[g_room[room].p1].m_s);
+	g_clients[g_room[room].p1].m_status = ST_FREE;
+	g_clients[g_room[room].p1].m_cl.unlock();
 
-	//send_leave_packet(g_room[room].p2);
-	//g_clients[g_room[room].p2].m_cl.lock();
-	//g_clients[g_room[room].p2].m_status = ST_ALLOC;
-	//closesocket(g_clients[g_room[room].p2].m_s);
-	//g_clients[g_room[room].p2].m_status = ST_FREE;
-	//g_clients[g_room[room].p2].m_cl.unlock();
+	send_leave_packet(g_room[room].p2);
+	g_clients[g_room[room].p2].m_cl.lock();
+	g_clients[g_room[room].p2].m_status = ST_ALLOC;
+	closesocket(g_clients[g_room[room].p2].m_s);
+	g_clients[g_room[room].p2].m_status = ST_FREE;
+	g_clients[g_room[room].p2].m_cl.unlock();
 
-	//send_leave_packet(g_room[room].p3);
-	//g_clients[g_room[room].p3].m_cl.lock();
-	//g_clients[g_room[room].p3].m_status = ST_ALLOC;
-	//closesocket(g_clients[g_room[room].p3].m_s);
-	//g_clients[g_room[room].p3].m_status = ST_FREE;
-	//g_clients[g_room[room].p3].m_cl.unlock();
+	send_leave_packet(g_room[room].p3);
+	g_clients[g_room[room].p3].m_cl.lock();
+	g_clients[g_room[room].p3].m_status = ST_ALLOC;
+	closesocket(g_clients[g_room[room].p3].m_s);
+	g_clients[g_room[room].p3].m_status = ST_FREE;
+	g_clients[g_room[room].p3].m_cl.unlock();
 
-	//g_room[room].p1 = NONE;
-	//g_room[room].p2 = NONE;
-	//g_room[room].p3 = NONE;
-	//g_room[room].full = false;
-	//g_room[room].chax = 0.f;
-	//g_room[room].chay = 270.f;
-	//g_room[room].Lpit = 0.f;
-	//g_room[room].Lyaw = 0.f;
-	//g_room[room].Lrol = 0.f;
-	//g_room[room].Rpit = 0.f;
-	//g_room[room].Ryaw = 0.f;
-	//g_room[room].Rrol = 0.f;
+	g_room[room].p1 = NONE;
+	g_room[room].p2 = NONE;
+	g_room[room].p3 = NONE;
+	g_room[room].full = false;
+	g_room[room].chax = 0.f;
+	g_room[room].chay = 270.f;
+	g_room[room].Lpit = 0.f;
+	g_room[room].Lyaw = 0.f;
+	g_room[room].Lrol = 0.f;
+	g_room[room].Rpit = 0.f;
+	g_room[room].Ryaw = 0.f;
+	g_room[room].Rrol = 0.f;*/
 }
 
 
@@ -254,8 +260,10 @@ void process_packet(int user_id, char* buf)
 	case C2S_LEAVE:
 	{
 		cs_packet_leave* packet = reinterpret_cast<cs_packet_leave*>(buf);
+		//cout << user_id << "번 로그아웃" << endl;
 		disconnect(user_id, packet->room);
 	}
+	break;
 	default:
 		cout << "Unknown Packet Type Error!\n";
 		DebugBreak();

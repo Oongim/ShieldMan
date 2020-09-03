@@ -225,6 +225,7 @@ bool UNetworkManager::PacketProcess(const char* packet)
 		case S2C_LEAVE:
 		{
 			const sc_packet_leave* packet_S2C_leave = reinterpret_cast<const sc_packet_leave*>(packet);
+			isConnect = false;
 			DisConnect();
 		}
 
@@ -284,6 +285,7 @@ void UNetworkManager::Send_InGame(float rp, float ry, float rr, float lp, float 
 
 void UNetworkManager::Send_Leave_Packet()
 {
+	m_host = false;
 	cs_packet_leave packet;
 	packet.size = sizeof(packet);
 	packet.type = C2S_LEAVE;
