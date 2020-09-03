@@ -254,6 +254,7 @@ void AShieldManCharacter::Death()
 	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
 	GI->networkManager->Send_Leave_Packet();
 	GI->networkManager->m_host = false;
+	GI->ismake = false;
 	SwitchLevel(FName("Title"));
 }
 

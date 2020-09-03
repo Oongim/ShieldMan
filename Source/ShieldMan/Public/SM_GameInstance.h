@@ -27,6 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Stage3;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ismake;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Network)
