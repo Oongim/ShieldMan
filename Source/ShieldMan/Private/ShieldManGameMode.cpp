@@ -2,7 +2,7 @@
 
 #include "ShieldManGameMode.h"
 #include "ShieldManCharacter.h"
-#include "SM_PlayerPawn.h"
+#include "SM_ArmPlayerPawn.h"
 #include "SM_GameState.h"
 #include "SM_PlayerState.h"
 #include "UObject/ConstructorHelpers.h"
@@ -16,8 +16,8 @@ AShieldManGameMode::AShieldManGameMode()
 	));
 	MainCharacterClass = MAINCHARACTERCLASS.Class;
 
-	static ConstructorHelpers::FClassFinder<ASM_PlayerPawn>ARMCHARACTERCLASS(TEXT(
-		"/Game/MySM_PlayerPawn.MySM_PlayerPawn_C"
+	static ConstructorHelpers::FClassFinder<ASM_ArmPlayerPawn>ARMCHARACTERCLASS(TEXT(
+		"/Game/BP/BP_ArmPlayerPawn.BP_ArmPlayerPawn_C"
 	));
 	ArmCharacterClass = ARMCHARACTERCLASS.Class;
 	GameStateClass = ASM_GameState::StaticClass();
@@ -30,18 +30,18 @@ AShieldManGameMode::AShieldManGameMode()
 
 void AShieldManGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
-	GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("InitGame")));
+	//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("InitGame")));
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), MainCharacterClass, FoundActors);
 
 	if (0 == FoundActors.Num())
 	{
-		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("AShieldManCharacter")));
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("AShieldManCharacter")));
 		DefaultPawnClass= MainCharacterClass;
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ArmCharacterClass")));
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("ArmCharacterClass")));
 		DefaultPawnClass= ArmCharacterClass;
 	}
 	Super::InitGame(MapName, Options, ErrorMessage);
@@ -51,7 +51,7 @@ void AShieldManGameMode::InitGame(const FString& MapName, const FString& Options
 void AShieldManGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("PostLogin")));
+	//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("PostLogin")));
 	auto PS = Cast<ASM_PlayerState>(NewPlayer->PlayerState);
 	if (nullptr == PS) {
 		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Red, FString::Printf(TEXT("ASM_PlayerState Nullptr")));

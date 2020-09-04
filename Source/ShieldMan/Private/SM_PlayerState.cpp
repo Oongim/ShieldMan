@@ -17,7 +17,7 @@ void ASM_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void ASM_PlayerState::InitPlayerData(ASM_GameState* game_state, FString name)
 {
-	GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("InitPlayerData")));
+	//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("InitPlayerData")));
 	GameState = game_state;
 
 	SetPlayerName(name);
@@ -27,7 +27,7 @@ void ASM_PlayerState::InitPlayerData(ASM_GameState* game_state, FString name)
 		for (auto PS : GameState->PlayerArray) {
 			if (PS->GetPlayerName() == FString{ "Body" }) {
 				Main_PlayerState = Cast<ASM_PlayerState>(PS);
-				GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("BodySetting")));
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("BodySetting")));
 			}
 		}
 	}

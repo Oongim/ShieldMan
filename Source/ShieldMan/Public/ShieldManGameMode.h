@@ -20,7 +20,7 @@ public:
 	TSubclassOf<class AShieldManCharacter> MainCharacterClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Class)
-	TSubclassOf<class ASM_PlayerPawn> ArmCharacterClass;
+	TSubclassOf<class ASM_ArmPlayerPawn> ArmCharacterClass;
 
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;

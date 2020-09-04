@@ -131,7 +131,7 @@ void AMetaBall_Boss::Tick(float DeltaTime)
 
 		break;
 	case ROTATING: {
-		GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("%d %d %d"), rand_target, rand_row, rand_rigt));
+		//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("%d %d %d"), rand_target, rand_row, rand_rigt));
 		RotateRow(static_cast<ROTATE_TARGET>(rand_target), rand_row, rand_rigt, DeltaTime);
 	}
 				 break;
@@ -254,9 +254,6 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 		if (ServerRow.Num()) {
 			
 			RandVal val = ServerRow[0];
-			UE_LOG(LogTemp, Warning, TEXT("======%d======"), ServerRow.Num());
-			UE_LOG(LogTemp, Warning, TEXT("%d %d %d"), val.rand_target, val.rand_row, val.rand_rigt);
-			UE_LOG(LogTemp, Warning, TEXT("=============="));
 			ServerRow.RemoveAt(0);
 
 			rand_target = val.rand_target;
@@ -266,7 +263,7 @@ void AMetaBall_Boss::RotateRow(ROTATE_TARGET Target_Row, int row, bool bRight_Ro
 		num_rotate++;
 		if (num_rotate == Max_Rotate)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Attack"));
+			//UE_LOG(LogTemp, Warning, TEXT("Attack"));
 			GetWorldTimerManager().SetTimer(RotateTimerHandle, this, &AMetaBall_Boss::spawn_Effect, avoid_term);
 		}
 		else

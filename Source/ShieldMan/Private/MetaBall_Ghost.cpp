@@ -87,7 +87,6 @@ void AMetaBall_Ghost::BeginPlay()
 	{
 		Player = Cast<AShieldManCharacter>(FA);
 	}
-
 	Balls_Position.Reserve(MAX_NUM_BLOB);
 
 	for (int i = 0; i < MAX_NUM_BLOB; ++i) {
@@ -465,10 +464,12 @@ void AMetaBall_Ghost::ChangeAttackedBaseColor()
 		ServerReturnColor();
 	}
 }
+
 void AMetaBall_Ghost::ServerReturnColor_Implementation()
 {
 	Dynamic_Mesh->SetVectorParameterValueOnMaterials(FName{ "BaseColor" }, { 0.194, 0.227, 0.675 });
 }
+
 void AMetaBall_Ghost::SetStatus(STATUS status)
 {
 	m_status = status;

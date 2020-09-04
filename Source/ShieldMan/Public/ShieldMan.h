@@ -38,7 +38,7 @@ Debug Logging Library 플러그인
 
 ULog::Hello();
 
-ULog::Hello(LO_Viewport);
+ULog::(LO_Viewport);
 
 ULog::Invalid("Can't equip Shield", "", LO_Viewport);
 
