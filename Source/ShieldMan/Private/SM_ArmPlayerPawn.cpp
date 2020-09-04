@@ -54,6 +54,7 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 		}
 		return;
 	}
+
 	PS = Cast<ASM_PlayerState>(GetPlayerState());
 
 	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
@@ -105,6 +106,10 @@ void ASM_ArmPlayerPawn::Tick(float DeltaTime)
 
 		//Controller->SetControlRotation(FRotator{ c.Pitch, c.Yaw, 0 });
 		SetActorLocation(MainCharacter->GetActorLocation());
+		if (true == MainCharacter->call_loading)
+		{
+			Call_Loading();
+		}
 		//Camera->SetWorldLocation();
 		//GetWorldTransform();
 		//Camera->SetWorldTransform(GetWorldTransform());

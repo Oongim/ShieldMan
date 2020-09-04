@@ -211,5 +211,8 @@ public:		//public ÇÔ¼ö
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 		bool ServerTraveling;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		bool call_loading;
 };
 

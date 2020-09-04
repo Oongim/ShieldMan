@@ -74,4 +74,7 @@ public:
 	float pit = 0;
 	float yaw = 0;
 	float rol = 0;
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void Call_Loading();
 };

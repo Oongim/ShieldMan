@@ -97,6 +97,7 @@ AShieldManCharacter::AShieldManCharacter()
 
 	playtime = 0;
 	ServerTraveling = false;
+	call_loading = false;
 }
 
 void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -110,6 +111,7 @@ void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AShieldManCharacter, HPlock);
 	DOREPLIFETIME(AShieldManCharacter, playtime);
 	DOREPLIFETIME(AShieldManCharacter, ServerTraveling);
+	DOREPLIFETIME(AShieldManCharacter, call_loading);
 }
 
 void AShieldManCharacter::Tick(float DeltaTime)
