@@ -1,10 +1,15 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
-
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include "Engine.h"
+//#include "Online.h"
+#include "UnrealNetwork.h"
 #include "EngineMinimal.h"
-#include "Log.h"
 
+using namespace std;
 
 enum EControlMode {
 	BodyControlMode,
@@ -33,7 +38,7 @@ Debug Logging Library 플러그인
 
 ULog::Hello();
 
-ULog::Hello(LO_Viewport);
+ULog::(LO_Viewport);
 
 ULog::Invalid("Can't equip Shield", "", LO_Viewport);
 

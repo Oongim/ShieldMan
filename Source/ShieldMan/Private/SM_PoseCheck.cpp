@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
-
 // Sets default values
 ASM_PoseCheck::ASM_PoseCheck()
 {
@@ -46,6 +45,9 @@ ASM_PoseCheck::ASM_PoseCheck()
 
 	//Door 이동설정
 	fDoorDeltaTime = 0;
+
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -59,17 +61,19 @@ void ASM_PoseCheck::BeginPlay()
 // Called every frame
 void ASM_PoseCheck::Tick(float DeltaTime)
 {
+	if (HasAuthority()) {
+		Super::Tick(DeltaTime);
 
-	Super::Tick(DeltaTime);
+		fDoorDeltaTime += DeltaTime;
 
-	fDoorDeltaTime += DeltaTime;
+		float fDoorHeight = 215 * DeltaTime;
 
-	float fDoorHeight = 215 * DeltaTime;
+		ServerDoorAddOffset(fDoorHeight);
+		
+		if (fDoorDeltaTime >= 0.99f) {
 
-	Door->AddLocalOffset(FVector(0.f, 0.f, -fDoorHeight));
-	if (fDoorDeltaTime >= 0.99f) {
-
-		PrimaryActorTick.SetTickFunctionEnable(false);
+			PrimaryActorTick.SetTickFunctionEnable(false);
+		}
 	}
 }
 
@@ -124,4 +128,9 @@ void ASM_PoseCheck::OnLeftOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor
 {
 	bLeftOverlapped = false;
 	Left_Light->SetVisibility(false);
+}
+
+void ASM_PoseCheck::ServerDoorAddOffset_Implementation(float val)
+{
+	Door->AddLocalOffset(FVector(0.f, 0.f, -val));
 }

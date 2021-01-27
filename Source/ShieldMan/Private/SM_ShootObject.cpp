@@ -12,16 +12,23 @@ ASM_ShootObject::ASM_ShootObject()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ShootBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SHOOT_BODY"));
+	Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("COLLISION"));
 
-	RootComponent = ShootBody;
-	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SHOOTBODY(TEXT(
-		"/Game/1Stage/AttackObject/SM_AttackObject.SM_AttackObject"));
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SHOOT_BODY"));
 
-	if (SM_SHOOTBODY.Succeeded())
+	AttackMagicCircle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MAGIC_CIRCLE"));
+
+	RootComponent = Collision;
+	Mesh->SetupAttachment(RootComponent);
+	AttackMagicCircle->SetupAttachment(RootComponent);
+
+	AttackMagicCircle->SetCollisionProfileName(TEXT("NoCollision"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_ATTACKCIECLE(TEXT(
+			"/Game/Import/MagicCircle.MagicCircle"));
+
+	if (SM_ATTACKCIECLE.Succeeded())
 	{
-		ShootBody->SetStaticMesh(SM_SHOOTBODY.Object);
+		AttackMagicCircle->SetStaticMesh(SM_ATTACKCIECLE.Object);
 	}
 
 	sleepTime = 0;
@@ -32,51 +39,72 @@ ASM_ShootObject::ASM_ShootObject()
 
 	ShootPower = 200000;
 
-	//ShootBody->SetCollisionEnabled(ECollisionEnabled::);
-	//ShootBody->SetCollisionObjectType(ECollisionChannel::);
-	//ShootBody->SetCollisionResponseToAllChannels(ECollisionResponse::);
-	//ShootBody->SetCollisionResponseToChannel(ECollisionChannel::,ECollisionResponse::);
-
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
 void ASM_ShootObject::BeginPlay()
 {
 	Super::BeginPlay();
-	auto p = GetWorld()->GetPawnIterator();
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AShieldManCharacter::StaticClass(), FoundActors);
 
-	Player = Cast<AShieldManCharacter>(*p);
-
-	PrimaryActorTick.SetTickFunctionEnable(false);
+	for (auto FA : FoundActors)
+	{
+		Player = Cast<AShieldManCharacter>(FA);
+	}
 	
+	PrimaryActorTick.SetTickFunctionEnable(false);
 }
 
 // Called every frame
 void ASM_ShootObject::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	if (HasAuthority()) {
+		Super::Tick(DeltaTime);
 
-	if (!bFire) {
-		FRotator ToPlayerInterpRot = 
-			FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player->GetActorLocation()).Rotation(), DeltaTime, 3.f);
-		SetActorRotation(ToPlayerInterpRot);
-	}
-	else
-	{ 
-		sleepTime += DeltaTime;
-		if (sleepTime >= maxSleepTime)
-		{
-			bFire = false;
-			sleepTime = 0;
+		if (!bFire) {
+			FVector Player_Location = Player->GetActorLocation();
+			Player_Location.Z += 30.f;
+			FRotator ToPlayerInterpRot =
+				FMath::RInterpTo(GetActorRotation(), (GetActorLocation() - Player_Location).Rotation(), DeltaTime, 3.f);
+			SetActorRotation(ToPlayerInterpRot);
 		}
-	}
-	reloadTime += DeltaTime;
+		else
+		{
+			sleepTime += DeltaTime;
 
-	if (reloadTime>=reloadMaxTime)
-	{
-		reloadTime = 0.f;
-		SpawnBullet(GetActorLocation(), GetActorRotation());
-		bFire = true;
+			if (sleepTime >= maxSleepTime)
+			{
+				bFire = false;
+				sleepTime = 0;
+
+			}
+
+		}
+		reloadTime += DeltaTime;
+
+		if (reloadTime >= reloadMaxTime)
+		{
+			ServerSetOpacity(1.0f);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1.0f);
+			reloadTime = 0.f;
+			SpawnBullet(GetActorLocation(), GetActorRotation());
+			bFire = true;
+		}
+		else if (reloadTime <= 0.5f) {
+			ServerSetOpacity(1 - reloadTime * 2);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 1 - reloadTime * 2);
+		}
+		else if (reloadTime <= 0.8f) {
+			ServerSetOpacity(0.f);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), 0.f);
+		}
+		else if (reloadTime >= reloadMaxTime - 1.0f) {
+			ServerSetOpacity(reloadTime - (int)reloadTime);
+			//AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), reloadTime - (int)reloadTime);
+		}
 	}
 }
 
@@ -96,5 +124,10 @@ void ASM_ShootObject::StartAttack()
 void ASM_ShootObject::StopAttack()
 {
 	PrimaryActorTick.SetTickFunctionEnable(false);
+}
+
+void ASM_ShootObject::ServerSetOpacity_Implementation(float val)
+{
+	AttackMagicCircle->SetScalarParameterValueOnMaterials(FName("Opacity"), val);
 }
 

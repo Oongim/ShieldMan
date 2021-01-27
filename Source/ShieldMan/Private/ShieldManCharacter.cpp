@@ -11,9 +11,13 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
-
+#include "Net/UnrealNetwork.h"
+#include "SM_PlayerState.h"
+#include "SM_GameState.h"
+#include "SM_GameInstance.h"
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
+#include "MetaBall_Slime.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AShieldManCharacter
@@ -27,7 +31,6 @@ AShieldManCharacter::AShieldManCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
-
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = false; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 100.0f, 0.0f); // ...at this rotation rate
@@ -37,7 +40,6 @@ AShieldManCharacter::AShieldManCharacter()
 	Init_Mesh();
 
 	Init_Camera();
-
 	//Init_PhysicalAnim();
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
@@ -60,12 +62,22 @@ AShieldManCharacter::AShieldManCharacter()
 	Left_Shield_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_lCollision")));
 	Left_Shield_Collision->SetBoxExtent(FVector(5, 2, 15));
 
+	Right_Shield_Gaurd_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("RIGHT_SHIELD_GUARD_COLLISION"));
+	Right_Shield_Gaurd_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_rCollision")));
+	Right_Shield_Gaurd_Collision->SetBoxExtent(FVector(20, 2, 20));
+
+	Left_Shield_Gaurd_Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("LEFT_SHIELD_GUARD_COLLISION"));
+	Left_Shield_Gaurd_Collision->SetupAttachment(GetMesh(), FName(TEXT("hand_lCollision")));
+	Left_Shield_Gaurd_Collision->SetBoxExtent(FVector(20, 2, 20));
+
 	Right_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("RIGHT_SHIELD"));
 	Left_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("LEFT_SHIELD"));
 
 	MaxHP=100.f;
-	CurrentHP = 80.f;
+	CurrentHP = 100.f;
 	PlayerName = TEXT("KDK");
+
+	bDeath = false;
 
 	ArmReflectPower = -1000.f;
 	ShieldBoundPower = 100.f;
@@ -73,9 +85,63 @@ AShieldManCharacter::AShieldManCharacter()
 	CurrentStatus = CharacterStatus::PossibleMove;
 
 	AttackDelayTime = 1.f;
-	bAttackPossible = true;
+	bAttackPossible = false;
 
 	Effect = CreateDefaultSubobject<UParticleSystem>(TEXT("EFFECT"));
+
+	HPlock = false;
+
+	SetReplicates(true);
+	bReplicates = true;
+	GetMesh()->SetIsReplicated(true);
+
+	playtime = 0;
+	ServerTraveling = false;
+	call_loading = false;
+}
+
+void AShieldManCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AShieldManCharacter, RightHandPos);
+	DOREPLIFETIME(AShieldManCharacter, LeftHandPos);
+	DOREPLIFETIME(AShieldManCharacter, AnimInstance);
+	DOREPLIFETIME(AShieldManCharacter, CurrentHP);
+	DOREPLIFETIME(AShieldManCharacter, HPlock);
+	DOREPLIFETIME(AShieldManCharacter, playtime);
+	DOREPLIFETIME(AShieldManCharacter, ServerTraveling);
+	DOREPLIFETIME(AShieldManCharacter, call_loading);
+}
+
+void AShieldManCharacter::Tick(float DeltaTime)
+{
+	if (HasAuthority())
+	{
+		if (false == ServerTraveling)
+		{
+			playtime += DeltaTime;
+		}
+	}
+	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	GI->GetNetworkManager()->Send_InGame(0, 0, 0, 0, 0, 0, cx, cy, 0);
+	GI->GetNetworkManager()->RecvPacket();
+	
+	if (nullptr == AnimInstance) {
+		if(GetMesh()->GetAnimInstance() != nullptr)
+			AnimInstance=Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
+		return; 
+	}
+	RightHandPos = FVector{ GI->networkManager->m_playerInfo.rp,
+											GI->networkManager->m_playerInfo.ry,
+											GI->networkManager->m_playerInfo.rr};
+
+	LeftHandPos = FVector{ GI->networkManager->m_playerInfo.lp,
+										GI->networkManager->m_playerInfo.ly,
+										GI->networkManager->m_playerInfo.lr };
+
+	AnimInstance->SetHand_RightPos(RightHandPos);
+	AnimInstance->SetHand_LeftPos(LeftHandPos);
 }
 
 bool AShieldManCharacter::CanSetShield()
@@ -107,10 +173,6 @@ void AShieldManCharacter::Init_Mesh()
 		FRotator(0.0f, -90.0f, 0.0f)
 	);
 	
-	//스켈레탈 메쉬 설정
-	/*static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
-		"/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));*/
-
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MANNEQUIN(TEXT(
 		"/Game/Import/CharacterMesh/Knight_SkeletalMesh.Knight_SkeletalMesh"));
 
@@ -118,18 +180,11 @@ void AShieldManCharacter::Init_Mesh()
 	{
 		GetMesh()->SetSkeletalMesh(SK_MANNEQUIN.Object);
 	}
-	else
-	{
-		ULog::Invalid("No Character", "", LO_Viewport);
-	}
 	//애니메이션 설정
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> TP_ANIM(TEXT(
-		"/Game/Mannequin/Animations/ThirdPerson_AnimBP.ThirdPerson_AnimBP_C"));
-
-	/*static ConstructorHelpers::FClassFinder<UAnimInstance> TP_ANIM(TEXT(
-		"/Game/InfinityBladeWarriors/Animation/WarriorAnimBP.WarriorAnimBP_C"));*/
+		"/Game/BP/Animation/BP_SMAnim.BP_SMAnim_C"));
 
 	if (TP_ANIM.Succeeded())
 	{
@@ -162,7 +217,7 @@ void AShieldManCharacter::Init_Camera()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 	Camera->SetRelativeLocationAndRotation(  //카메라 초기 위치와 각도 조정
-		FVector(0.0f, 0.0f, 80.0f),
+		FVector(0.0f, 0.0f, 100.0f),
 		FRotator(-5.f, 0.f, 0.f)
 	);
 }
@@ -187,8 +242,22 @@ void AShieldManCharacter::Init_PhysicalAnim()
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, true, false);*/
 }
 
-void AShieldManCharacter::OnEffectFinished(UParticleSystemComponent* PSystem)
+void AShieldManCharacter::Set_DeathCamera()
 {
+	GetController()->SetControlRotation(FRotator{FVector(GetActorForwardVector().X, GetActorForwardVector().Y,0).Rotation()});
+	Camera->SetRelativeLocationAndRotation(  
+		FVector(500.0f, 0.0f, 50.0f),
+		FRotator(0.f, 180.f, 0.f)
+	);
+}
+
+void AShieldManCharacter::Death()
+{
+	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	GI->networkManager->Send_Leave_Packet();
+	GI->networkManager->m_host = false;
+	GI->ismake = false;
+	SwitchLevel(FName("Title"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -197,13 +266,16 @@ void AShieldManCharacter::OnEffectFinished(UParticleSystemComponent* PSystem)
 void AShieldManCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	stage = GetWorld()->GetMapName();
 	AnimInstance = Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance != nullptr)
 	{
-		UE_LOG(LogTemp, Log, TEXT("why not --"));
+		//UE_LOG(LogTemp, Log, TEXT("why not --"));
 
 	}
 	Left_Shield_Collision->OnComponentBeginOverlap.AddDynamic(this, &AShieldManCharacter::OnShieldOverlapBegin);
+
+	//GetWorldTimerManager().SetTimer(PlayerStateTimer, this, &AShieldManCharacter::SetPlayerState, 0.5f);
 }
 
 void AShieldManCharacter::SetBodyControl()
@@ -242,12 +314,13 @@ void AShieldManCharacter::SwitchLevel(FName LevelName)
 	if (World)
 	{
 		FName CurrentLevelName(*World->GetMapName());
-
+		
 		if (CurrentLevelName != LevelName)
 		{
 			UGameplayStatics::OpenLevel(World, LevelName);
 		}
 	}
+
 }
 
 void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
@@ -255,62 +328,124 @@ void AShieldManCharacter::SetCharacterStatus(CharacterStatus status)
 	CurrentStatus = status;
 }
 
+void AShieldManCharacter::ServerShieldImpulse_Implementation(FVector Lpower, FVector Rpower, FVector pos)
+{
+	GetMesh()->AddImpulseToAllBodiesBelow(Lpower, TEXT("Bip001-L-Forearm"));
+	GetMesh()->AddImpulseToAllBodiesBelow(Rpower, TEXT("Bip001-R-Forearm"));
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, pos, FRotator::ZeroRotator, true);
+}
 void AShieldManCharacter::OnShieldOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bAttackPossible) {
-		FVector LeftArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-L-Forearm"));
-		FVector RightArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-R-Forearm"));
-		float power = LeftArmVelocity.Size() + RightArmVelocity.Size();
-		LeftArmVelocity.Normalize();
-		RightArmVelocity.Normalize();
+	if (Role == ROLE_Authority)
+	{
+		if (bAttackPossible) {
+			FVector LeftArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-L-Forearm"));
+			FVector RightArmVelocity = GetMesh()->GetPhysicsLinearVelocity(TEXT("Bip001-R-Forearm"));
+			float power = LeftArmVelocity.Size() + RightArmVelocity.Size();
+			LeftArmVelocity.Normalize();
+			RightArmVelocity.Normalize();
 
-		GetMesh()->AddImpulseToAllBodiesBelow(LeftArmVelocity * ArmReflectPower * power, TEXT("Bip001-L-Forearm"));
-		GetMesh()->AddImpulseToAllBodiesBelow(RightArmVelocity * ArmReflectPower * power, TEXT("Bip001-R-Forearm"));
+			FVector ImpulsePosition = (Right_Shield_Collision->GetComponentLocation() + Right_Shield_Collision->GetComponentLocation()) / 2;
 
-		FVector ImpulsePosition = (Right_Shield_Collision->GetComponentLocation() + Right_Shield_Collision->GetComponentLocation()) / 2;
+			ServerShieldImpulse(LeftArmVelocity * ArmReflectPower * power, RightArmVelocity * ArmReflectPower * power, ImpulsePosition);
+			/*GetMesh()->AddImpulseToAllBodiesBelow(LeftArmVelocity * ArmReflectPower * power, TEXT("Bip001-L-Forearm"));
+			GetMesh()->AddImpulseToAllBodiesBelow(RightArmVelocity * ArmReflectPower * power, TEXT("Bip001-R-Forearm"));
 
-		TArray<FOverlapResult> OutHits;
-		FCollisionShape MyColSphere = FCollisionShape::MakeSphere(power / 10);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition, FRotator::ZeroRotator, true);*/
 
-		/*UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Effect, ImpulsePosition,FRotator::ZeroRotator,true);
-		bool isHit = GetWorld()->OverlapMultiByChannel(OutHits, ImpulsePosition,
-			FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
+			TArray<FOverlapResult> OutHits;
+			FCollisionShape MyColSphere = FCollisionShape::MakeSphere(power / 10);
 
-		FColor color;
-		if (isHit)
-		{
-			color = FColor::Green;
+			
+			bool isHit = GetWorld()->OverlapMultiByChannel(OutHits, ImpulsePosition,
+				FQuat::Identity, ECC_GameTraceChannel7, MyColSphere);
+
+			FColor color;
+			if (isHit)
+			{
+				color = FColor::Green;
+			}
+			else
+			{
+				color = FColor::Red;
+			}
+
+			//DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
+
+			if (isHit)
+			{
+				for (auto& Hit : OutHits)
+				{
+					UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
+					//UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
+					if (MeshComp)
+					{
+						MeshComp->AddRadialImpulse(ImpulsePosition,
+							power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
+						AMetaBall_Slime* slime = Cast<AMetaBall_Slime>(Hit.GetActor());
+						if (slime)slime->Attacked();
+					}
+				}
+			}
+
+			//ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
+			bAttackPossible = false;
+			GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
 		}
-		else
-		{
-			color = FColor::Red;
-		}*/
-
-		//DrawDebugSphere(GetWorld(), ImpulsePosition, MyColSphere.GetSphereRadius(), 30, color, true);
-
-		//if (isHit)
-		//{
-		//	for (auto& Hit : OutHits)
-		//	{
-		//		UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
-		//		UE_LOG(LogTemp, Warning, TEXT("%s"), *(Hit.GetActor())->GetName());
-		//		if (MeshComp)
-		//		{
-		//			MeshComp->AddRadialImpulse(ImpulsePosition,
-		//				power, power * ShieldBoundPower, ERadialImpulseFalloff::RIF_Constant);
-		//		}
-		//	}
-		//}
-
-		//ULog::Number(power * ShieldBoundPower, "Power is: ", "", LO_Viewport);
-		//bAttackPossible = false;
-		//GetWorldTimerManager().SetTimer(AttackTimer, this, &AShieldManCharacter::ToggleAttackPossible, AttackDelayTime);
 	}
 }
 
 void AShieldManCharacter::ToggleAttackPossible()
 {
 	bAttackPossible = true;
+}
+
+void AShieldManCharacter::DecreaseHP(float val)
+{
+	if (false == HPlock)
+	{
+		CurrentHP -= val;
+		if (CurrentHP <= 0)
+		{
+			if (Role == ROLE_Authority)
+			{
+				ChangeDeath();
+			}
+		}
+	}
+}
+
+void AShieldManCharacter::ChangeDeath()
+{
+	ServerDeath();
+	//ULog::Number(Anim->GetMaxCurrentTime(), "Time: ", "", LO_Viewport);
+	//Set_DeathCamera();
+	bDeath = true;
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
+}
+void AShieldManCharacter::ServerDeath_Implementation()
+{
+	GetMesh()->PlayAnimation(Anim, false);
+}
+
+
+void AShieldManCharacter::ChangeMagmaDeath()
+{
+	
+	GetController()->SetControlRotation(FRotator{ FVector(GetActorForwardVector().X, GetActorForwardVector().Y,0).Rotation() });
+	Camera->SetRelativeLocationAndRotation(
+		FVector(0.0f, 0.0f, 500.0f),
+		FRotator(-60.f, 0.f, 0.f)
+	);
+	bDeath = true;
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AShieldManCharacter::Death, Anim->GetMaxCurrentTime());
+}
+
+
+bool AShieldManCharacter::isDeath()
+{
+	return bDeath;
 }
 
 void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -335,53 +470,80 @@ void AShieldManCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 void AShieldManCharacter::AddControllerYawInput(float Val)
 {
+	if (bDeath) return;
 	if (CurControlMode->isControlMode(BodyControlMode)) {
 		//if(CurrentStatus== CharacterStatus::PossibleMove)
 			Super::AddControllerYawInput(Val);
+			if (nullptr != GetPlayerState()) {
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
+				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
+				PS->ControllerRot = GetController()->GetControlRotation();
+				cx = PS->ControllerRot.Pitch;
+			}
 	}
 	//좌 우 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-
-		AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
+		RightHandPos.Y += Val;
+		AnimInstance->SetHand_RightPos(RightHandPos);
+		//AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
+		LeftHandPos.Y -= Val;
+		AnimInstance->SetHand_LeftPos(LeftHandPos);
+		//AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
 
 	}
 }
 
 void AShieldManCharacter::AddControllerPitchInput(float Val)
 {
+	if (bDeath) return;
 	if (CurControlMode->isControlMode(BodyControlMode)) {
 		//if (CurrentStatus == CharacterStatus::PossibleMove)
 			Super::AddControllerPitchInput(Val);
+			if (nullptr != GetPlayerState()) {
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("GetPlayerState Exist")));
+				auto PS = Cast<ASM_PlayerState>(GetPlayerState());
+
+				PS->ControllerRot = GetController()->GetControlRotation();
+
+				cy = PS->ControllerRot.Yaw;
+				//GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("AShieldManCharacter ControllerRot : %f, %f, %f"), PS->ControllerRot.Pitch, PS->ControllerRot.Yaw, PS->ControllerRot.Roll));
+			}
 	}
 	//위 아래 이동
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ Val, 0.f, 0.f });
+
+		RightHandPos.X += Val;
+		AnimInstance->SetHand_RightPos(RightHandPos);
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ Val, 0.f, 0.f });
+		LeftHandPos.X += Val;
+		AnimInstance->SetHand_LeftPos(LeftHandPos);
 	}
 }
 
 void AShieldManCharacter::AddControllerRolInput(float Val)
 {
+	if (bDeath) return;
 	Val *= 2;
 	//앞 뒤 이동
 	if (CurControlMode->isControlMode(RHandControlMode)) {
-		AnimInstance->AddHand_RightPos({ 0.f, 0.f, Val });
+		RightHandPos.Z += Val;
+		AnimInstance->SetHand_RightPos(RightHandPos);
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
-		AnimInstance->AddHand_LeftPos({ 0.f, 0.f, -Val });
+		LeftHandPos.Z -= Val;
+		AnimInstance->SetHand_LeftPos(LeftHandPos);
 	}
 }
 
 void AShieldManCharacter::MoveForward(float Value)
 {
+	if (bDeath) return;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		if (CurControlMode->isControlMode(BodyControlMode)) {
+		{
 			// find out which way is forward
 			const FRotator Rotation = Controller->GetControlRotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -391,7 +553,7 @@ void AShieldManCharacter::MoveForward(float Value)
 			AddMovementInput(Direction, Value);
 		}
 		//위 아래 이동
-		else if (CurControlMode->isControlMode(RHandControlMode)) {
+		if (CurControlMode->isControlMode(RHandControlMode)) {
 			AnimInstance->AddHand_RightRot({ -Value, 0.f, 0.f });
 		}
 		else if (CurControlMode->isControlMode(LHandControlMode)) {
@@ -403,9 +565,10 @@ void AShieldManCharacter::MoveForward(float Value)
 
 void AShieldManCharacter::MoveRight(float Value)
 {
+	if (bDeath) return;
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
-		if (CurControlMode->isControlMode(BodyControlMode)) {
+		{
 			// find out which way is right
 			const FRotator Rotation = Controller->GetControlRotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -416,13 +579,11 @@ void AShieldManCharacter::MoveRight(float Value)
 			AddMovementInput(Direction, Value);
 		}
 		//위 아래 이동
-		else if (CurControlMode->isControlMode(RHandControlMode)) {
+		if (CurControlMode->isControlMode(RHandControlMode)) {
 			AnimInstance->AddHand_RightRot({ 0.f, -Value , 0.f});
 		}
 		else if (CurControlMode->isControlMode(LHandControlMode)) {
 			AnimInstance->AddHand_LeftRot({ 0.f, Value, 0.f });
 		}
-		
 	}
 }
-

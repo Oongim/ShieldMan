@@ -71,7 +71,9 @@ public:
 	
 	UFUNCTION()
 		void OnLeftOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
+	
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerDoorAddOffset(float val);
 };
 
 

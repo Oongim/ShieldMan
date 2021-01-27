@@ -17,10 +17,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
 		float Speed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true),Replicated)
 		FVector V_Hand_Right;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true), Replicated)
 		FVector V_Hand_Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = pawn, Meta = (AllowPrivateAccess = true))
@@ -34,6 +34,7 @@ private:
 
 public:
 	USMAnimInstance();
+	//UFUNCTION(NetMulticast, Reliable)
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 private:
@@ -44,7 +45,9 @@ public:
 	void AddHand_RightPos(FVector pos);
 	void AddHand_LeftPos(FVector pos);
 
+	UFUNCTION(BlueprintCallable)
 	void SetHand_RightPos(FVector pos);
+	UFUNCTION(BlueprintCallable)
 	void SetHand_LeftPos(FVector pos);
 
 	void AddHand_RightRot(FRotator rot);
@@ -55,4 +58,7 @@ public:
 
 	const FVector GetHand_RightPos();
 	const FVector GetHand_LeftPos();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
 };

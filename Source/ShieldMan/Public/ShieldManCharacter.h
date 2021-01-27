@@ -7,6 +7,7 @@
 #include "LHandControl.h"
 #include "ShieldMan.h"
 #include "GameFramework/Character.h"
+#include "NetworkManager.h"
 #include "ShieldManCharacter.generated.h"
 
 
@@ -23,10 +24,17 @@ private:   //private변수들
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance, meta = (AllowPrivateAccess = "true"))
+	
+public:
+	UPROPERTY(Replicated,VisibleAnywhere, BlueprintReadOnly, Category = AnimInstance, meta = (AllowPrivateAccess = "true"))
 	class USMAnimInstance* AnimInstance;
 
+	UPROPERTY(Replicated)
+		FVector RightHandPos;
+	UPROPERTY(Replicated)
+		FVector LeftHandPos;
+
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand, meta = (AllowPrivateAccess = "true"))
 	FVector Hand_Right;
 
@@ -49,6 +57,12 @@ private:   //private변수들
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
 		UBoxComponent* Left_Shield_Collision;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Right_Shield_Gaurd_Collision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Hand_Collision, meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* Left_Shield_Gaurd_Collision;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Shield, meta = (AllowPrivateAccess = "true"))
 		class ASM_Shield* Left_Shield;
 
@@ -63,12 +77,20 @@ private:   //private변수들
 
 	FTimerHandle AttackTimer;
 
+	FTimerHandle DeathTimer;
+
+	FTimerHandle PlayerStateTimer;
+
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = AttackTime, meta = (AllowPrivateAccess = "true"))
 	float AttackDelayTime;
 
 	bool bAttackPossible;
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PhysicalAnimaion, meta = (AllowPrivateAccess = "true"))
-		//UPhysicalAnimationComponent* PhysicalAnimation;
+	
+	bool bDeath;
+
+	class ASM_PlayerState* PS;
+
+	bool bStateExist;
 
 public:		//생성자 , public 변수
 	AShieldManCharacter();
@@ -84,14 +106,30 @@ public:		//생성자 , public 변수
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Status")
 		float MaxHP;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Player Status")
 		float CurrentHP;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Player Status")
+		bool HPlock;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Status")
 		FName PlayerName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 		UParticleSystem* Effect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+		UAnimationAsset* Anim;
+
+	UPROPERTY(BlueprintReadOnly, Category = UI)
+		FString stage;
+
+	float mx = 0;
+	float my = 0;
+	float mz = 0;
+	float cx = 0;
+	float cy = 0;
+	float cz = 0;
 
 protected: //조작
 	/** Called for forwards/backward input */
@@ -102,7 +140,6 @@ protected: //조작
 
 	/*팔 앞뒤 조종*/
 	void AddControllerRolInput(float Val);
-
 	virtual void AddControllerYawInput(float Val) override;
 	virtual void AddControllerPitchInput(float Val) override;
 
@@ -121,8 +158,9 @@ private:	//private 함수
 	void Init_Camera();
 	void Init_PhysicalAnim();
 
-	UFUNCTION()
-		void OnEffectFinished(class UParticleSystemComponent* PSystem);
+	void Set_DeathCamera();
+
+	void Death();
 
 public:		//public 함수
 	UFUNCTION()
@@ -134,6 +172,7 @@ public:		//public 함수
 	UFUNCTION()
 	void AddForceToCharacter(FVector vDirection, float power);
 
+	UFUNCTION(BlueprintCallable)
 	void SwitchLevel(FName LevelName);
 
 	void SetCharacterStatus(CharacterStatus status);
@@ -143,5 +182,37 @@ public:		//public 함수
 
 	UFUNCTION()
 		void ToggleAttackPossible();
+
+	UFUNCTION()
+		void DecreaseHP(float val);
+
+	UFUNCTION()
+		void ChangeDeath();
+
+	UFUNCTION()
+		void ChangeMagmaDeath();
+
+	UFUNCTION()
+		bool isDeath();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	virtual void Tick(float DeltaTime) override;
+
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerShieldImpulse(FVector Lpower, FVector Rpower, FVector pos);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void ServerDeath();
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	float playtime;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		bool ServerTraveling;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+		bool call_loading;
 };
 

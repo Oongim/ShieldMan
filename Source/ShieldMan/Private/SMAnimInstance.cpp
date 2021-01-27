@@ -2,10 +2,11 @@
 
 
 #include "SMAnimInstance.h"
+#include "Net/UnrealNetwork.h"
 
 USMAnimInstance::USMAnimInstance()
 {
-	bIsInAir = false;
+	bIsInAir = false;  
 }
 
 void USMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -24,6 +25,14 @@ void USMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bIsInAir = Character->GetMovementComponent()->IsFalling();
 		}
 	}
+
+}
+void USMAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USMAnimInstance, V_Hand_Right);
+	DOREPLIFETIME(USMAnimInstance, V_Hand_Left);
 }
 
 void USMAnimInstance::AddHand_RightPos(FVector pos)

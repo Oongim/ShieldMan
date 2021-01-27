@@ -4,6 +4,7 @@
 #include "LevelTransitionVolume.h"
 #include "Components/BillboardComponent.h"
 #include "ShieldManCharacter.h"
+#include "SM_GameInstance.h"
 
 // Sets default values
 ALevelTransitionVolume::ALevelTransitionVolume()
@@ -43,7 +44,15 @@ void ALevelTransitionVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 		auto Character = Cast<AShieldManCharacter>(OtherActor);
 		if (Character)
 		{
-			Character->SwitchLevel(TransitionLevelName);
+
+		/*	UWorld* World = GetWorld();
+			if (!ensure(World != nullptr)) return;
+			World->ServerTravel("/Game/2Stage/Stage2?listen");*/
+
+			ChangeStage();
+			//auto GI = Cast<USM_GameInstance>(GetGameInstance());
+			//GI->ChangeStage(TransitionLevelName);
+			//Character->SwitchLevel(TransitionLevelName);
 		}
 
 	}

@@ -16,8 +16,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = DynamicMesh, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* Dynamic_Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
-		float power;
+	class AShieldManCharacter* Player;
+
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float ShakePower;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
@@ -42,10 +42,29 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Physics, meta = (AllowPrivateAccess = "true"))
 		float damping;
 
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float speedPower;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float Health;
+
+	FTimerHandle RepeatTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Option, meta = (AllowPrivateAccess = "true"))
+		float RepeatInterval;
+
+	int Ball_Size;
+
+	bool bAttacked;
+
+	bool bAlive;
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadwrite, Category = Collision)
 		USphereComponent* Collision;
 
+	float ShakeClamp;
+
+	float RunAwayPower;
 public:
 	// Sets default values for this actor's properties
 	AMetaBall_Slime();
@@ -65,6 +84,24 @@ public:
 	void Muitiple_SpringMass_System(float timeStep);
 
 	UFUNCTION(BlueprintCallable, Category = floatSetting)
-		void AddForceToVelocity(FVector vec);
+		void AddForceToVelocity(FVector vec, float power);
 
+	void OnRepeatTimer();
+
+	void Attacked();
+
+	void MoveStart();
+
+	bool GetAlive();
+
+	void setSpeedPower(float power);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ServerAddForceToVelocity(FVector vec, float power);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerUpdateMetaBall(float timeStep);
+
+	UFUNCTION(NetMulticast, Reliable)
+		virtual void ServerUpdateBallSize(float size);
 };

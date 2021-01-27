@@ -20,6 +20,8 @@ ASM_FloatingMoveFlatform::ASM_FloatingMoveFlatform()
 	InterpSpeed = 4.0f;
 	InterpTime = 1.0f;
 
+	bReplicates = true;
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -39,27 +41,29 @@ void ASM_FloatingMoveFlatform::BeginPlay()
 // Called every frame
 void ASM_FloatingMoveFlatform::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	if (HasAuthority()) {
+		Super::Tick(DeltaTime);
 
-	if (bInterping)
-	{
-		FVector CurrentLocation = GetActorLocation();
-
-		FVector Interp = FMath::VInterpTo(CurrentLocation, EndPoint, DeltaTime, InterpSpeed);
-
-		SetActorLocation(Interp);
-
-
-		float DistanceTraveld = (GetActorLocation() - StartPoint).Size();
-		if (Distance - DistanceTraveld <= 5.f)
+		if (bInterping)
 		{
-			ToggleInterping();
+			FVector CurrentLocation = GetActorLocation();
 
-			GetWorldTimerManager().SetTimer(InterpTimer, this, &ASM_FloatingMoveFlatform::ToggleInterping, InterpTime);
-			SwapVectors(StartPoint, EndPoint);
+			FVector Interp = FMath::VInterpTo(CurrentLocation, EndPoint, DeltaTime, InterpSpeed);
+
+			SetActorLocation(Interp);
+
+
+			float DistanceTraveld = (GetActorLocation() - StartPoint).Size();
+			if (Distance - DistanceTraveld <= 10.f)
+			{
+				ToggleInterping();
+
+
+				GetWorldTimerManager().SetTimer(InterpTimer, this, &ASM_FloatingMoveFlatform::ToggleInterping, InterpTime);
+				SwapVectors(StartPoint, EndPoint);
+			}
 		}
 	}
-
 	
 }
 
