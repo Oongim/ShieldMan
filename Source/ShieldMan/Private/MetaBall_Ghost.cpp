@@ -318,8 +318,6 @@ void AMetaBall_Ghost::Muitiple_SpringMass_System(float timeStep)
 		// Mass 2 position
 		FVector velocity = Balls_Velocity[i + numLeg] * timeStep;
 
-
-
 		Balls_Position[i + numLeg] += velocity;
 
 	}

@@ -9,8 +9,8 @@ void ASM_GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASM_GameState, ControllerRot);
-	DOREPLIFETIME(ASM_GameState, RightHandPos);
-	DOREPLIFETIME(ASM_GameState, LeftHandPos);
+	//DOREPLIFETIME(ASM_GameState, RightHandPos);
+	//DOREPLIFETIME(ASM_GameState, LeftHandPos);
 
 	DOREPLIFETIME(ASM_GameState, Stage1);
 	DOREPLIFETIME(ASM_GameState, Stage2);

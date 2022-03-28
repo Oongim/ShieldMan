@@ -18,6 +18,7 @@
 #include "SMAnimInstance.h"
 #include "SM_Shield.h"
 #include "MetaBall_Slime.h"
+#include "LevelSequenceActor.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AShieldManCharacter
@@ -73,6 +74,7 @@ AShieldManCharacter::AShieldManCharacter()
 	Right_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("RIGHT_SHIELD"));
 	Left_Shield = CreateDefaultSubobject<ASM_Shield>(TEXT("LEFT_SHIELD"));
 
+	CreateDefaultSubobject<LevelSequence>(TEXT("LEFT_COLLISION"));
 	MaxHP=100.f;
 	CurrentHP = 100.f;
 	PlayerName = TEXT("KDK");
@@ -123,22 +125,22 @@ void AShieldManCharacter::Tick(float DeltaTime)
 			playtime += DeltaTime;
 		}
 	}
-	USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
+	/*USM_GameInstance* GI = Cast<USM_GameInstance>(GetGameInstance());
 	GI->GetNetworkManager()->Send_InGame(0, 0, 0, 0, 0, 0, cx, cy, 0);
-	GI->GetNetworkManager()->RecvPacket();
+	GI->GetNetworkManager()->RecvPacket();*/
 	
 	if (nullptr == AnimInstance) {
 		if(GetMesh()->GetAnimInstance() != nullptr)
 			AnimInstance=Cast<USMAnimInstance>(GetMesh()->GetAnimInstance());
 		return; 
 	}
-	RightHandPos = FVector{ GI->networkManager->m_playerInfo.rp,
+	/*RightHandPos = FVector{ GI->networkManager->m_playerInfo.rp,
 											GI->networkManager->m_playerInfo.ry,
 											GI->networkManager->m_playerInfo.rr};
 
 	LeftHandPos = FVector{ GI->networkManager->m_playerInfo.lp,
 										GI->networkManager->m_playerInfo.ly,
-										GI->networkManager->m_playerInfo.lr };
+										GI->networkManager->m_playerInfo.lr };*/
 
 	AnimInstance->SetHand_RightPos(RightHandPos);
 	AnimInstance->SetHand_LeftPos(LeftHandPos);
@@ -485,12 +487,12 @@ void AShieldManCharacter::AddControllerYawInput(float Val)
 	else if (CurControlMode->isControlMode(RHandControlMode)) {
 		RightHandPos.Y += Val;
 		AnimInstance->SetHand_RightPos(RightHandPos);
-		//AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
+		AnimInstance->AddHand_RightPos({ 0.f,  Val,0.f });
 	}
 	else if (CurControlMode->isControlMode(LHandControlMode)) {
 		LeftHandPos.Y -= Val;
 		AnimInstance->SetHand_LeftPos(LeftHandPos);
-		//AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
+		AnimInstance->AddHand_LeftPos({ 0.f,  -Val ,0.f });
 
 	}
 }

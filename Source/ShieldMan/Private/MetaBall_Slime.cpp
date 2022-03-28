@@ -196,15 +196,11 @@ void AMetaBall_Slime::OnRepeatTimer()
 	{
 		RunAwayVec.Normalize();
 		ServerAddForceToVelocity(RunAwayVec, speedPower * 1500);
-		//AddForceToVelocity(RunAwayVec, speedPower * 1500);
-		//ULog::Invalid("bAttacked", "", LO_Viewport);
 	}
 	else if ((RunAwayVec).Size() < 300.f)
 	{
 		RunAwayVec.Normalize();
 		ServerAddForceToVelocity(RunAwayVec, speedPower * 1500);
-		//AddForceToVelocity(RunAwayVec, speedPower * 1500);
-		//ULog::Invalid("RunAway", "", LO_Viewport);
 	}
 	else {
 		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
@@ -213,7 +209,6 @@ void AMetaBall_Slime::OnRepeatTimer()
 		if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.f, NextLocation))
 		{
 			ServerAddForceToVelocity(NextLocation.Location, speedPower * 30);
-			//AddForceToVelocity(NextLocation.Location, speedPower * 30);
 		}
 	}
 }
@@ -261,3 +256,6 @@ void AMetaBall_Slime::ServerAddForceToVelocity_Implementation(FVector vec, float
 {
 	AddForceToVelocity(vec, power);
 }
+
+
+
